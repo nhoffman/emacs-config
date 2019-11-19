@@ -605,7 +605,8 @@ the path."
 
 ;;* org-mode
 (use-package org
-  :ensure t
+  :ensure org-plus-contrib
+  :pin org
   :config
   (push '("\\.org\\'" . org-mode) auto-mode-alist)
   (push '("\\.org\\.txt\\'" . org-mode) auto-mode-alist)
