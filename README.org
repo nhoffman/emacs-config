@@ -1,22 +1,26 @@
 #+TITLE: my emacs config
 #+AUTHOR: Noah Hoffman
 
-* Setup
+* high-level features
 
-You can install this configuration by either cloning it directly from
-my repository, or by forking on GitHub and installing yours (obviously
-you will want to do the latter if you want to retain your own
-modifications:
+I declared emacs bankruptcy and replaced a much more elaborate
+configuration with this one.
+
+- use-package for package management
+- hyrda for most custom key bindings
+- ivy, counsel, and friends for search and navigation
+- lsp-mode and Microsoft python language server for python development
+
+* installation
 
 #+BEGIN_SRC sh
 cd ~
 git clone https://github.com/nhoffman/emacs-config .emacs.d
 #+END_SRC
 
-After cloning the repository into your home directory, just a bit of
-setup is required before first use.
+On first run, all dependencies should be installed by use-package.
 
-** set up a shell environment
+* shell environment
 
 This configuration provides some commands (tested with bash and zsh)
 that are useful for using Emacs from the shell. In particular, if you
@@ -48,9 +52,45 @@ fi
 
 Here's what this file looks like
 
-#+BEGIN_SRC sh :eval yes :exports results
+#+BEGIN_SRC sh :eval yes :results output
 cat init.bash
 #+END_SRC
+
+#+RESULTS:
+#+begin_example
+if [[ $(uname) == 'Darwin' ]]; then
+    EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+    EMACSCLIENT=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
+    alias emacs="$EMACS"
+    alias emacsclient="$EMACSCLIENT"
+else
+    EMACS=emacs
+    EMACSCLIENT=emacsclient
+fi
+
+edaemon(){
+    rm -f ~/.emacs.desktop.lock ~/.emacs.d/.emacs.desktop.lock
+    (cd ~ && "$EMACS" --daemon)
+}
+
+ec(){
+    "$EMACSCLIENT" -c "$@" &
+}
+
+enw(){
+    "$EMACSCLIENT" -nw "$@"
+}
+
+e(){
+    # open file in an existing server process
+    re='^[0-9]+$'
+    if [[ $2 =~ $re ]]; then
+	"$EMACSCLIENT" -n +$2:0 $1
+    else
+	"$EMACSCLIENT" -n "$@"
+    fi
+}
+#+end_example
 
 You will have to open a new terminal window for the shell commands
 above to become available. Once they are, you can launch the graphical
@@ -141,11 +181,3 @@ The last two items cause option plus the right and left arrows to
 perform the same actions as =M-f= (=forward-word=) and =M-b=
 (=backward-word=) in both Emacs and in contexts that support default
 readline key bindings (which is [[https://coderwall.com/p/usc8qg][just about everywhere]]).
-
-*** What next?
-If you are completely new to Emacs, the very first thing to do is to
-become acquainted with the built-in help system. You can get to the
-help menu by typing =<f1>= or =C-h ?=.
-
-Next, I'd recommend starting with the built in tutorial by typing =C-h
-t=.
