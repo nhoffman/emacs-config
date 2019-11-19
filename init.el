@@ -243,7 +243,7 @@ Assumes that the frame is only split into two."
   (message "** could not find hunspell or aspell"))
 
 ;;* init file utilities
-(defvar nh/init-el "~/.emacs.d/init-minimal.el" "My init file")
+(defvar nh/init-el "~/.emacs.d/init.el" "My init file")
 (defun nh/init-file-edit ()
   "Edit init file specified by `nh/init-el'"
   (interactive)
