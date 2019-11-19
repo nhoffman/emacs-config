@@ -8,16 +8,6 @@ else
     EMACSCLIENT=emacsclient
 fi
 
-emacs-venv-activate(){
-    local venv=~/.emacs.d/emacs-env
-    if [[ -f "$venv/bin/activate" && -z "$VIRTUAL_ENV" ]]; then
-	echo "using virtualenv in $venv"
-	source "$venv/bin/activate"
-    else
-	echo "no virtualenv"
-    fi
-}
-
 edaemon(){
     rm -f ~/.emacs.desktop.lock ~/.emacs.d/.emacs.desktop.lock
     (cd ~ && "$EMACS" --daemon)
@@ -40,9 +30,3 @@ e(){
 	"$EMACSCLIENT" -n "$@"
     fi
 }
-
-# if [[ $(basename $SHELL) == "zsh" ]]; then
-#     compdef ec=ls
-#     compdef enw=ls
-#     compdef e=ls
-# fi
