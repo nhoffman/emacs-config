@@ -419,9 +419,6 @@ Assumes that the frame is only split into two."
 
 ;;* python
 
-(use-package virtualenvwrapper
-  :ensure t)
-
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 (use-package lsp-python-ms
   :ensure t
