@@ -1,0 +1,151 @@
+#+TITLE: my emacs config
+#+AUTHOR: Noah Hoffman
+
+* Setup
+
+You can install this configuration by either cloning it directly from
+my repository, or by forking on GitHub and installing yours (obviously
+you will want to do the latter if you want to retain your own
+modifications:
+
+#+BEGIN_SRC sh
+cd ~
+git clone https://github.com/nhoffman/emacs-config .emacs.d
+#+END_SRC
+
+After cloning the repository into your home directory, just a bit of
+setup is required before first use.
+
+** set up a shell environment
+
+This configuration provides some commands (tested with bash and zsh)
+that are useful for using Emacs from the shell. In particular, if you
+are on a mac and have installed [[http://emacsformacosx.com/][Emacs for OS X]] or compiled the Cocoa
+version, Emacs will be installed to
+=/Applications/Emacs.app/Contents/MacOS/Emacs= and =emacsclient= is
+found in
+=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient=. These are
+aliased to =emacs= and =emacsclient=, respectively.
+
+In addition, there are some shell commands that simplify running and
+using Emacs in server mode:
+
+- edaemon :: launch the Emacs server daemon, removing any locked desktop files.
+- ec :: attach to the Emacs server in GUI mode (=emacsclient -c=) in the background.
+- enw :: attach to the Emacs server in terminal mode in place (=emacsclient -nw=).
+- e :: open a file in an already open window (=emacsclient -n=).
+
+Rather than copying the functions defined in =init.bash= elsewhere,
+I'd recommend sourcing it instead. For example, just place the
+following in your =~/.bash_login= or =~/.zshrc= or [[http://shreevatsa.wordpress.com/2008/03/30/zshbash-startup-files-loading-order-bashrc-zshrc-etc/][whatever]] (depending
+on your shell):
+
+#+BEGIN_SRC sh :eval no
+if [[ -f ~/.emacs.d/init.bash ]]; then
+    source ~/.emacs.d/init.bash
+fi
+#+END_SRC
+
+Here's what this file looks like
+
+#+BEGIN_SRC sh :eval yes :exports results
+cat init.bash
+#+END_SRC
+
+You will have to open a new terminal window for the shell commands
+above to become available. Once they are, you can launch the graphical
+version of emacs using:
+
+: emacs -c &
+
+or the terminal version using
+
+: emacs -nw
+
+A bit of explanation about Emacs server: the above two commands launch
+Emacs in an entirely new process. Using the Emacs server, you can run
+an Emacs server instance in the background and then "attach" either a
+graphical or terminal window as necessary. Working locally, you would
+do this by first starting the server:
+
+: edaemon
+
+And then opening either a graphical or terminal window, for example:
+
+: ec
+
+If you are subsequently working at the command line and you want to
+open =somefile= in an already-open Emacs window, you can use:
+
+: e somefile
+
+(You can of course always open a file from within Emacs using many
+mechanisms, eg using =C-c f=).
+
+Emacs server is particularly useful when you are running Emacs
+remotely on a server and you want to be able to log out and return to
+your work later: if you quit the terminal process using =C-x C-c=
+(=M-x save-buffers-kill-terminal=), the server continues running in
+the background. You can kill the server from within Emacs using =M-x
+save-buffers-kill-emacs=.
+
+** option as Meta (=M-=) on a Mac
+
+I use Emacs from a variety of terminal types on my machines running OS
+X:
+
+- the Cocoa version when working locally
+- X11 when working remotely over a fast connection
+- a terminal application when working remotely over a slow connection
+
+I have done my best to configure all three to provide an experience
+that's as comparable as possible. Here are some configuration
+suggestions to use the option key as Meta (=M-=), as opposed to Esc.
+
+*** Cocoa
+
+I just download it from http://emacsformacosx.com/ - as far as I can
+tell, option is used as Meta by default.
+
+*** X11
+
+I use [[http://xquartz.macosforge.org/downloads/SL/XQuartz-2.7.7.dmg][XQuartz]]
+
+Create the file ~/.Xmodmap as follows to use option as Meta in X11
+(you'll need to quit X11 for the changes to take effect):
+
+#+BEGIN_SRC sh
+cat > ~/.Xmodmap <<EOF
+clear Mod1
+clear Mod2
+keycode 63 = Mode_switch
+keycode 66 = Meta_L
+add Mod1 = Meta_L
+add Mod2 = Mode_switch
+EOF
+#+END_SRC
+
+[[http://tylerkieft.com/archives/2006/10/05/redefine-the-x11-meta-key-in-mac-os-x/][This post]] has more information on configuring X11.
+
+*** Terminal
+
+I prefer [[http://iterm2.com/][iTerm2]] over Terminal.app
+
+Head over to Preferences --> Profiles --> Keys and do these things:
+
+- select "Left/right option key acts as": +Esc (to use option as Meta)
+- + --> Keyboard shortcut "OPT+<left arrow>": Send Escape sequence "b"
+- + --> Keyboard shortcut "OPT+<right arrow>": Send Escape sequence "f"
+
+The last two items cause option plus the right and left arrows to
+perform the same actions as =M-f= (=forward-word=) and =M-b=
+(=backward-word=) in both Emacs and in contexts that support default
+readline key bindings (which is [[https://coderwall.com/p/usc8qg][just about everywhere]]).
+
+*** What next?
+If you are completely new to Emacs, the very first thing to do is to
+become acquainted with the built-in help system. You can get to the
+help menu by typing =<f1>= or =C-h ?=.
+
+Next, I'd recommend starting with the built in tutorial by typing =C-h
+t=.
