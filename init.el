@@ -276,7 +276,6 @@ Assumes that the frame is only split into two."
         ("gnu" . "https://elpa.gnu.org/packages/")
         ("melpa" . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ("marmalade" . "https://marmalade-repo.org/packages/")
 	("org" . "https://orgmode.org/elpa/")
         ))
 
@@ -284,7 +283,6 @@ Assumes that the frame is only split into two."
       '(("org" . 30)
         ("elpy" . 30)
         ("melpa-stable" . 20)
-        ("marmalade" . 10)
         ("gnu" . 10)
         ("melpa" . 5)))
 
