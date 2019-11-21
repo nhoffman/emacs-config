@@ -785,3 +785,6 @@ convert to .docx with pandoc"
 
 (use-package yaml-mode
   :ensure t)
+
+(use-package jinja2-mode
+  :ensure t)
