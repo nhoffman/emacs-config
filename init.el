@@ -402,10 +402,10 @@ Assumes that the frame is only split into two."
 (use-package lsp-ui
   :ensure t
   :config
-  (setq lsp-ui-doc-max-height 20
-	lsp-ui-doc-max-width 50
-	lsp-ui-sideline-ignore-duplicate t
-	lsp-ui-peek-always-show t))
+  (setq lsp-ui-doc-enable t)
+  (setq lsp-ui-imenu-enable nil)
+  (setq lsp-ui-peek-enable nil)
+  (setq lsp-ui-sideline-enable nil))
 
 (use-package company-lsp
   :ensure t
@@ -730,12 +730,11 @@ convert to .docx with pandoc"
 (use-package yasnippet
   :ensure t
   :init
-  (progn
-    (add-hook 'after-save-hook
-              (lambda ()
-                (when (eql major-mode 'snippet-mode)
-                  (yas-reload-all)))))
-  :commands (yas-global-mode)
+  (add-hook 'after-save-hook
+            (lambda ()
+              (when (eql major-mode 'snippet-mode)
+                (yas-reload-all))))
+  :config (yas-global-mode t)
   :mode ("\\.yasnippet" . snippet-mode))
 
 (use-package magit
