@@ -403,9 +403,9 @@ Assumes that the frame is only split into two."
   :ensure t
   :config
   (setq lsp-ui-doc-max-height 20
-	    lsp-ui-doc-max-width 50
-	    lsp-ui-sideline-ignore-duplicate t
-	    lsp-ui-peek-always-show t))
+	lsp-ui-doc-max-width 50
+	lsp-ui-sideline-ignore-duplicate t
+	lsp-ui-peek-always-show t))
 
 (use-package company-lsp
   :ensure t
