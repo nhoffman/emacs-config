@@ -15,16 +15,16 @@
 ;; Default 'untabify converts a tab to equivalent number of spaces
 ;; before deleting a single character.
 (setq backward-delete-char-untabify-method "all")
+;; use 'ls --dired' if available
+(setq dired-use-ls-dired
+	  (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
+		  t nil))
 
 ;; save customizations in a file other than init.el
 (defconst custom-file (expand-file-name "custom.el" user-emacs-directory))
 (unless (file-exists-p custom-file)
   (write-region "" nil custom-file))
 (load custom-file)
-
-(setq frame-title-format
-      (list (format "%s %%S: %%j " (system-name))
-            '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
 ;; File path in title bar.
 (setq frame-title-format
