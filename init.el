@@ -403,8 +403,16 @@ Assumes that the frame is only split into two."
 	(mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
 	(elt x (- (length x) 1)))))
 
+(defun nh/emacs-dir-path (name)
+  "Return absolute path to a file in the same directory as `user-init-file'"
+  (nh/path-join (file-name-directory user-init-file) name))
+
 (defvar nh/py3-venv nil "virtualenv for flycheck, etc")
-(setq nh/py3-venv (nh/path-join "~" ".emacs.d" "py3-env"))
+(setq nh/py3-venv (nh/emacs-dir-path "py3-env"))
+
+(defun nh/py3-venv-path (name)
+  "Return the path to a program installed in `nh/py3-venv'"
+  (nh/path-join nh/py3-venv "bin" name))
 
 (use-package python-mode
   :mode
@@ -435,42 +443,47 @@ Assumes that the frame is only split into two."
   :ensure t
   :config
   (setq flycheck-python-flake8-executable
-		(nh/path-join nh/py3-venv "bin" "flake8"))
+		(nh/py3-venv-path "flake8"))
   (setq flycheck-flake8rc
-		(nh/path-join "~/.emacs.d" "flake8.conf"))
+		(nh/emacs-dir-path "flake8.conf"))
   :hook
   (python-mode . flycheck-mode))
 
-;; autopep8
-(defun nh/autopep8-region-or-buffer ()
-  "Apply autopep8 to the current region or buffer"
+;; function to reformat using yapf
+(defun nh/yapf-region-or-buffer ()
+  "Apply yapf to the current region or buffer"
   (interactive)
+  (let* ((yapf (nh/py3-venv-path "yapf"))
+		 (yapf-config (nh/emacs-dir-path "yapf.cfg"))
+		 ;; use config file if exists
+		 (yapf-cmd (if (file-exists-p yapf-config)
+					   (concat yapf " --style " yapf-config)
+					 yapf))
+		 )
   (unless (region-active-p)
     (mark-whole-buffer))
   (shell-command-on-region
-   (region-beginning) (region-end)      ;; beginning and end of region or buffer
-   "autopep8 -"                         ;; command and parameters
-   (current-buffer)                     ;; output buffer
-   t                                    ;; replace?
-   "*autopep8 errors*"                  ;; name of the error buffer
-   t)                                   ;; show error buffer?
-  (goto-char (region-end))              ;; ... and delete trailing newlines
-  (re-search-backward "\n+" nil t)
-  (replace-match "" nil t))
+   (region-beginning) (region-end)  ;; beginning and end of region or buffer
+   yapf-cmd                        ;; command and parameters
+   (current-buffer)                 ;; output buffer
+   t                                ;; replace?
+   "*yapf errors*"                  ;; name of the error buffer
+   t)                               ;; show error buffer?
+  ))
 
-(defun nh/autopep8-and-ediff ()
-  "Compare the current buffer to the output of autopep8 using ediff"
-  (interactive)
-  (let ((p8-output
-         (get-buffer-create (format "* %s autopep8 *" (buffer-name)))))
-    (shell-command-on-region
-     (point-min) (point-max)    ;; beginning and end of buffer
-     "autopep8 -"               ;; command and parameters
-     p8-output                  ;; output buffer
-     nil                        ;; replace?
-     "*autopep8 errors*"        ;; name of the error buffer
-     t)                         ;; show error buffer?
-    (ediff-buffers (current-buffer) p8-output)))
+;; (defun nh/autopep8-and-ediff ()
+;;   "Compare the current buffer to the output of autopep8 using ediff"
+;;   (interactive)
+;;   (let ((p8-output
+;;          (get-buffer-create (format "* %s autopep8 *" (buffer-name)))))
+;;     (shell-command-on-region
+;;      (point-min) (point-max)    ;; beginning and end of buffer
+;;      "autopep8 -"               ;; command and parameters
+;;      p8-output                  ;; output buffer
+;;      nil                        ;; replace?
+;;      "*autopep8 errors*"        ;; name of the error buffer
+;;      t)                         ;; show error buffer?
+;;     (ediff-buffers (current-buffer) p8-output)))
 
 ;;* javascript/json
 (add-hook 'js-mode-hook
@@ -566,7 +579,7 @@ Assumes that the frame is only split into two."
     ("c" flycheck-list-errors "flycheck-list-errors")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
     ;; ("v" activate-venv-current-project "activate-venv-current-project")
-    ;; ("y" elpy-yapf-fix-code "elpy-yapf-fix-code")
+    ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer")
     ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point"))
 
   (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
