@@ -518,7 +518,8 @@ Assumes that the frame is only split into two."
     ("t" org-todo-list "org-todo-list")
     ("T" nh/transpose-buffers "transpose-buffers")
     ("u" untabify "untabify")
-    ("w" hydra-web-mode/body "web-mode commands"))
+    ("w" hydra-web-mode/body "web-mode commands")
+	("y" hydra-yasnippet/body "yasnippet commands"))
   (global-set-key (kbd "C-\\") 'hydra-launcher/body)
 
   (defhydra hydra-init-file (:color blue :columns 4 :post (redraw-display))
@@ -575,6 +576,11 @@ Assumes that the frame is only split into two."
     ;; ("v" activate-venv-current-project "activate-venv-current-project")
     ;; ("y" elpy-yapf-fix-code "elpy-yapf-fix-code")
     ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point"))
+
+  (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
+    "hydra-yasnippet"
+    ("RET" redraw-display "<quit>")
+	("i" yas-insert-snippet "yas-insert-snippet"))
 
     ) ;; end hydra config
 
