@@ -399,40 +399,53 @@ Assumes that the frame is only split into two."
 (use-package lsp-mode
   :ensure t)
 
-(use-package lsp-ui
-  :ensure t
-  :config
-  (setq lsp-ui-doc-enable t)
-  (setq lsp-ui-imenu-enable nil)
-  (setq lsp-ui-peek-enable nil)
-  (setq lsp-ui-sideline-enable nil))
+;; (use-package lsp-ui
+;;   :ensure t
+;;   :config
+;;   (setq lsp-ui-doc-enable t)
+;;   (setq lsp-ui-imenu-enable nil)
+;;   (setq lsp-ui-peek-enable nil)
+;;   (setq lsp-ui-sideline-enable nil)
+;;   (setq lsp-ui-flycheck-enable nil)
+;;   (setq lsp-ui-sideline-show-flycheck t))
 
-(use-package company-lsp
-  :ensure t
-  :config
-  (push 'company-lsp company-backends))
+;; (use-package company-lsp
+;;   :ensure t
+;;   :config
+;;   (push 'company-lsp company-backends))
 
-(use-package lsp-ivy
-  :ensure t)
+;; (use-package lsp-ivy
+;;   :ensure t)
 
 ;;* python
+(use-package python-mode
+  :mode
+  ("\\.py$'" . python-mode)
+  ("\\.wsgi$" . python-mode)
+  ("\\.cgi$" . python-mode)
+  ("SConstruct" . python-mode)
+  ("SConscript" . python-mode)
+  :init
+  (setq tab-width 4)
+  :config
+  (setq indent-tabs-mode nil)
+  (setq python-indent-offset tab-width)
+  (setq py-smart-indentation t))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 (use-package lsp-python-ms
   :ensure t
   :after (yasnippet)
-  :hook (python-mode . (lambda ()
-			 (setq indent-tabs-mode nil)
-			 (setq tab-width 4)
-			 (setq py-indent-offset tab-width)
-			 (setq py-smart-indentation t)
-			 (push '("SConstruct" . python-mode) auto-mode-alist)
-			 (push '("SConscript" . python-mode) auto-mode-alist)
-			 (push '("*.cgi" . python-mode) auto-mode-alist)
-                         (require 'lsp-python-ms)
-                         (lsp)))
   :config
-  (setq lsp-python-ms-python-executable-cmd "python3"))
+  (setq lsp-python-ms-python-executable-cmd "python3")
+  :hook
+  (python-mode . (lambda ()
+		   (require 'lsp-python-ms)
+		   (lsp))))
+
+(use-package flycheck
+  :ensure t
+  :hook (python-mode . flycheck-mode))
 
 ;; TODO: add to hydra
 ;; lsp-describe-thing-at-point
