@@ -388,20 +388,12 @@ Assumes that the frame is only split into two."
 ;; (use-package lsp-ui
 ;;   :ensure t
 ;;   :config
-;;   (setq lsp-ui-doc-enable t)
-;;   (setq lsp-ui-imenu-enable nil)
+;;   (setq lsp-ui-doc-enable nil)
+;;   (setq lsp-ui-imenu-enable t)
 ;;   (setq lsp-ui-peek-enable nil)
 ;;   (setq lsp-ui-sideline-enable nil)
 ;;   (setq lsp-ui-flycheck-enable nil)
-;;   (setq lsp-ui-sideline-show-flycheck t))
-
-;; (use-package company-lsp
-;;   :ensure t
-;;   :config
-;;   (push 'company-lsp company-backends))
-
-;; (use-package lsp-ivy
-;;   :ensure t)
+;;   (setq lsp-ui-sideline-show-flycheck nil))
 
 ;;* python
 (defun nh/path-join (&rest x)
