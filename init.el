@@ -307,7 +307,6 @@ Assumes that the frame is only split into two."
       )))
 
 ;;* search and navigation (ivy, counsel, and friends)
-
 (use-package ivy
   :ensure t
   :config
@@ -387,7 +386,6 @@ Assumes that the frame is only split into two."
 ;; (advice-add 'counsel-projectile-grep :before #'nh/grep-ignore-venv-current-project)
 
 ;;* auto-complete using company-mode
-
 (use-package company
   :ensure t
   :config
@@ -421,6 +419,16 @@ Assumes that the frame is only split into two."
 ;;   :ensure t)
 
 ;;* python
+(defun nh/path-join (&rest x)
+  "Join elements of x with a path separator and apply `expand-file-name'"
+  (expand-file-name
+   (concat
+	(mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
+	(elt x (- (length x) 1)))))
+
+(defvar nh/py3-venv nil "virtualenv for flycheck, etc")
+(setq nh/py3-venv (nh/path-join "~" ".emacs.d" "py3-env"))
+
 (use-package python-mode
   :mode
   ("\\.py$'" . python-mode)
@@ -448,7 +456,13 @@ Assumes that the frame is only split into two."
 
 (use-package flycheck
   :ensure t
-  :hook (python-mode . flycheck-mode))
+  :config
+  (setq flycheck-python-flake8-executable
+		(nh/path-join nh/py3-venv "bin" "flake8"))
+  (setq flycheck-flake8rc
+		(nh/path-join "~/.emacs.d" "flake8.conf"))
+  :hook
+  (python-mode . flycheck-mode))
 
 ;; autopep8
 (defun nh/autopep8-region-or-buffer ()
