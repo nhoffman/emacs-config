@@ -314,23 +314,7 @@ Assumes that the frame is only split into two."
   (setq enable-recursive-minibuffers t)
   (setq ivy-count-format "%d/%d ")
   (setq ivy-height 30)
-  ;; https://github.com/abo-abo/swiper/wiki/ivy-display-function
-  ;; (setq ivy-display-functions-alist
-  ;; 	'((counsel-M-x . ivy-display-function-lv)
-  ;;         (ivy-completion-in-region . ivy-display-function-overlay)))
   (global-set-key (kbd "C-c C-r") 'ivy-resume))
-
-;; (defun ivy-display-function-lv (text)
-;;   (let ((lv-force-update t))
-;;     (lv-message
-;;      (replace-regexp-in-string
-;;       "%" "%%"
-;;       (if (string-match "\\`\n" text)
-;;           (substring text 1)
-;;         text)))))
-
-;; (use-package lv
-;;   :ensure t)
 
 (use-package counsel
   :ensure t
