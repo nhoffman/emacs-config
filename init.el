@@ -313,6 +313,7 @@ Assumes that the frame is only split into two."
   (ivy-mode 1)
   (setq enable-recursive-minibuffers t)
   (setq ivy-count-format "%d/%d ")
+  (setq ivy-height 30)
   ;; https://github.com/abo-abo/swiper/wiki/ivy-display-function
   ;; (setq ivy-display-functions-alist
   ;; 	'((counsel-M-x . ivy-display-function-lv)
