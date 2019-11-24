@@ -12,6 +12,9 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
+;; Default 'untabify converts a tab to equivalent number of spaces
+;; before deleting a single character.
+(setq backward-delete-char-untabify-method "all")
 
 ;; save customizations in a file other than init.el
 (defconst custom-file (expand-file-name "custom.el" user-emacs-directory))
@@ -447,13 +450,6 @@ Assumes that the frame is only split into two."
   :ensure t
   :hook (python-mode . flycheck-mode))
 
-;; TODO: add to hydra
-;; lsp-describe-thing-at-point
-
-;; Default 'untabify converts a tab to equivalent number of spaces
-;; before deleting a single character.
-(setq backward-delete-char-untabify-method "all")
-
 ;; autopep8
 (defun nh/autopep8-region-or-buffer ()
   "Apply autopep8 to the current region or buffer"
@@ -570,7 +566,18 @@ Assumes that the frame is only split into two."
     ("w" nh/org-element-as-docx "nh/org-element-as-docx" :color blue)
     ("q" nil "<quit>"))
 
-  ) ;; end hydra config
+  (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
+    "hydra-python"
+    ("RET" redraw-display "<quit>")
+    ;; ("2" activate-venv-default-py2 "activate-venv-default-py2")
+    ;; ("3" activate-venv-default-py3 "activate-venv-default-py3")
+    ("c" flycheck-list-errors "flycheck-list-errors")
+    ("f" flycheck-verify-setup "flycheck-verify-setup")
+    ;; ("v" activate-venv-current-project "activate-venv-current-project")
+    ;; ("y" elpy-yapf-fix-code "elpy-yapf-fix-code")
+    ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point"))
+
+    ) ;; end hydra config
 
 ;;* ESS (R language support)
 
