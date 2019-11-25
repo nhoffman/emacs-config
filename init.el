@@ -767,6 +767,9 @@ convert to .docx with pandoc"
 (use-package magit
   :ensure t)
 
+(use-package git-timemachine
+  :ensure t)
+
 (use-package smart-mode-line
   :ensure t
   :config
