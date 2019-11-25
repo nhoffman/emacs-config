@@ -127,8 +127,8 @@
   (unless (string-match path (getenv "PATH"))
     (setenv "PATH" (concat path ":" (getenv "PATH")))))
 
-(nh/prepend-path "~/.emacs.d/bin")
-(add-to-list 'exec-path "~/.emacs.d/bin")
+(nh/prepend-path (nh/emacs-dir-path "bin"))
+(add-to-list 'exec-path (nh/emacs-dir-path "bin"))
 
 ;;* other settings
 (setq suggest-key-bindings 4)
