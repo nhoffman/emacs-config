@@ -622,6 +622,7 @@ the path."
                (message "** Loading ess-mode hooks")
                ;; leave my underscore key alone!
                (setq ess-S-assign "_")
+			   (ess-toggle-underscore nil)
                ;; set ESS indentation style [GNU, BSD, K&R, CLB, C++]
                (ess-set-style 'GNU 'quiet)
 			   (nh/set-inferior-ess-r-program-name)
