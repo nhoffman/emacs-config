@@ -622,12 +622,9 @@ the path."
                (message "** Loading ess-mode hooks")
                ;; leave my underscore key alone!
                (setq ess-S-assign "_")
-               ;; (ess-toggle-underscore nil)
-               ;; set ESS indentation style
-               ;; choose from GNU, BSD, K&R, CLB, and C++
+               ;; set ESS indentation style [GNU, BSD, K&R, CLB, C++]
                (ess-set-style 'GNU 'quiet)
-	       (if nh/enable-flyspell-p (flyspell-mode))
-	       (nh/set-inferior-ess-r-program-name)
+			   (nh/set-inferior-ess-r-program-name)
 	       )))
 
 ;;* org-mode
