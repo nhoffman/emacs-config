@@ -20,16 +20,28 @@
 	  (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
 		  t nil))
 
-;; save customizations in a file other than init.el
-(defconst custom-file (expand-file-name "custom.el" user-emacs-directory))
-(unless (file-exists-p custom-file)
-  (write-region "" nil custom-file))
-(load custom-file)
-
 ;; File path in title bar.
 (setq frame-title-format
       (list (format "%s %%S: %%j " (system-name))
             '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
+
+;; path utilities
+(defun nh/path-join (&rest x)
+  "Join elements of x with a path separator and apply `expand-file-name'"
+  (expand-file-name
+   (concat
+	(mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
+	(elt x (- (length x) 1)))))
+
+(defun nh/emacs-dir-path (name)
+  "Return absolute path to a file in the same directory as `user-init-file'"
+  (expand-file-name name user-emacs-directory))
+
+(defcustom nh/custom-file
+  (nh/emacs-dir-path "custom.el") "file for saving customizations other than init.el")
+(unless (file-exists-p nh/custom-file)
+  (write-region "" nil nh/custom-file))
+(load nh/custom-file)
 
 (defun nh/set-default-font-verbosely (font-name)
   (interactive)
@@ -98,7 +110,8 @@
 (defun nh/ssh-refresh ()
   "Reset the environment variable SSH_AUTH_SOCK"
   (interactive)
-  (let (ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
+  (let ((ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
+		())
     (setenv "SSH_AUTH_SOCK"
             (car (split-string
                   (shell-command-to-string
@@ -111,7 +124,6 @@
      (format "SSH_AUTH_SOCK %s --> %s"
              ssh-auth-sock-old (getenv "SSH_AUTH_SOCK")))))
 
-(add-to-list 'exec-path "~/.emacs.d/bin")
 (defun nh/prepend-path (path)
   "Add `path' to the beginning of $PATH unless already present."
   (interactive)
@@ -119,6 +131,7 @@
     (setenv "PATH" (concat path ":" (getenv "PATH")))))
 
 (nh/prepend-path "~/.emacs.d/bin")
+(add-to-list 'exec-path "~/.emacs.d/bin")
 
 ;;* other settings
 (setq suggest-key-bindings 4)
@@ -246,20 +259,20 @@ Assumes that the frame is only split into two."
   (message "** could not find hunspell or aspell"))
 
 ;;* init file utilities
-(defvar nh/init-el "~/.emacs.d/init.el" "My init file")
+;; TODO: refer to
 (defun nh/init-file-edit ()
-  "Edit init file specified by `nh/init-el'"
+  "Edit `user-init-file'"
   (interactive)
-  (find-file nh/init-el))
+  (find-file user-init-file))
 
 (defun nh/init-file-header-occur ()
   (interactive)
-  (find-file nh/init-el)
+  (find-file user-init-file)
   (occur "^;;\\* "))
 
 (defun nh/init-file-use-package-occur ()
   (interactive)
-  (find-file nh/init-el)
+  (find-file user-init-file)
   (occur "^(use-package"))
 
 (defun nh/init-file-header-insert ()
@@ -270,7 +283,7 @@ Assumes that the frame is only split into two."
 (defun nh/init-file-load ()
   "Reload init file"
   (interactive)
-  (load nh/init-el))
+  (load user-init-file))
 
 ;;* Package management
 (require 'package)
@@ -279,8 +292,7 @@ Assumes that the frame is only split into two."
         ("gnu" . "https://elpa.gnu.org/packages/")
         ("melpa" . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")
-	("org" . "https://orgmode.org/elpa/")
-        ))
+		("org" . "https://orgmode.org/elpa/")))
 
 (setq package-archive-priorities
       '(("org" . 30)
@@ -396,22 +408,11 @@ Assumes that the frame is only split into two."
 ;;   (setq lsp-ui-sideline-show-flycheck nil))
 
 ;;* python
-(defun nh/path-join (&rest x)
-  "Join elements of x with a path separator and apply `expand-file-name'"
-  (expand-file-name
-   (concat
-	(mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
-	(elt x (- (length x) 1)))))
+(defcustom nh/py3-venv
+  (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
-(defun nh/emacs-dir-path (name)
-  "Return absolute path to a file in the same directory as `user-init-file'"
-  (nh/path-join (file-name-directory user-init-file) name))
-
-(defvar nh/py3-venv nil "virtualenv for flycheck, etc")
-(setq nh/py3-venv (nh/emacs-dir-path "py3-env"))
-
-(defun nh/py3-venv-path (name)
-  "Return the path to a program installed in `nh/py3-venv'"
+(defun nh/py3-venv-bin (name)
+  "Return the path to an executable installed in `nh/py3-venv'"
   (nh/path-join nh/py3-venv "bin" name))
 
 (use-package python-mode
@@ -443,7 +444,7 @@ Assumes that the frame is only split into two."
   :ensure t
   :config
   (setq flycheck-python-flake8-executable
-		(nh/py3-venv-path "flake8"))
+		(nh/py3-venv-bin "flake8"))
   (setq flycheck-flake8rc
 		(nh/emacs-dir-path "flake8.conf"))
   :hook
@@ -453,7 +454,7 @@ Assumes that the frame is only split into two."
 (defun nh/yapf-region-or-buffer ()
   "Apply yapf to the current region or buffer"
   (interactive)
-  (let* ((yapf (nh/py3-venv-path "yapf"))
+  (let* ((yapf (nh/py3-venv-bin "yapf"))
 		 (yapf-config (nh/emacs-dir-path "yapf.cfg"))
 		 ;; use config file if exists
 		 (yapf-cmd (if (file-exists-p yapf-config)
