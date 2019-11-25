@@ -106,20 +106,17 @@
     (add-hook 'auto-save-hook 'nh/desktop-save-no-p)))
 
 ;;* execution environment
-;; TODO: OS-specific commands
 (defun nh/ssh-refresh ()
   "Reset the environment variable SSH_AUTH_SOCK"
   (interactive)
-  (let ((ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
-		())
+  (let
+	  ((ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
+	   (mac-cmd "ls -t $(find /tmp/* -user $USER -name Listeners 2> /dev/null)")
+	   (linux-cmd "ls -t $(find /tmp/ssh-* -user $USER -name 'agent.*' 2> /dev/null)"))
     (setenv "SSH_AUTH_SOCK"
             (car (split-string
                   (shell-command-to-string
-                   (if (eq system-type 'darwin)
-                       "cat ~/.ssh-auth-sock"
-                     ;; "ls -t $(find /tmp/* -user $USER -name Listeners 2> /dev/null)"
-                     "ls -t $(find /tmp/ssh-* -user $USER -name 'agent.*' 2> /dev/null)"
-                     )))))
+                   (if (eq system-type 'darwin) mac-cmd linux-cmd)))))
     (message
      (format "SSH_AUTH_SOCK %s --> %s"
              ssh-auth-sock-old (getenv "SSH_AUTH_SOCK")))))
