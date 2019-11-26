@@ -37,11 +37,11 @@
   "Return absolute path to a file in the same directory as `user-init-file'"
   (expand-file-name name user-emacs-directory))
 
-(defcustom nh/custom-file
-  (nh/emacs-dir-path "custom.el") "file for saving customizations other than init.el")
-(unless (file-exists-p nh/custom-file)
-  (write-region "" nil nh/custom-file))
-(load nh/custom-file)
+;; save customizations here instead of init.el
+(setq custom-file (nh/emacs-dir-path "custom.el"))
+(unless (file-exists-p custom-file)
+  (write-region "" nil custom-file))
+(load custom-file)
 
 (defun nh/set-default-font-verbosely (font-name)
   (interactive)
