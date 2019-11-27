@@ -815,3 +815,7 @@ convert to .docx with pandoc"
 
 (use-package jinja2-mode
   :ensure t)
+
+(use-package dockerfile-mode
+  :ensure t
+  :mode ("Dockerfile" . dockerfile-mode))
