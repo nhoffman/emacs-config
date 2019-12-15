@@ -435,7 +435,7 @@ Assumes that the frame is only split into two."
   :hook
   (python-mode . (lambda ()
 		   (require 'lsp-python-ms)
-		   (lsp))))
+		   (lsp-deferred))))
 
 (use-package flycheck
   :ensure t
@@ -452,22 +452,22 @@ Assumes that the frame is only split into two."
   "Apply yapf to the current region or buffer"
   (interactive)
   (let* ((yapf (nh/py3-venv-bin "yapf"))
-		 (yapf-config (nh/emacs-dir-path "yapf.cfg"))
-		 ;; use config file if exists
-		 (yapf-cmd (if (file-exists-p yapf-config)
-					   (concat yapf " --style " yapf-config)
-					 yapf))
-		 )
-  (unless (region-active-p)
-    (mark-whole-buffer))
-  (shell-command-on-region
-   (region-beginning) (region-end)  ;; beginning and end of region or buffer
-   yapf-cmd                        ;; command and parameters
-   (current-buffer)                 ;; output buffer
-   t                                ;; replace?
-   "*yapf errors*"                  ;; name of the error buffer
-   t)                               ;; show error buffer?
-  ))
+	 (yapf-config (nh/emacs-dir-path "yapf.cfg"))
+	 ;; use config file if exists
+	 (yapf-cmd (if (file-exists-p yapf-config)
+		       (concat yapf " --style " yapf-config)
+		     yapf))
+	 )
+    (unless (region-active-p)
+      (mark-whole-buffer))
+    (shell-command-on-region
+     (region-beginning) (region-end)  ;; beginning and end of region or buffer
+     yapf-cmd                         ;; command and parameters
+     (current-buffer)                 ;; output buffer
+     t                                ;; replace?
+     "*yapf errors*"                  ;; name of the error buffer
+     t)                               ;; show error buffer?
+    ))
 
 ;; (defun nh/autopep8-and-ediff ()
 ;;   "Compare the current buffer to the output of autopep8 using ediff"
