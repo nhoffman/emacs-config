@@ -681,6 +681,10 @@ the path."
   :ensure t
   :after (org))
 
+(use-package org-re-reveal
+  :ensure t
+  :after (org))
+
 (defun nh/org-add-entry (filename time-format)
   ;; Add an entry to an org-file with today's timestamp.
   (interactive "FFile: ")
