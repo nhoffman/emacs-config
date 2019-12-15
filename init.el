@@ -392,7 +392,10 @@ Assumes that the frame is only split into two."
 
 ;;* lsp-mode
 (use-package lsp-mode
-  :ensure t)
+  :ensure t
+  :config
+  (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
+  )
 
 ;; (use-package lsp-ui
 ;;   :ensure t
@@ -427,15 +430,16 @@ Assumes that the frame is only split into two."
   (setq py-smart-indentation t))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
+;; apparently including ":after yasnippet" prevents the python-mode hook from running
 (use-package lsp-python-ms
   :ensure t
-  :after (yasnippet)
   :config
   (setq lsp-python-ms-python-executable-cmd "python3")
   :hook
   (python-mode . (lambda ()
-		   (require 'lsp-python-ms)
-		   (lsp-deferred))))
+  		   (require 'lsp-python-ms)
+  		   (lsp)))
+  )
 
 (use-package flycheck
   :ensure t
@@ -757,7 +761,6 @@ convert to .docx with pandoc"
   (error (message "** could not load tramp")))
 
 ;;* misc packages
-
 (use-package yasnippet
   :ensure t
   :init
