@@ -488,6 +488,9 @@ Assumes that the frame is only split into two."
 ;;     (ediff-buffers (current-buffer) p8-output)))
 
 ;;* javascript/json
+(use-package json-mode
+  :ensure t)
+
 (add-hook 'js-mode-hook
           (lambda ()
             (make-local-variable 'js-indent-level)
