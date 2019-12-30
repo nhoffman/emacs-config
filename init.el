@@ -17,8 +17,8 @@
 (setq backward-delete-char-untabify-method "all")
 ;; use 'ls --dired' if available
 (setq dired-use-ls-dired
-	  (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
-		  t nil))
+      (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
+	  t nil))
 
 ;; File path in title bar.
 (setq frame-title-format
@@ -30,8 +30,8 @@
   "Join elements of x with a path separator and apply `expand-file-name'"
   (expand-file-name
    (concat
-	(mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
-	(elt x (- (length x) 1)))))
+    (mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
+    (elt x (- (length x) 1)))))
 
 (defun nh/emacs-dir-path (name)
   "Return absolute path to a file in the same directory as `user-init-file'"
@@ -110,9 +110,9 @@
   "Reset the environment variable SSH_AUTH_SOCK"
   (interactive)
   (let
-	  ((ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
-	   (mac-cmd "ls -t $(find /tmp/* -user $USER -name Listeners 2> /dev/null)")
-	   (linux-cmd "ls -t $(find /tmp/ssh-* -user $USER -name 'agent.*' 2> /dev/null)"))
+      ((ssh-auth-sock-old (getenv "SSH_AUTH_SOCK"))
+       (mac-cmd "ls -t $(find /tmp/* -user $USER -name Listeners 2> /dev/null)")
+       (linux-cmd "ls -t $(find /tmp/ssh-* -user $USER -name 'agent.*' 2> /dev/null)"))
     (setenv "SSH_AUTH_SOCK"
             (car (split-string
                   (shell-command-to-string
@@ -223,7 +223,7 @@ Assumes that the frame is only split into two."
 (defun nh/unfill-paragraph ()
   (interactive)
   (let ((fill-column (point-max)))
-  (fill-paragraph nil)))
+    (fill-paragraph nil)))
 (global-set-key (kbd "M-C-q") 'nh/unfill-paragraph)
 
 (defun nh/copy-region-or-line-other-window ()
@@ -446,9 +446,9 @@ Assumes that the frame is only split into two."
   :ensure t
   :config
   (setq flycheck-python-flake8-executable
-		(nh/py3-venv-bin "flake8"))
+	(nh/py3-venv-bin "flake8"))
   (setq flycheck-flake8rc
-		(nh/emacs-dir-path "flake8.conf"))
+	(nh/emacs-dir-path "flake8.conf"))
   :hook
   (python-mode . flycheck-mode))
 
@@ -591,9 +591,9 @@ Assumes that the frame is only split into two."
   (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
     "hydra-yasnippet"
     ("RET" redraw-display "<quit>")
-	("i" yas-insert-snippet "yas-insert-snippet"))
+    ("i" yas-insert-snippet "yas-insert-snippet"))
 
-    ) ;; end hydra config
+  ) ;; end hydra config
 
 ;;* ESS (R language support)
 
@@ -602,24 +602,24 @@ Assumes that the frame is only split into two."
 interpreter. On systems using 'modules'
 (http://modules.sourceforge.net/), load the R module before defining
 the path."
-     (interactive)
-     (setq inferior-ess-r-program-name
-	   (replace-regexp-in-string
-	    "\n" ""
-	    (shell-command-to-string
-	     "which ml > /dev/null && (ml R; which R) || which R"))))
+  (interactive)
+  (setq inferior-ess-r-program-name
+	(replace-regexp-in-string
+	 "\n" ""
+	 (shell-command-to-string
+	  "which ml > /dev/null && (ml R; which R) || which R"))))
 
 (defun nh/set-inferior-ess-r-program-name ()
-    "Set `inferior-ess-r-program-name' as the absolute path to the R
+  "Set `inferior-ess-r-program-name' as the absolute path to the R
 interpreter. On systems using 'modules'
 (http://modules.sourceforge.net/), load the R module before defining
 the path."
-    (interactive)
-    (setq inferior-ess-r-program-name
-	  (replace-regexp-in-string
-	   "\n" ""
-	   (shell-command-to-string
-	    "which ml > /dev/null && (ml R; which R) || which R"))))
+  (interactive)
+  (setq inferior-ess-r-program-name
+	(replace-regexp-in-string
+	 "\n" ""
+	 (shell-command-to-string
+	  "which ml > /dev/null && (ml R; which R) || which R"))))
 
 (use-package ess
   :ensure t
@@ -630,10 +630,10 @@ the path."
                (message "** Loading ess-mode hooks")
                ;; leave my underscore key alone!
                (setq ess-S-assign "_")
-			   (ess-toggle-underscore nil)
+	       (ess-toggle-underscore nil)
                ;; set ESS indentation style [GNU, BSD, K&R, CLB, C++]
                (ess-set-style 'GNU 'quiet)
-			   (nh/set-inferior-ess-r-program-name)
+	       (nh/set-inferior-ess-r-program-name)
 	       )))
 
 ;;* org-mode
@@ -732,8 +732,9 @@ convert to .docx with pandoc"
          (header (plist-get sec ':title))
          (fname (nh/safename header))
          (basedir
-          (shell-quote-argument (read-directory-name
-           "Output directory: " (expand-file-name "~/Downloads"))))
+          (shell-quote-argument
+	   (read-directory-name
+	    "Output directory: " (expand-file-name "~/Downloads"))))
          (orgfile (make-temp-file fname nil ".org"))
          (docx (concat (file-name-as-directory basedir) fname ".docx")))
     (write-region
@@ -818,7 +819,7 @@ convert to .docx with pandoc"
   :ensure t
   :mode ("\\.nf" . groovy-mode)
   :hook (groovy-mode . (lambda ()
-                        (setq indent-tabs-mode nil))))
+			 (setq indent-tabs-mode nil))))
 
 (use-package discover
   :ensure t
