@@ -289,7 +289,8 @@ Assumes that the frame is only split into two."
         ("gnu" . "https://elpa.gnu.org/packages/")
         ("melpa" . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")
-		("org" . "https://orgmode.org/elpa/")))
+	("org" . "https://orgmode.org/elpa/")
+	))
 
 (setq package-archive-priorities
       '(("org" . 30)
@@ -636,53 +637,60 @@ the path."
 	       )))
 
 ;;* org-mode
-(use-package org
-  :ensure org-plus-contrib
-  :pin org
-  :config
-  (push '("\\.org\\'" . org-mode) auto-mode-alist)
-  (push '("\\.org\\.txt\\'" . org-mode) auto-mode-alist)
-  (add-hook 'org-mode-hook
-            '(lambda ()
-               (message "Loading org-mode hooks")
-               ;; (font-lock-mode)
-               (setq org-confirm-babel-evaluate nil)
-               (setq org-src-fontify-natively t)
-               (setq org-edit-src-content-indentation 0)
-               (define-key org-mode-map (kbd "M-<right>") 'forward-word)
-               (define-key org-mode-map (kbd "M-<left>") 'backward-word)
-               ;; provides key mapping for the above; replaces default
-               ;; key bindings for org-promote/demote-subtree
-               (define-key org-mode-map (kbd "M-S-<right>") 'org-do-demote)
-               (define-key org-mode-map (kbd "M-S-<left>") 'org-do-promote)
-               (define-key org-mode-map (kbd "C-c n")  'hydra-org-navigation/body)
-               (visual-line-mode)
-               ;; org-babel
+(defun nh/org-mode-hooks ()
+  (message "Loading org-mode hooks")
+  ;; (font-lock-mode)
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-fontify-natively t)
+  (setq org-edit-src-content-indentation 0)
+  (define-key org-mode-map (kbd "M-<right>") 'forward-word)
+  (define-key org-mode-map (kbd "M-<left>") 'backward-word)
+  ;; provides key mapping for the above; replaces default
+  ;; key bindings for org-promote/demote-subtree
+  (define-key org-mode-map (kbd "M-S-<right>") 'org-do-demote)
+  (define-key org-mode-map (kbd "M-S-<left>") 'org-do-promote)
+  (define-key org-mode-map (kbd "C-c n")  'hydra-org-navigation/body)
+  (visual-line-mode)
+  ;; org-babel
 
-               ;; enable a subset of languages for evaluation in code blocks
-               (setq nh/org-babel-load-languages
-                     '((R . t)
-                       (latex . t)
-                       (python . t)
-                       (sql . t)
-                       (sqlite . t)
-                       (emacs-lisp . t)
-                       (dot . t)))
+  ;; enable a subset of languages for evaluation in code blocks
+  (setq nh/org-babel-load-languages
+	'((R . t)
+	  (latex . t)
+	  (python . t)
+	  (sql . t)
+	  (sqlite . t)
+	  (emacs-lisp . t)
+	  (dot . t)))
 
-               ;; use "shell" for org-mode versions 9 and above
-               (add-to-list 'nh/org-babel-load-languages
-                            (if (>= (string-to-number (substring (org-version) 0 1)) 9)
-				'(shell . t) '(sh . t)))
+  ;; use "shell" for org-mode versions 9 and above
+  (add-to-list 'nh/org-babel-load-languages
+	       (if (>= (string-to-number (substring (org-version) 0 1)) 9)
+		   '(shell . t) '(sh . t)))
 
-               (org-babel-do-load-languages
-		'org-babel-load-languages nh/org-babel-load-languages)
+  (org-babel-do-load-languages
+   'org-babel-load-languages nh/org-babel-load-languages)
 
-               (defadvice org-todo-list (after org-todo-list-bottom ())
-		 "Move to bottom of page after entering org-todo-list"
-		 (progn (end-of-buffer) (recenter-top-bottom)))
-               (ad-activate 'org-todo-list)
-               ))
+  (defadvice org-todo-list (after org-todo-list-bottom ())
+    "Move to bottom of page after entering org-todo-list"
+    (progn (end-of-buffer) (recenter-top-bottom)))
+  (ad-activate 'org-todo-list)
   )
+
+;; work around difficulties installing org-plus-contrib on linux
+;; (probably due to the age of the system)
+(if (eq system-type 'darwin)
+    (use-package org
+      :ensure org-plus-contrib
+      :mode
+      ("\\.org\\'" . org-mode)
+      ("\\.org\\.txt\\'" . org-mode)
+      :hook (org-mode . nh/org-mode-hooks))
+  (use-package org
+    :mode
+    ("\\.org\\'" . org-mode)
+    ("\\.org\\.txt\\'" . org-mode)
+    :hook (org-mode . nh/org-mode-hooks)))
 
 (use-package ox-minutes
   :ensure t
