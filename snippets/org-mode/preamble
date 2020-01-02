@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: preamble
+# key: preamble
+# --
+#+TITLE:
+#+OPTIONS: ^:nil
+#+PROPERTY: header-args:sh :shebang "#!/bin/bash" :results output
