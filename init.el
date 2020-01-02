@@ -675,6 +675,9 @@ the path."
     "Move to bottom of page after entering org-todo-list"
     (progn (end-of-buffer) (recenter-top-bottom)))
   (ad-activate 'org-todo-list)
+
+  ;; minor modes
+  (yas-minor-mode t)
   )
 
 ;; work around difficulties installing org-plus-contrib on linux
