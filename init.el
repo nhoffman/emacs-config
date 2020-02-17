@@ -428,7 +428,8 @@ Assumes that the frame is only split into two."
   :config
   (setq indent-tabs-mode nil)
   (setq python-indent-offset tab-width)
-  (setq py-smart-indentation t))
+  (setq py-smart-indentation t)
+  (setq python-shell-interpreter "python3"))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
