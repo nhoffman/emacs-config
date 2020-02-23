@@ -545,6 +545,15 @@ Assumes that the frame is only split into two."
     ("H" nh/init-file-header-insert "insert header")
     ("u" nh/init-file-use-package-occur "occur use-package declarations"))
 
+  (defun nh/set-bookmark-for-function ()
+	(interactive)
+	(let* ((tag (read-string "project tag: "))
+		   (funcname (which-function))
+		   (name (format "%s %s" tag funcname)))
+	  (if (y-or-n-p (format "set bookmark '%s'? " name))
+		  (bookmark-set name)))
+	)
+
   ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Bookmarks.html
   (defhydra hydra-bookmarks (:color blue :columns 4 :post (redraw-display))
     "hydra-bookmarks"
@@ -553,7 +562,8 @@ Assumes that the frame is only split into two."
     ("l" list-bookmarks "list bookmarks")
 	("j" bookmark-jump "jump to bookmark")
 	("s" bookmark-set "set bookmark")
-	("d" bookmark-delete "delete bookmark"))
+	("d" bookmark-delete "delete bookmark")
+	("f" nh/set-bookmark-for-function "bookmark this function"))
 
   (defhydra hydra-toggle-mode (:color blue :columns 4 :post (redraw-display))
     "hydra-toggle-mode"
