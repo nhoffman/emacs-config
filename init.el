@@ -512,7 +512,8 @@ Assumes that the frame is only split into two."
     "hydra-launcher"
     ("C-g" redraw-display "<quit>")
     ("RET" redraw-display "<quit>")
-    ("b" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
+	("b" hydra-bookmarks/body "hyrda for bookmarks")
+    ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
     ("d" nh/insert-date "nh/insert-date")
     ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("f" nh/fix-frame "fix-frame")
@@ -543,6 +544,16 @@ Assumes that the frame is only split into two."
     ("h" nh/init-file-header-occur "occur headers")
     ("H" nh/init-file-header-insert "insert header")
     ("u" nh/init-file-use-package-occur "occur use-package declarations"))
+
+  ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Bookmarks.html
+  (defhydra hydra-bookmarks (:color blue :columns 4 :post (redraw-display))
+    "hydra-bookmarks"
+    ("RET" redraw-display "<quit>")
+    ("C-g" redraw-display "<quit>")
+    ("l" list-bookmarks "list bookmarks")
+	("j" bookmark-jump "jump to bookmark")
+	("s" bookmark-set "set bookmark")
+	("d" bookmark-delete "delete bookmark"))
 
   (defhydra hydra-toggle-mode (:color blue :columns 4 :post (redraw-display))
     "hydra-toggle-mode"
