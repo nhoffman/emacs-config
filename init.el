@@ -400,6 +400,7 @@ Assumes that the frame is only split into two."
 ;;* lsp-mode
 (use-package lsp-mode
   :ensure t
+  :pin melpa
   :config
   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
   )
@@ -441,6 +442,7 @@ Assumes that the frame is only split into two."
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
 (use-package lsp-python-ms
   :ensure t
+  :pin melpa
   :config
   (setq lsp-python-ms-python-executable-cmd "python3")
   :hook
