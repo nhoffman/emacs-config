@@ -62,7 +62,7 @@
            (set-keyboard-coding-system 'mac-roman)
            (setq mac-option-modifier 'meta)
            (setq mac-command-key-is-meta nil)
-           (nh/set-default-font-verbosely "Menlo-14")))
+           (nh/set-default-font-verbosely "Menlo-15")))
         ((string= "x" window-system)
          (progn
            (message (format "** running %s windowing system" window-system))
@@ -315,6 +315,12 @@ Assumes that the frame is only split into two."
       (warn
        "use-package is not installed - could not activate %s" (symbol-name pkg))
       )))
+
+;;* choose a theme
+(use-package spacemacs-theme
+  :ensure t
+  :defer t
+  :init (load-theme 'spacemacs-dark t))
 
 ;;* search and navigation (ivy, counsel, and friends)
 (use-package ivy
