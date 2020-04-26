@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-venv="~/.emacs.d/py3-env"
+venv="$HOME/.emacs.d/py3-env"
 
 python3 -m venv "$venv"
 source "$venv/bin/activate"
