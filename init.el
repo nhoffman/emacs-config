@@ -19,6 +19,7 @@
 (setq dired-use-ls-dired
       (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
 	  t nil))
+(global-auto-revert-mode t)
 
 ;; File path in title bar.
 (setq frame-title-format
@@ -432,11 +433,11 @@ Assumes that the frame is only split into two."
   ("SConscript" . python-mode)
   :init
   (setq tab-width 4)
+  (setq python-shell-interpreter "python3")
   :config
   (setq indent-tabs-mode nil)
   (setq python-indent-offset tab-width)
-  (setq py-smart-indentation t)
-  (setq python-shell-interpreter "python3"))
+  (setq py-smart-indentation t))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
