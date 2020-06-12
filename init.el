@@ -456,9 +456,11 @@ Assumes that the frame is only split into two."
   :ensure t
   :config
   (setq flycheck-python-flake8-executable
-	(nh/py3-venv-bin "flake8"))
+		(nh/py3-venv-bin "flake8"))
+  (setq flycheck-python-pylint-executable
+		(nh/py3-venv-bin "pylint"))
   (setq flycheck-flake8rc
-	(nh/emacs-dir-path "flake8.conf"))
+		(nh/emacs-dir-path "flake8.conf"))
   :hook
   (python-mode . flycheck-mode))
 
