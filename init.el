@@ -454,13 +454,17 @@ Assumes that the frame is only split into two."
 
 (use-package flycheck
   :ensure t
+  :pin melpa
   :config
   (setq flycheck-python-flake8-executable
-		(nh/py3-venv-bin "flake8"))
-  (setq flycheck-python-pylint-executable
-		(nh/py3-venv-bin "pylint"))
+	(nh/py3-venv-bin "flake8"))
   (setq flycheck-flake8rc
-		(nh/emacs-dir-path "flake8.conf"))
+	(nh/emacs-dir-path "flake8.conf"))
+  (setq flycheck-python-pylint-executable
+	(nh/py3-venv-bin "pylint"))
+  (setq flycheck-pylintrc
+	(nh/emacs-dir-path "python-pylint.conf"))
+  (flycheck-add-next-checker 'lsp 'python-flake8)
   :hook
   (python-mode . flycheck-mode))
 
