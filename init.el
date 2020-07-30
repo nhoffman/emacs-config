@@ -441,16 +441,18 @@ Assumes that the frame is only split into two."
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
-(use-package lsp-python-ms
-  :ensure t
-  :pin melpa
-  :config
-  (setq lsp-python-ms-python-executable-cmd "python3")
-  :hook
-  (python-mode . (lambda ()
-  		   (require 'lsp-python-ms)
-  		   (lsp)))
-  )
+;; TODO: make this work on linux
+(when (eq system-type 'darwin)
+  (use-package lsp-python-ms
+    :ensure t
+    :pin melpa
+    :config
+    (setq lsp-python-ms-python-executable-cmd "python3")
+    :hook
+    (python-mode . (lambda ()
+		     (require 'lsp-python-ms)
+		     (lsp)))
+    ))
 
 (use-package flycheck
   :ensure t
