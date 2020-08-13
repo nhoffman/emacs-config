@@ -48,7 +48,8 @@
   (interactive)
   (message (format "** setting default font to %s" font-name))
   (condition-case nil
-      (set-default-font font-name)
+      ; (set-default-font font-name)
+      (set-face-attribute 'default nil :font font-name)
     (error (message (format "** Error: could not set to font %s" font-name)))))
 
 (defun nh/fix-frame (&optional frame)
