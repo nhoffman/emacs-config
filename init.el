@@ -19,7 +19,10 @@
 (setq dired-use-ls-dired
       (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
 	  t nil))
+
 (global-auto-revert-mode t)
+(unless (< emacs-major-version 27)
+    (setq auto-revert-avoid-polling t))
 
 ;; File path in title bar.
 (setq frame-title-format
