@@ -452,6 +452,7 @@ Assumes that the frame is only split into two."
     :pin melpa
     :config
     (setq lsp-python-ms-python-executable-cmd "python3")
+    :bind (("M-." . lsp-find-definition))
     :hook
     (python-mode . (lambda ()
 		     (require 'lsp-python-ms)
