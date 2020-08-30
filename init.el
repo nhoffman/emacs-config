@@ -473,7 +473,6 @@ Assumes that the frame is only split into two."
 	(nh/py3-venv-bin "pylint"))
   (setq flycheck-pylintrc
 	(nh/emacs-dir-path "python-pylint.conf"))
-  (flycheck-add-next-checker 'lsp 'python-flake8)
   :hook
   (python-mode . flycheck-mode))
 
