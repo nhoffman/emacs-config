@@ -19,6 +19,8 @@
 (setq dired-use-ls-dired
       (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
 	  t nil))
+;; dired performs file renaming using underlying version control system
+(setq dired-vc-rename-file t)
 
 (global-auto-revert-mode t)
 (unless (< emacs-major-version 27)
