@@ -610,6 +610,11 @@ Assumes that the frame is only split into two."
     ("w" web-mode "web-mode")
     ("y" yaml-mode "yaml-mode"))
 
+  (defun nh/org-show-todos-move-down ()
+	(interactive)
+	(org-show-todo-tree nil)
+	(end-of-buffer))
+
   (defhydra hydra-org-navigation
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
     "hydra-org-navigation"
@@ -620,6 +625,7 @@ Assumes that the frame is only split into two."
     ("<left>" org-previous-block "org-previous-block")
     ("<down>" outline-next-visible-heading "outline-next-visible-heading")
     ("<up>" outline-previous-visible-heading "outline-previous-visible-heading")
+	("t" nh/org-show-todos-move-down "show todos" :color blue)
     ("S-<down>" org-forward-paragraph "org-forward-paragraph")
     ("S-<up>" org-backward-paragraph "org-backward-paragraph")
     ("s" (org-insert-structure-template "src") "add src block" :color blue)
