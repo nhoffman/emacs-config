@@ -21,6 +21,7 @@
 	  t nil))
 ;; dired performs file renaming using underlying version control system
 (setq dired-vc-rename-file t)
+(setq fill-column 80)
 
 (global-auto-revert-mode t)
 (unless (< emacs-major-version 27)
