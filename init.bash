@@ -30,3 +30,23 @@ e(){
 	"$EMACSCLIENT" -n "$@"
     fi
 }
+
+ef () {
+    if [[ -z $1 ]]; then
+	echo "open file matching pattern in emacs"
+	echo "usage $0 find-pattern [grep-pattern]"
+	return
+    fi
+
+    if [[ -z $2 ]]; then
+	fname="$(fd "$1" | fzf)"
+    else
+	fname="$(fd "$1" \
+	    | xargs grep -l "$2" \
+	    | fzf --preview "grep --color=always -n -C 5 "$2" {}")"
+    fi
+
+    if [[ ! -z "$fname" ]]; then
+	e "$fname"
+    fi
+}
