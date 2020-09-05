@@ -39,11 +39,11 @@ ef () {
     fi
 
     if [[ -z $2 ]]; then
-	fname="$(fd "$1" | fzf)"
+	fname="$(fd "$1" | fzf --exact)"
     else
 	fname="$(fd "$1" \
 	    | xargs grep -l "$2" \
-	    | fzf --preview "grep --color=always -n -C 5 "$2" {}")"
+	    | fzf --exact --preview "grep --color=always -n -C 5 "$2" {}")"
     fi
 
     if [[ ! -z "$fname" ]]; then
