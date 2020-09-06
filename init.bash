@@ -33,8 +33,8 @@ e(){
 
 ef () {
     if [[ -z $1 ]]; then
-	echo "open file matching pattern in emacs"
-	echo "usage $0 find-pattern [grep-pattern]"
+	echo "Use fzf to select file matching pattern and open in emacs"
+	echo "usage: $0 find-pattern [grep-pattern]"
 	return
     fi
 
