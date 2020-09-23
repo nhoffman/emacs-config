@@ -899,3 +899,8 @@ convert to .docx with pandoc"
 (use-package dockerfile-mode
   :ensure t
   :mode ("Dockerfile" . dockerfile-mode))
+
+;; see https://github.com/defunkt/gist.el
+(use-package gist
+  :ensure t)
+
