@@ -699,6 +699,7 @@ the path."
   (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-edit-src-content-indentation 0)
+  (setq org-babel-python-command "python3")
   (define-key org-mode-map (kbd "M-<right>") 'forward-word)
   (define-key org-mode-map (kbd "M-<left>") 'backward-word)
   ;; provides key mapping for the above; replaces default
@@ -733,8 +734,7 @@ the path."
   (ad-activate 'org-todo-list)
 
   ;; minor modes
-  (yas-minor-mode t)
-  )
+  (yas-minor-mode t))
 
 ;; work around difficulties installing org-plus-contrib on linux
 ;; (probably due to the age of the system)
