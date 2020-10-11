@@ -431,6 +431,12 @@ Assumes that the frame is only split into two."
   "Return the path to an executable installed in `nh/py3-venv'"
   (nh/path-join nh/py3-venv "bin" name))
 
+(defun nh/python-flycheck-select-flake8 ()
+  (interactive)
+  (flycheck-mode t)
+  (flycheck-select-checker 'python-flake8)
+  (flycheck-list-errors))
+
 (use-package python-mode
   :mode
   ("\\.py$'" . python-mode)
@@ -447,7 +453,7 @@ Assumes that the frame is only split into two."
   (setq py-smart-indentation t)
   :hook
   (python-mode . (lambda ()
-	(setq display-fill-column-indicator-column 80))))
+		   (setq display-fill-column-indicator-column 80))))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
@@ -462,7 +468,7 @@ Assumes that the frame is only split into two."
     :hook
     (python-mode . (lambda ()
 		     (require 'lsp-python-ms)
-		     (lsp)))
+		     (lsp-deferred)))
     ))
 
 (use-package flycheck
@@ -638,11 +644,15 @@ Assumes that the frame is only split into two."
     ("RET" redraw-display "<quit>")
     ;; ("2" activate-venv-default-py2 "activate-venv-default-py2")
     ;; ("3" activate-venv-default-py3 "activate-venv-default-py3")
-    ("c" flycheck-list-errors "flycheck-list-errors")
+    ("c" nh/python-flycheck-select-flake8 "activate flake8")
+    ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point")
+    ("e" flycheck-list-errors "flycheck-list-errors")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
+    ("n" flycheck-next-error "flycheck-next-error" :color red)
+    ("p" flycheck-previous-error "flycheck-previous-error" :color red)
+    ("P" python-mode "python-mode")
     ;; ("v" activate-venv-current-project "activate-venv-current-project")
-    ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer")
-    ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point"))
+    ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer"))
 
   (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
     "hydra-yasnippet"
