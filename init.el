@@ -325,6 +325,9 @@ Assumes that the frame is only split into two."
       )))
 
 ;;* choose a theme
+;; use list-faces-display to show preview of all faces for the current theme
+;; use M-x customize-group to modify theme elements in specific modes
+
 (use-package spacemacs-theme
   :ensure t
   :defer t
