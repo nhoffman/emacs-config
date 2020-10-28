@@ -712,6 +712,7 @@ the path."
   (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-edit-src-content-indentation 0)
+  (setq org-adapt-indentation nil)  ;; all headlines are flush left
   (setq org-babel-python-command "python3")
   (define-key org-mode-map (kbd "M-<right>") 'forward-word)
   (define-key org-mode-map (kbd "M-<left>") 'backward-word)
