@@ -597,10 +597,10 @@ Assumes that the frame is only split into two."
     ("RET" redraw-display "<quit>")
     ("C-g" redraw-display "<quit>")
     ("l" list-bookmarks "list bookmarks")
-	("j" bookmark-jump "jump to bookmark")
-	("s" bookmark-set "set bookmark")
-	("d" bookmark-delete "delete bookmark")
-	("f" nh/set-bookmark-for-function "bookmark this function"))
+    ("j" bookmark-jump "jump to bookmark")
+    ("s" bookmark-set "set bookmark")
+    ("d" bookmark-delete "delete bookmark")
+    ("f" nh/set-bookmark-for-function "bookmark this function"))
 
   (defhydra hydra-toggle-mode (:color blue :columns 4 :post (redraw-display))
     "hydra-toggle-mode"
@@ -917,4 +917,10 @@ convert to .docx with pandoc"
 ;; see https://github.com/defunkt/gist.el
 (use-package gist
   :ensure t)
+
+(use-package expand-region
+  :ensure t
+  :bind (("C-=" . er/expand-region)
+	 ("C--" . er/contract-region)))
+
 
