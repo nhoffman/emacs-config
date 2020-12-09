@@ -369,7 +369,8 @@ Assumes that the frame is only split into two."
 
 (use-package avy
   :ensure t
-  :bind (("M-'" . avy-goto-word-1)))
+  :bind (("M-'" . avy-goto-word-1)
+	 ("C-M-SPC" . avy-goto-word-1)))
 
 ;; see https://github.com/ericdanan/counsel-projectile
 (use-package counsel-projectile
