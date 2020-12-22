@@ -663,6 +663,10 @@ Assumes that the frame is only split into two."
     ("RET" redraw-display "<quit>")
     ("i" yas-insert-snippet "yas-insert-snippet"))
 
+  (defhydra hydra-expand-region (:color red :columns 1)
+    "hydra-expand-region"
+    ("." er/expand-region "er/expand-region")
+    ("," er/contract-region "er/contract-region"))
   ) ;; end hydra config
 
 ;;* ESS (R language support)
@@ -922,6 +926,7 @@ convert to .docx with pandoc"
 (use-package expand-region
   :ensure t
   :bind (("C-=" . er/expand-region)
-	 ("C--" . er/contract-region)))
+	 ("C--" . er/contract-region)
+	 ("C-M-." . hydra-expand-region/body)))
 
 
