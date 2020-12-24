@@ -99,6 +99,9 @@
 	 (save-buffers-kill-terminal))))
 (global-set-key (kbd "C-x C-c") 'nh/ask-before-exit)
 
+;; kill buffer without asking which one by default
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+
 ;; desktop
 (defun nh/desktop-save-no-p ()
   "Save desktop without prompting (replaces `desktop-save-in-desktop-dir')"
