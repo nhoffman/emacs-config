@@ -655,6 +655,7 @@ Assumes that the frame is only split into two."
     ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point")
     ("e" flycheck-list-errors "flycheck-list-errors")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
+    ("j" (swiper "class\\|def ") "jump to function or class")
     ("n" flycheck-next-error "flycheck-next-error" :color red)
     ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
