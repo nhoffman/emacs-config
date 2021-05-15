@@ -413,22 +413,21 @@ Assumes that the frame is only split into two."
   (global-company-mode +1))
 
 ;;* lsp-mode
+;; (use-package lsp-mode
+;;   :ensure t
+;;   :pin melpa
+;;   :config
+;;   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
+;;   )
+
 (use-package lsp-mode
   :ensure t
   :pin melpa
+  :hook
+  ((python-mode . lsp-deferred))
   :config
   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
   )
-
-;; (use-package lsp-ui
-;;   :ensure t
-;;   :config
-;;   (setq lsp-ui-doc-enable nil)
-;;   (setq lsp-ui-imenu-enable t)
-;;   (setq lsp-ui-peek-enable nil)
-;;   (setq lsp-ui-sideline-enable nil)
-;;   (setq lsp-ui-flycheck-enable nil)
-;;   (setq lsp-ui-sideline-show-flycheck nil))
 
 ;;* python
 (defcustom nh/py3-venv
@@ -443,6 +442,14 @@ Assumes that the frame is only split into two."
   (flycheck-mode t)
   (flycheck-select-checker 'python-flake8)
   (flycheck-list-errors))
+
+;; pip install -U jedi-language-server
+(use-package lsp-jedi
+  :ensure t
+  :config
+  (with-eval-after-load "lsp-mode"
+    (add-to-list 'lsp-disabled-clients 'pyls)
+    (add-to-list 'lsp-enabled-clients 'jedi)))
 
 (use-package python-mode
   :mode
@@ -465,18 +472,18 @@ Assumes that the frame is only split into two."
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
 ;; TODO: make this work on linux
-(when (eq system-type 'darwin)
-  (use-package lsp-python-ms
-    :ensure t
-    :pin melpa
-    :config
-    (setq lsp-python-ms-python-executable-cmd "python3")
-    :bind (("M-." . lsp-find-definition))
-    :hook
-    (python-mode . (lambda ()
-		     (require 'lsp-python-ms)
-		     (lsp-deferred)))
-    ))
+;; (when (eq system-type 'darwin)
+;;   (use-package lsp-python-ms
+;;     :ensure t
+;;     :pin melpa
+;;     :config
+;;     (setq lsp-python-ms-python-executable-cmd "python3")
+;;     :bind (("M-." . lsp-find-definition))
+;;     :hook
+;;     (python-mode . (lambda ()
+;; 		     (require 'lsp-python-ms)
+;; 		     (lsp-deferred)))
+;;     ))
 
 (use-package flycheck
   :ensure t
