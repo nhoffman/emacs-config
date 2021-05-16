@@ -443,6 +443,8 @@ Assumes that the frame is only split into two."
   (flycheck-select-checker 'python-flake8)
   (flycheck-list-errors))
 
+;;* jedi language server
+;; https://github.com/pappasam/jedi-language-server
 ;; pip install -U jedi-language-server
 (use-package lsp-jedi
   :ensure t
@@ -468,6 +470,49 @@ Assumes that the frame is only split into two."
   :hook
   (python-mode . (lambda ()
 		   (setq display-fill-column-indicator-column 80))))
+
+(use-package pyvenv
+  :ensure t)
+
+(defun nh/venv-list (basedir)
+  "Return a list of paths to virtualenvs in 'basedir' or nil if
+ none can be found"
+  (interactive)
+  (let ((fstr "find %s -path '*bin/activate' -maxdepth 3")
+        (pth (replace-regexp-in-string "/$" "" basedir)))
+    (mapcar (lambda (string)
+              (replace-regexp-in-string "/bin/activate$" "" string))
+            (cl-remove-if
+             (lambda (string) (= (length string) 0))
+             (split-string (shell-command-to-string (format fstr pth)) "\n")))
+    ))
+
+(defun nh/venv-activate ()
+  "Activate the virtualenv in the current project, or in
+`default-directory' if not in a project. Prompts for a selection
+if there is more than one option."
+  (interactive)
+  (let* ((thisdir (or (projectile-project-root) default-directory))
+	 (venvs (append (nh/venv-list thisdir) `(,nh/py3-venv)))
+	 (venv (ivy-read "choose a virtualenv: " venvs)))
+    (pyvenv-activate venv)
+    (message "Activated virtualenv %s (%s)"
+	     venv (string-trim (shell-command-to-string "python3 --version")))
+    ))
+
+(defun nh/venv-setup ()
+  "Install dependencies to a virtualenv. Prompts for a selection
+if none is active"
+  (interactive)
+  (unless pyvenv-virtual-env (nh/venv-activate))
+  (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
+      (let ((bufname nil))
+	(setq bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
+	(switch-to-buffer bufname)
+	(call-process-shell-command
+	 (format "%sbin/pip install -U flake8 yapf jedi-language-server"
+		 pyvenv-virtual-env) nil bufname t)
+	)))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
@@ -509,8 +554,7 @@ Assumes that the frame is only split into two."
 	 ;; use config file if exists
 	 (yapf-cmd (if (file-exists-p yapf-config)
 		       (concat yapf " --style " yapf-config)
-		     yapf))
-	 )
+		     yapf)))
     (unless (region-active-p)
       (mark-whole-buffer))
     (shell-command-on-region
@@ -617,6 +661,7 @@ Assumes that the frame is only split into two."
     "hydra-toggle-mode"
     ("RET" redraw-display "<quit>")
     ;; ("c" csv-mode "csv-mode")
+    ("e" emacs-lisp-mode "emacs-lisp-mode")
     ("h" html-mode "html-mode")
     ("j" jinja2-mode "jinja2-mode")
     ("k" markdown-mode "markdown-mode")
@@ -656,8 +701,6 @@ Assumes that the frame is only split into two."
   (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
     "hydra-python"
     ("RET" redraw-display "<quit>")
-    ;; ("2" activate-venv-default-py2 "activate-venv-default-py2")
-    ;; ("3" activate-venv-default-py3 "activate-venv-default-py3")
     ("c" nh/python-flycheck-select-flake8 "activate flake8")
     ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point")
     ("e" flycheck-list-errors "flycheck-list-errors")
@@ -666,7 +709,8 @@ Assumes that the frame is only split into two."
     ("n" flycheck-next-error "flycheck-next-error" :color red)
     ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
-    ;; ("v" activate-venv-current-project "activate-venv-current-project")
+    ("v" nh/venv-activate "nh/venv-activate")
+    ("V" nh/venv-setup "nh/venv-setup")
     ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer"))
 
   (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
