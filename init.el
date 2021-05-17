@@ -464,6 +464,9 @@ Assumes that the frame is only split into two."
 ;; pip install -U jedi-language-server
 (use-package lsp-jedi
   :ensure t
+  :pin melpa
+  :init
+  (setq lsp-jedi-executable-command (nh/py3-venv-bin "jedi-language-server"))
   :config
   (with-eval-after-load "lsp-mode"
     (add-to-list 'lsp-disabled-clients 'pyls)
