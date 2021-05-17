@@ -429,9 +429,25 @@ Assumes that the frame is only split into two."
   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
   )
 
+;; (use-package lsp-ui
+;;   :ensure t
+;;   :config
+;;   (setq lsp-ui-sideline-enable nil
+;;         lsp-ui-sideline-show-code-actions nil
+;;         lsp-ui-sideline-show-hover nil
+;;         lsp-ui-doc-enable t
+;;         lsp-ui-doc-include-signature nil
+;;         lsp-eldoc-enable-hover nil ; Disable eldoc displays in minibuffer
+;;         lsp-ui-doc-position 'at-point
+;;         lsp-ui-sideline-ignore-duplicate t)
+;;   )
+
 ;;* python
 (defcustom nh/py3-venv
   (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
+
+(defcustom nh/venv-setup-packages
+  '("flake8 yapf") "packages to install using `nh/venv-setup'")
 
 (defun nh/py3-venv-bin (name)
   "Return the path to an executable installed in `nh/py3-venv'"
@@ -498,20 +514,24 @@ if there is more than one option."
     (pyvenv-activate venv)
     (message "Activated virtualenv %s (%s)"
 	     venv (string-trim (shell-command-to-string "python3 --version")))
+    ;; is jedi smart enough to respect the active virtualenv?
+    ;; (setq lsp-jedi-executable-command
+    ;; 	  (concat (file-name-as-directory venv) "bin/jedi-language-server"))
     ))
 
 (defun nh/venv-setup ()
-  "Install dependencies to a virtualenv. Prompts for a selection
-if none is active"
+  "Install dependencies specified in `nh/venv-setup-packages' to
+the active virtualenv. Prompts for a selection if none is active"
   (interactive)
   (unless pyvenv-virtual-env (nh/venv-activate))
   (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
-      (let ((bufname nil))
+      (let ((bufname nil)
+	    (packages (mapconcat 'identity nh/venv-setup-packages " ")))
 	(setq bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
 	(switch-to-buffer bufname)
 	(call-process-shell-command
-	 (format "%sbin/pip install -U flake8 yapf jedi-language-server"
-		 pyvenv-virtual-env) nil bufname t)
+	 (format "%sbin/pip install -U %s" pyvenv-virtual-env packages)
+	 nil bufname t)
 	)))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
