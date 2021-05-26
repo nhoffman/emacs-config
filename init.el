@@ -708,13 +708,14 @@ the active virtualenv. Prompts for a selection if none is active"
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
     "hydra-org-navigation"
     ("RET" nil "<quit>")
+    ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
     ("i" org-previous-item "org-previous-item")
     ("k" org-next-item "org-next-item")
     ("<right>" org-next-block "org-next-block")
     ("<left>" org-previous-block "org-previous-block")
     ("<down>" outline-next-visible-heading "outline-next-visible-heading")
     ("<up>" outline-previous-visible-heading "outline-previous-visible-heading")
-	("t" nh/org-show-todos-move-down "show todos" :color blue)
+    ("t" nh/org-show-todos-move-down "show todos" :color blue)
     ("S-<down>" org-forward-paragraph "org-forward-paragraph")
     ("S-<up>" org-backward-paragraph "org-backward-paragraph")
     ("s" (org-insert-structure-template "src") "add src block" :color blue)
@@ -863,6 +864,12 @@ the path."
   (end-of-buffer)
   (delete-blank-lines)
   (insert (format-time-string time-format)))
+
+(defun nh/org-babel-tangle-block()
+  ;; Tangle only the block at point
+  (interactive)
+  (let ((current-prefix-arg '(4)))
+    (call-interactively 'org-babel-tangle)))
 
 (defvar nh/org-index "~/Dropbox/notes/index.org")
 (defun nh/org-add-entry-to-index ()
