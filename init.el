@@ -339,6 +339,7 @@ Assumes that the frame is only split into two."
 ;;* search and navigation (ivy, counsel, and friends)
 (use-package ivy
   :ensure t
+  :pin melpa
   :config
   (ivy-mode 1)
   (setq enable-recursive-minibuffers t)
@@ -348,6 +349,7 @@ Assumes that the frame is only split into two."
 
 (use-package counsel
   :ensure t
+  :pin melpa
   :config
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
