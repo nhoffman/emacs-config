@@ -807,6 +807,7 @@ the path."
   (define-key org-mode-map (kbd "M-S-<right>") 'org-do-demote)
   (define-key org-mode-map (kbd "M-S-<left>") 'org-do-promote)
   (define-key org-mode-map (kbd "C-c n")  'hydra-org-navigation/body)
+  (define-key org-mode-map (kbd "C-c C-v") verb-command-map)
   (visual-line-mode)
   ;; org-babel
 
@@ -818,7 +819,8 @@ the path."
 	  (sql . t)
 	  (sqlite . t)
 	  (emacs-lisp . t)
-	  (dot . t)))
+	  (dot . t)
+	  (verb . t)))
 
   ;; use "shell" for org-mode versions 9 and above
   (add-to-list 'nh/org-babel-load-languages
@@ -857,6 +859,11 @@ the path."
 
 (use-package org-re-reveal
   :ensure t
+  :after (org))
+
+(use-package verb
+  :ensure t
+  :pin melpa
   :after (org))
 
 (defun nh/org-add-entry (filename time-format)
