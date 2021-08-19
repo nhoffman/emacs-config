@@ -33,6 +33,10 @@
       (list (format "%s %%S: %%j " (system-name))
             '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
+(defvar nh/icloud
+  "/Users/nhoffman/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync"
+  "Base directory for files stored in icloud")
+
 ;; path utilities
 (defun nh/path-join (&rest x)
   "Join elements of x with a path separator and apply `expand-file-name'"
@@ -881,7 +885,7 @@ the path."
   (let ((current-prefix-arg '(4)))
     (call-interactively 'org-babel-tangle)))
 
-(defvar nh/org-index "~/Dropbox/notes/index.org")
+(defvar nh/org-index (concat (file-name-as-directory nh/icloud) "notes/index.org"))
 (defun nh/org-add-entry-to-index ()
   (interactive)
   (nh/org-add-entry nh/org-index "\n* <%Y-%m-%d %a> "))
