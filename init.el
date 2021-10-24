@@ -1062,6 +1062,7 @@ convert to .docx with pandoc"
 
 (use-package groovy-mode
   :ensure t
+  :pin melpa
   :mode ("\\.nf" . groovy-mode)
   :hook (groovy-mode . (lambda ()
 			 (setq indent-tabs-mode nil))))
