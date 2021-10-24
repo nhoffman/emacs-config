@@ -641,7 +641,8 @@ the active virtualenv. Prompts for a selection if none is active"
     ("g" hydra-toggle-mode/body "toggle mode")
     ("h" hydra-helm/body "helm commands")
     ("i" hydra-init-file/body "hydra for init file")
-    ("l" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
+    ("l" hydra-org-links/body "hydra-org-links")
+    ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
     ("n" nh/org-find-index "nh/org-find-index")
     ("N" nh/org-add-entry-to-index "nh/org-add-entry-to-index")
     ("m" magit-status "magit-status")
@@ -707,9 +708,9 @@ the active virtualenv. Prompts for a selection if none is active"
     ("y" yaml-mode "yaml-mode"))
 
   (defun nh/org-show-todos-move-down ()
-	(interactive)
-	(org-show-todo-tree nil)
-	(end-of-buffer))
+    (interactive)
+    (org-show-todo-tree nil)
+    (end-of-buffer))
 
   (defhydra hydra-org-navigation
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
@@ -728,6 +729,16 @@ the active virtualenv. Prompts for a selection if none is active"
     ("s" (org-insert-structure-template "src") "add src block" :color blue)
     ("w" nh/org-element-as-docx "nh/org-element-as-docx" :color blue)
     ("q" nil "<quit>"))
+
+  (defhydra hydra-org-links
+    (:exit t :foreign-keys warn :columns 4 :post (redraw-display))
+    "hydra-org-links"
+    ("RET" nil "<quit>")
+    ("d" nh/org-open-org-download-dir "nh/org-open-org-download-dir")
+    ("i" org-download-screenshot "insert screenshot from clipboard")
+    ("t" org-toggle-inline-images "org-toggle-inline-images")
+    ("o" org-open-at-point "org-open-at-point (also C-l C-o)")
+    ("x" nh/org-link-file-delete "delete linked file"))
 
   (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
     "hydra-python"
@@ -811,7 +822,6 @@ the path."
   ;; key bindings for org-promote/demote-subtree
   (define-key org-mode-map (kbd "M-S-<right>") 'org-do-demote)
   (define-key org-mode-map (kbd "M-S-<left>") 'org-do-promote)
-  (define-key org-mode-map (kbd "C-c n")  'hydra-org-navigation/body)
   (define-key org-mode-map (kbd "C-c C-v") verb-command-map)
   (visual-line-mode)
   ;; org-babel
@@ -831,6 +841,9 @@ the path."
   (add-to-list 'nh/org-babel-load-languages
 	       (if (>= (string-to-number (substring (org-version) 0 1)) 9)
 		   '(shell . t) '(sh . t)))
+
+  ;; org-open-at-point uses system app for png
+  (add-to-list 'org-file-apps '("\\.png\\'" . system))
 
   (org-babel-do-load-languages
    'org-babel-load-languages nh/org-babel-load-languages)
@@ -870,6 +883,61 @@ the path."
   :ensure t
   :pin melpa
   :after (org))
+
+;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
+;; requires pngpaste (install with homebrew)
+(defvar nh/org-download-image-dir "images")
+
+(defun nh/org-download-add-caption (link)
+  ;; Annotate link with caption, enter RET for no output
+  (interactive)
+  (let ((caption (read-string "Caption: ")))
+    (if (> (length caption) 0) (format "#+CAPTION: %s" caption))))
+
+(defun nh/org-open-org-download-dir ()
+  (interactive)
+  (let* ((buffer-file-dir (file-name-directory buffer-file-name))
+         (image-dir (concat buffer-file-dir nh/org-download-image-dir)))
+    (if (file-directory-p image-dir)
+        (browse-url-of-file image-dir)
+      (warn (format "Directory %s does not exist" image-dir)))))
+
+  ;; https://emacs.stackexchange.com/questions/3981/how-to-copy-links-out-of-org-mode
+  (defun nh/org-link-at-point ()
+    ;; Return absolute path of link at point
+    (let* ((link (org-element-lineage (org-element-context) '(link) t))
+           (type (org-element-property :type link))
+           (url (org-element-property :path link)))
+      (if (equal type "file")
+          (file-truename url)
+        (error (format "%s is not a regular file" link)))))
+
+  (defun nh/org-link-file-delete ()
+    ;; Remove link and delete the associated file
+    (interactive)
+    (let ((link (nh/org-link-at-point)))
+      (if (y-or-n-p (format "Delete %s?" link))
+          (progn
+            (delete-file link)
+            (if (org-in-regexp org-link-bracket-re 1)
+                (save-excursion
+                  (apply 'delete-region (list (match-beginning 0) (match-end 0)))
+                  ))))))
+
+(use-package org-download
+  :ensure t
+  :after org
+  :defer nil
+  :custom
+  (org-download-method 'directory)
+  (org-download-image-dir nh/org-download-image-dir)
+  (org-download-heading-lvl nil)
+  (org-download-timestamp "%Y-%m-%d-%H%M%S_")
+  (org-image-actual-width 500)
+  (org-download-screenshot-method "/usr/local/bin/pngpaste %s")
+  (org-download-annotate-function 'nh/org-download-add-caption)
+  :config
+  (require 'org-download))
 
 (defun nh/org-add-entry (filename time-format)
   ;; Add an entry to an org-file with today's timestamp.
