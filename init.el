@@ -737,6 +737,7 @@ the active virtualenv. Prompts for a selection if none is active"
     ("d" nh/org-open-org-download-dir "nh/org-open-org-download-dir")
     ("i" org-download-screenshot "insert screenshot from clipboard")
     ("t" org-toggle-inline-images "org-toggle-inline-images")
+    ("n" nh/org-add-entry "nh/org-add-entry")
     ("o" org-open-at-point "org-open-at-point (also C-l C-o)")
     ("x" nh/org-link-file-delete "delete linked file"))
 
@@ -939,13 +940,13 @@ the path."
   :config
   (require 'org-download))
 
-(defun nh/org-add-entry (filename time-format)
+(defun nh/org-add-entry (&rest filename time-format)
   ;; Add an entry to an org-file with today's timestamp.
-  (interactive "FFile: ")
-  (find-file filename)
+  (interactive)
+  (find-file (or filename buffer-file-name))
   (end-of-buffer)
   (delete-blank-lines)
-  (insert (format-time-string time-format)))
+  (insert (format-time-string (or time-format "\n* <%Y-%m-%d %a> "))))
 
 (defun nh/org-babel-tangle-block()
   ;; Tangle only the block at point
@@ -956,7 +957,7 @@ the path."
 (defvar nh/org-index (concat (file-name-as-directory nh/icloud) "notes/index.org"))
 (defun nh/org-add-entry-to-index ()
   (interactive)
-  (nh/org-add-entry nh/org-index "\n* <%Y-%m-%d %a> "))
+  (nh/org-add-entry nh/org-index))
 
 (defun nh/org-find-index ()
   (interactive)
