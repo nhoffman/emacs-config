@@ -940,7 +940,13 @@ the path."
   :config
   (require 'org-download))
 
-(defun nh/org-add-entry (&rest filename time-format)
+(defun nh/org-babel-tangle-block()
+  ;; Tangle only the block at point
+  (interactive)
+  (let ((current-prefix-arg '(4)))
+    (call-interactively 'org-babel-tangle)))
+
+(defun nh/org-add-entry (&optional filename time-format)
   ;; Add an entry to an org-file with today's timestamp.
   (interactive)
   (find-file (or filename buffer-file-name))
@@ -948,13 +954,8 @@ the path."
   (delete-blank-lines)
   (insert (format-time-string (or time-format "\n* <%Y-%m-%d %a> "))))
 
-(defun nh/org-babel-tangle-block()
-  ;; Tangle only the block at point
-  (interactive)
-  (let ((current-prefix-arg '(4)))
-    (call-interactively 'org-babel-tangle)))
-
 (defvar nh/org-index (concat (file-name-as-directory nh/icloud) "notes/index.org"))
+
 (defun nh/org-add-entry-to-index ()
   (interactive)
   (nh/org-add-entry nh/org-index))
