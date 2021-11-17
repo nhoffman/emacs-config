@@ -121,6 +121,12 @@
     (desktop-save-mode 1)
     (add-hook 'auto-save-hook 'nh/desktop-save-no-p)))
 
+;; save buffers automatically
+(use-package super-save
+  :ensure t
+  :config
+  (super-save-mode +1))
+
 ;;* execution environment
 (defun nh/ssh-refresh ()
   "Reset the environment variable SSH_AUTH_SOCK"
