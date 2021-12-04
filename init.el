@@ -152,6 +152,10 @@
 (nh/prepend-path (nh/emacs-dir-path "bin"))
 (add-to-list 'exec-path (nh/emacs-dir-path "bin"))
 
+;; fix errors with connection to package repositories
+;; see https://github.com/melpa/melpa/issues/7238
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+
 ;;* other settings
 (setq suggest-key-bindings 4)
 
