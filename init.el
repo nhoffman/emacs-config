@@ -950,6 +950,11 @@ the path."
   :config
   (require 'org-download))
 
+(defadvice org-download-screenshot (before nh/org-download-screenshot-advice ())
+  "Remove extra lines before inserted screenshot"
+  (progn (delete-blank-lines) (org-delete-backward-char 1)))
+(ad-activate 'org-download-screenshot)
+
 (defun nh/org-babel-tangle-block()
   ;; Tangle only the block at point
   (interactive)
