@@ -862,20 +862,26 @@ the path."
   ;; minor modes
   (yas-minor-mode t))
 
-;; work around difficulties installing org-plus-contrib on linux
-;; (probably due to the age of the system)
-(if (eq system-type 'darwin)
-    (use-package org
-      :ensure org-plus-contrib
-      :mode
-      ("\\.org\\'" . org-mode)
-      ("\\.org\\.txt\\'" . org-mode)
-      :hook (org-mode . nh/org-mode-hooks))
-  (use-package org
+(use-package org
     :mode
     ("\\.org\\'" . org-mode)
     ("\\.org\\.txt\\'" . org-mode)
-    :hook (org-mode . nh/org-mode-hooks)))
+    :hook (org-mode . nh/org-mode-hooks))
+
+;; work around difficulties installing org-plus-contrib on linux
+;; (probably due to the age of the system)
+;; (if (eq system-type 'darwin)
+;;     (use-package org
+;;       :ensure org-plus-contrib
+;;       :mode
+;;       ("\\.org\\'" . org-mode)
+;;       ("\\.org\\.txt\\'" . org-mode)
+;;       :hook (org-mode . nh/org-mode-hooks))
+;;   (use-package org
+;;     :mode
+;;     ("\\.org\\'" . org-mode)
+;;     ("\\.org\\.txt\\'" . org-mode)
+;;     :hook (org-mode . nh/org-mode-hooks)))
 
 (use-package ox-minutes
   :ensure t
