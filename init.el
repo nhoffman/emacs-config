@@ -308,14 +308,10 @@ Assumes that the frame is only split into two."
       '(("ELPA" . "https://tromey.com/elpa/")
         ("gnu" . "https://elpa.gnu.org/packages/")
         ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-	("org" . "https://orgmode.org/elpa/")
-	))
+        ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 (setq package-archive-priorities
-      '(("org" . 30)
-        ("elpy" . 30)
-        ("melpa-stable" . 20)
+      '(("melpa-stable" . 20)
         ("gnu" . 10)
         ("melpa" . 5)))
 
