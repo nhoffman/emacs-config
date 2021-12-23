@@ -649,7 +649,6 @@ the active virtualenv. Prompts for a selection if none is active"
     ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("f" nh/fix-frame "fix-frame")
     ("g" hydra-toggle-mode/body "toggle mode")
-    ("h" hydra-helm/body "helm commands")
     ("i" hydra-init-file/body "hydra for init file")
     ("l" hydra-org-links/body "hydra-org-links")
     ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
