@@ -121,12 +121,6 @@
     (desktop-save-mode 1)
     (add-hook 'auto-save-hook 'nh/desktop-save-no-p)))
 
-;; save buffers automatically
-(use-package super-save
-  :ensure t
-  :config
-  (super-save-mode +1))
-
 ;;* execution environment
 (defun nh/ssh-refresh ()
   "Reset the environment variable SSH_AUTH_SOCK"
@@ -341,6 +335,12 @@ Assumes that the frame is only split into two."
       (warn
        "use-package is not installed - could not activate %s" (symbol-name pkg))
       )))
+
+;; save buffers automatically
+(use-package super-save
+  :ensure t
+  :config
+  (super-save-mode +1))
 
 ;;* choose a theme
 ;; use list-faces-display to show preview of all faces for the current theme
