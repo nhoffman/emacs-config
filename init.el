@@ -1,32 +1,36 @@
 ;;* appearance and GUI
 (blink-cursor-mode 1)
+(set-cursor-color "red")
+
 (menu-bar-mode -1)   ;; hide menu bar
 (scroll-bar-mode -1) ;; hide scroll bar
-(set-cursor-color "red")
+(tool-bar-mode -1)   ;; hide tool bar
+
 (setq column-number-mode t)
 (setq ediff-split-window-function 'split-window-horizontally)
 ;; prevent windows from being split vertically
 (setq split-height-threshold nil)
+
+;; show matching parens
 (show-paren-mode 1)
-(tool-bar-mode -1)   ;; hide tool bar
+
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
+
 ;; Default 'untabify converts a tab to equivalent number of spaces
 ;; before deleting a single character.
-(setq backward-delete-char-untabify-method "all")
+(setq backward-delete-char-untabify-method "all"
+(setq-default indent-tabs-mode nil)
+
 ;; use 'ls --dired' if available
 (setq dired-use-ls-dired
       (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
 	  t nil))
 ;; dired performs file renaming using underlying version control system
 (setq dired-vc-rename-file t)
-(setq fill-column 80)
-(setq-default indent-tabs-mode nil)
 
-(global-auto-revert-mode t)
-(unless (< emacs-major-version 27)
-    (setq auto-revert-avoid-polling t))
+(setq fill-column 80)
 
 ;; File path in title bar.
 (setq frame-title-format
@@ -90,7 +94,6 @@
 ;;* startup and shutdown
 (setq inhibit-splash-screen t)
 (setq initial-scratch-message nil)
-(setq make-backup-files nil)
 (setq require-final-newline t)
 (setq delete-trailing-lines nil)
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -331,6 +334,12 @@ Assumes that the frame is only split into two."
       (warn
        "use-package is not installed - could not activate %s" (symbol-name pkg))
       )))
+
+;;* saving
+(setq make-backup-files nil)
+(global-auto-revert-mode t)
+(unless (< emacs-major-version 27)
+    (setq auto-revert-avoid-polling t))
 
 ;; save buffers automatically
 (use-package super-save
