@@ -813,6 +813,29 @@ the path."
 	       (nh/set-inferior-ess-r-program-name)
 	       )))
 
+(use-package poly-R
+  :ensure t)
+
+(use-package markdown-mode
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md" . gfm-mode)
+         ("\\.md" . markdown-mode)
+         ("\\.markdown" . markdown-mode))
+  :bind (:map markdown-mode-map
+              ;; don't redefine =M-<left>= and =M-<right>= in this mode
+              ("M-<right>" . nil)
+              ("M-<left>" . nil))
+  :init  (setq markdown-command "multimarkdown")
+  :config (custom-set-faces
+	   '(markdown-code-face
+	     ((t (:inherit fixed-pitch :background "lavender"))))))
+
+;; https://plantarum.ca/2021/10/03/emacs-tutorial-rmarkdown/
+(use-package poly-markdown
+  :ensure t
+  :init (setq markdown-code-block-braces t)
+  :mode (("\\.Rmd" . poly-gfm+r-mode)))
+
 ;;* org-mode
 (defun nh/org-mode-hooks ()
   (message "Loading org-mode hooks")
@@ -1063,20 +1086,6 @@ convert to .docx with pandoc"
 
 (use-package tex-mode
   :ensure auctex)
-
-(use-package markdown-mode
-  :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md" . gfm-mode)
-         ("\\.md" . markdown-mode)
-         ("\\.markdown" . markdown-mode))
-  :bind (:map markdown-mode-map
-              ;; don't redefine =M-<left>= and =M-<right>= in this mode
-              ("M-<right>" . nil)
-              ("M-<left>" . nil))
-  :init  (setq markdown-command "multimarkdown")
-  :config (custom-set-faces
-	   '(markdown-code-face
-	     ((t (:inherit fixed-pitch :background "lavender"))))))
 
 (use-package groovy-mode
   :ensure t
