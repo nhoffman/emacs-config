@@ -30,8 +30,9 @@
 ;; dired performs file renaming using underlying version control system
 (setq dired-vc-rename-file t)
 
-(setq fill-column 80)
-
+;; Let a period followed by a single space be treated as end of sentence
+(setq sentence-end-double-space nil)
+(setq-default fill-column 80)
 ;; File path in title bar.
 (setq frame-title-format
       (list (format "%s %%S: %%j " (system-name))
@@ -505,7 +506,6 @@ Assumes that the frame is only split into two."
   (setq tab-width 4)
   (setq python-shell-interpreter "python3")
   :config
-  (setq indent-tabs-mode nil)
   (setq python-indent-offset tab-width)
   (setq py-smart-indentation t)
   :hook
@@ -1099,9 +1099,7 @@ convert to .docx with pandoc"
 (use-package groovy-mode
   :ensure t
   :pin melpa
-  :mode ("\\.nf" . groovy-mode)
-  :hook (groovy-mode . (lambda ()
-			 (setq indent-tabs-mode nil))))
+  :mode ("\\.nf" . groovy-mode))
 
 (use-package discover
   :ensure t
