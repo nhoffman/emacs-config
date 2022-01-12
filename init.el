@@ -20,7 +20,7 @@
 
 ;; Default 'untabify converts a tab to equivalent number of spaces
 ;; before deleting a single character.
-(setq backward-delete-char-untabify-method "all"
+(setq backward-delete-char-untabify-method "all")
 (setq-default indent-tabs-mode nil)
 
 ;; use 'ls --dired' if available
