@@ -152,7 +152,10 @@
 
 ;; fix errors with connection to package repositories
 ;; see https://github.com/melpa/melpa/issues/7238
-(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+;; suppress on Ubuntu 18.04 to prevent errors
+(unless
+    (equal (string-trim (shell-command-to-string "lsb_release -rs")) "18.04")
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 
 ;;* other settings
 (setq suggest-key-bindings 4)
