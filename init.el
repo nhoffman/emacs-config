@@ -153,6 +153,7 @@
 ;; fix errors with connection to package repositories
 ;; see https://github.com/melpa/melpa/issues/7238
 ;; suppress on Ubuntu 18.04 to prevent errors
+(require 'subr-x) ;; for string-trim
 (unless
     (equal (string-trim (shell-command-to-string "lsb_release -rs")) "18.04")
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
