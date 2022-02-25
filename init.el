@@ -735,6 +735,7 @@ the active virtualenv. Prompts for a selection if none is active"
     "hydra-org-navigation"
     ("RET" nil "<quit>")
     ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
+    ("c" nh/org-table-copy-cell "nh/org-table-copy-cell" :color blue)
     ("i" org-previous-item "org-previous-item")
     ("k" org-next-item "org-next-item")
     ("<right>" org-next-block "org-next-block")
@@ -981,7 +982,7 @@ the path."
   (org-download-image-dir nh/org-download-image-dir)
   (org-download-heading-lvl nil)
   (org-download-timestamp "%Y-%m-%d-%H%M%S_")
-  (org-image-actual-width 500)
+  (org-image-actual-width 600)
   (org-download-screenshot-method "/usr/local/bin/pngpaste %s")
   (org-download-annotate-function 'nh/org-download-add-caption)
   :config
@@ -1015,6 +1016,11 @@ the path."
 (defun nh/org-find-index ()
   (interactive)
   (find-file nh/org-index))
+
+(defun nh/org-table-copy-cell ()
+  "Copy org-table cell at point to the kill-ring."
+  (interactive)
+  (kill-new (string-trim (org-table-get-field)) t))
 
 (defun nh/safename (str)
   "Remove non-alphanum characters and downcase"
