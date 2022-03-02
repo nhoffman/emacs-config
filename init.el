@@ -973,6 +973,9 @@ the path."
                   (apply 'delete-region (list (match-beginning 0) (match-end 0)))
                   ))))))
 
+(defvar nh/pngpaste
+  (executable-find "pngpaste"))
+
 (use-package org-download
   :ensure t
   :after org
@@ -989,8 +992,10 @@ the path."
   (require 'org-download))
 
 (defadvice org-download-screenshot (before nh/org-download-screenshot-advice ())
-  "Remove extra lines before inserted screenshot"
-  (progn (delete-blank-lines) (org-delete-backward-char 1)))
+  "Remove extra lines before inserted screenshot and check for pngpaste"
+  (if nh/pngpaste
+      (progn (delete-blank-lines) (org-delete-backward-char 1))
+    (error "pngpaste is not installed")))
 (ad-activate 'org-download-screenshot)
 
 (defun nh/org-babel-tangle-block()
