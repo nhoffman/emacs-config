@@ -973,9 +973,6 @@ the path."
                   (apply 'delete-region (list (match-beginning 0) (match-end 0)))
                   ))))))
 
-(defvar nh/pngpaste
-  (executable-find "pngpaste"))
-
 (use-package org-download
   :ensure t
   :after org
@@ -986,14 +983,15 @@ the path."
   (org-download-heading-lvl nil)
   (org-download-timestamp "%Y-%m-%d-%H%M%S_")
   (org-image-actual-width 600)
-  (org-download-screenshot-method "/usr/local/bin/pngpaste %s")
-  (org-download-annotate-function 'nh/org-download-add-caption)
+  (org-download-screenshot-method (format "%s %%s" (executable-find "pngpaste")))
+  ;; (org-download-annotate-function 'nh/org-download-add-caption)
+  (org-download-annotate-function (lambda (link) ""))
   :config
   (require 'org-download))
 
 (defadvice org-download-screenshot (before nh/org-download-screenshot-advice ())
   "Remove extra lines before inserted screenshot and check for pngpaste"
-  (if nh/pngpaste
+  (if (executable-find "pngpaste")
       (progn (delete-blank-lines) (org-delete-backward-char 1))
     (error "pngpaste is not installed")))
 (ad-activate 'org-download-screenshot)
