@@ -323,6 +323,7 @@ Assumes that the frame is only split into two."
         ("gnu" . 10)
         ("melpa" . 5)))
 
+(setq package-native-compile t)
 (setq package-menu-hide-low-priority t)
 (setq package-check-signature nil) ;; TODO: fix this properly
 (package-initialize)
