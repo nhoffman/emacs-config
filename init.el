@@ -813,23 +813,23 @@ the path."
 	 (shell-command-to-string
 	  "which ml > /dev/null && (ml R; which R) || which R"))))
 
-(use-package ess
-  :ensure t
-  :init (require 'ess-site)
-  :config
-  (add-hook 'ess-mode-hook
-            #'(lambda()
-                (message "** Loading ess-mode hooks")
-                ;; leave my underscore key alone!
-                (setq ess-S-assign "_")
-	            (ess-toggle-underscore nil)
-                ;; set ESS indentation style [GNU, BSD, K&R, CLB, C++]
-                (ess-set-style 'GNU 'quiet)
-	            (nh/set-inferior-ess-r-program-name)
-	            )))
+;; (use-package ess
+;;   :ensure t
+;;   :init (require 'ess-site)
+;;   :config
+;;   (add-hook 'ess-mode-hook
+;;             (lambda()
+;;               (message "** Loading ess-mode hooks")
+;;               ;; leave my underscore key alone!
+;;               (setq ess-S-assign "_")
+;; 	      (ess-toggle-underscore nil)
+;;               ;; set ESS indentation style [GNU, BSD, K&R, CLB, C++]
+;;               (ess-set-style 'GNU 'quiet)
+;; 	      (nh/set-inferior-ess-r-program-name)
+;; 	      )))
 
-(use-package poly-R
-  :ensure t)
+;; (use-package poly-R
+;;   :ensure t)
 
 (use-package markdown-mode
   :commands (markdown-mode gfm-mode)
@@ -1062,16 +1062,16 @@ convert to .docx with pandoc"
 ;;* text-mode
 
 (add-hook 'text-mode-hook
-          #'(lambda ()
-              ;; (longlines-mode)
-              (if nh/enable-flyspell-p (flyspell-mode))))
+          (lambda ()
+            ;; (longlines-mode)
+            (if nh/enable-flyspell-p (flyspell-mode))))
 
 ;;* rst-mode
 (add-hook 'rst-mode-hook
-          #'(lambda ()
-              (message "Loading rst-mode hooks")
-              (if nh/enable-flyspell-p (flyspell-mode))
-              (define-key rst-mode-map (kbd "C-c C-a") 'rst-adjust)))
+          (lambda ()
+            (message "Loading rst-mode hooks")
+            (if nh/enable-flyspell-p (flyspell-mode))
+            (define-key rst-mode-map (kbd "C-c C-a") 'rst-adjust)))
 
 ;;* tramp
 
