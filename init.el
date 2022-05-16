@@ -442,13 +442,20 @@ Assumes that the frame is only split into two."
 ;;* auto-complete using company-mode
 (use-package company
   :ensure t
+  :defer t
   :config
   (setq company-minimum-prefix-length 1
 	company-idle-delay 0
 	company-tooltip-limit 10
 	company-transformers nil
 	company-show-numbers t)
-  (global-company-mode +1))
+  (global-company-mode)
+  :hook (python-mode . company-mode))
+
+;; * elgot
+(use-package eglot
+  :ensure t
+  :defer t)
 
 ;;* lsp-mode
 ;; (use-package lsp-mode
@@ -458,14 +465,14 @@ Assumes that the frame is only split into two."
 ;;   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
 ;;   )
 
-(use-package lsp-mode
-  :ensure t
-  :pin melpa
-  :hook
-  ((python-mode . lsp-deferred))
-  :config
-  (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
-  )
+;; (use-package lsp-mode
+;;   :ensure t
+;;   :pin melpa
+;;   :hook
+;;   ((python-mode . lsp-deferred))
+;;   :config
+;;   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
+;;   )
 
 ;; (use-package lsp-ui
 ;;   :ensure t
@@ -485,7 +492,8 @@ Assumes that the frame is only split into two."
   (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
 (defcustom nh/venv-setup-packages
-  '("flake8 yapf") "packages to install using `nh/venv-setup'")
+  '("pip" "wheel" "'python-lsp-server[all]'")
+  "packages to install using `nh/venv-setup'")
 
 (defun nh/py3-venv-bin (name)
   "Return the path to an executable installed in `nh/py3-venv'"
@@ -500,15 +508,26 @@ Assumes that the frame is only split into two."
 ;;* jedi language server
 ;; https://github.com/pappasam/jedi-language-server
 ;; pip install -U jedi-language-server
-(use-package lsp-jedi
-  :ensure t
-  :pin melpa
-  :init
-  (setq lsp-jedi-executable-command (nh/py3-venv-bin "jedi-language-server"))
-  :config
-  (with-eval-after-load "lsp-mode"
-    (add-to-list 'lsp-disabled-clients 'pyls)
-    (add-to-list 'lsp-enabled-clients 'jedi)))
+;; (use-package lsp-jedi
+;;   :ensure t
+;;   :pin melpa
+;;   :init
+;;   (setq lsp-jedi-executable-command (nh/py3-venv-bin "jedi-language-server"))
+;;   :config
+;;   (with-eval-after-load "lsp-mode"
+;;     (add-to-list 'lsp-disabled-clients 'pyls)
+;;     (add-to-list 'lsp-enabled-clients 'jedi)))
+
+;; Fix issue where python code block evaluation freezes on a mac in org-mode
+;; using :session. This as a bug in prompt detection in python.el: apparently
+;; the startup message for the python interpreter is not being recognized.
+;; Launching the interpreter with python -q suppresses the prompt, but the
+;; variable python-shell-interpreter-args does not appear to be respected. So
+;; the brute force solution is to advise the function that sets up
+;; inferior-python-mode to add -q:
+(defun nh/python-shell-make-comint (orig-fun &rest args)
+  (setq args (append '("python3 -q") (cdr args)))
+  (apply orig-fun args))
 
 (use-package python-mode
   :mode
@@ -518,8 +537,14 @@ Assumes that the frame is only split into two."
   ("SConstruct" . python-mode)
   ("SConscript" . python-mode)
   :init
-  (setq tab-width 4)
   (setq python-shell-interpreter "python3")
+  (setq tab-width 4)
+  (setq python-indent-guess-indent-offset t)
+  (setq python-indent-guess-indent-offset-verbose nil)
+  (if (eq system-type 'darwin)
+      (progn
+        (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
+        (setq python-shell-completion-native-enable nil)))
   :config
   (setq python-indent-offset tab-width)
   (setq py-smart-indentation t)
@@ -543,6 +568,15 @@ Assumes that the frame is only split into two."
              (split-string (shell-command-to-string (format fstr pth)) "\n")))
     ))
 
+(defun nh/venv-activate-eglot ()
+  "Activate eglot in the selected virtualenv, installing
+dependencies if necessary."
+  (interactive)
+  (nh/venv-activate)
+  (unless (= 0 (shell-command "python -c 'import pylsp'"))
+    (save-excursion (nh/venv-setup)))
+  (eglot-ensure))
+
 (defun nh/venv-activate ()
   "Activate the virtualenv in the current project, or in
 `default-directory' if not in a project. Prompts for a selection
@@ -560,19 +594,20 @@ if there is more than one option."
     ))
 
 (defun nh/venv-setup ()
-  "Install dependencies specified in `nh/venv-setup-packages' to
-the active virtualenv. Prompts for a selection if none is active"
+  "Install or update dependencies specified in
+`nh/venv-setup-packages' to the active virtualenv. Prompts for a
+selection if none is active"
   (interactive)
   (unless pyvenv-virtual-env (nh/venv-activate))
   (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
       (let ((bufname nil)
 	    (packages (mapconcat 'identity nh/venv-setup-packages " ")))
 	(setq bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
-	(switch-to-buffer bufname)
-	(call-process-shell-command
-	 (format "%sbin/pip install -U %s" pyvenv-virtual-env packages)
-	 nil bufname t)
-	)))
+	(unless (= 0 (call-process-shell-command
+	              (format "%sbin/pip install -U %s" pyvenv-virtual-env packages)
+	              nil bufname t))
+          (switch-to-buffer bufname))
+        (message "installation complete, see output in %s" bufname))))
 
 ;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
 ;; apparently including ":after yasnippet" prevents the python-mode hook from running
@@ -777,6 +812,7 @@ the active virtualenv. Prompts for a selection if none is active"
     ("c" nh/python-flycheck-select-flake8 "activate flake8")
     ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point")
     ("e" flycheck-list-errors "flycheck-list-errors")
+    ("E" nh/venv-activate-eglot "activate eglot")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
     ("j" (swiper "class\\|def\\b") "jump to function or class")
     ("n" flycheck-next-error "flycheck-next-error" :color red)
