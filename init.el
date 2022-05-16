@@ -353,6 +353,16 @@ Assumes that the frame is only split into two."
   :config
   (super-save-mode +1))
 
+(setq undo-limit 800000)
+(setq undo-strong-limit 12000000)
+(setq undo-outer-limit 120000000)
+
+;; persistent undo history
+(use-package undohist
+  :ensure t
+  :config
+  (undohist-initialize))
+
 ;;* choose a theme
 ;; use list-faces-display to show preview of all faces for the current theme
 ;; use M-x customize-group to modify theme elements in specific modes
