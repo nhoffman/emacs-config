@@ -887,9 +887,12 @@ the path."
               ("M-<right>" . nil)
               ("M-<left>" . nil))
   :init  (setq markdown-command "multimarkdown")
-  :config (custom-set-faces
-	   '(markdown-code-face
-	     ((t (:inherit fixed-pitch :background "lavender"))))))
+  :config
+  (set-face-background 'markdown-pre-face "grey20")
+  (set-face-background 'markdown-markup-face "grey20")
+  (set-face-background 'markdown-code-face "grey20")
+  (set-face-background 'markdown-inline-code-face "grey20")
+  (set-face-foreground 'markdown-markup-face "lavender"))
 
 ;; https://plantarum.ca/2021/10/03/emacs-tutorial-rmarkdown/
 (use-package poly-markdown
