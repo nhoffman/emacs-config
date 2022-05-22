@@ -367,6 +367,13 @@ Assumes that the frame is only split into two."
 ;; use list-faces-display to show preview of all faces for the current theme
 ;; use M-x customize-group to modify theme elements in specific modes
 
+(defun nh/toggle-theme ()
+  "Toggle theme between spacemacs light and dark theme"
+  (interactive)
+  (if (string-equal (face-attribute 'default :background) "#292b2e")
+      (load-theme 'spacemacs-light t)
+    (load-theme 'spacemacs-dark t)))
+
 (use-package spacemacs-theme
   :ensure t
   :defer t
@@ -700,6 +707,7 @@ selection if none is active"
     ("RET" redraw-display "<quit>")
 	("b" hydra-bookmarks/body "hyrda for bookmarks")
     ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
+    ("c" nh/toggle-theme "toggle light/dark mode")
     ("d" nh/insert-date "nh/insert-date")
     ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("f" nh/fix-frame "fix-frame")
