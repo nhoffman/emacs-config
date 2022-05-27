@@ -367,17 +367,29 @@ Assumes that the frame is only split into two."
 ;; use list-faces-display to show preview of all faces for the current theme
 ;; use M-x customize-group to modify theme elements in specific modes
 
+(defvar nh/theme-dark 'spacemacs-dark)
+(defvar nh/theme-light 'spacemacs-light)
+
+(defun nh/hex-to-rgb (hexcolor)
+  "Return a list of decimal RGB values from a hex color name"
+  (mapcar (lambda (start)
+            (string-to-number
+             (substring-no-properties hexcolor start (+ start 2)) 16))
+          '(1 3 5)))
+
 (defun nh/toggle-theme ()
-  "Toggle theme between spacemacs light and dark theme"
+  "Toggle theme between preferred light and dark themes"
   (interactive)
-  (if (string-equal (face-attribute 'default :background) "#292b2e")
-      (load-theme 'spacemacs-light t)
-    (load-theme 'spacemacs-dark t)))
+  ;; sum the RGB values of the current theme's background color and guess that
+  ;; the current theme is dark if < 300
+  (if (< (apply '+ (nh/hex-to-rgb (face-attribute 'default :background))) 300)
+      (load-theme nh/theme-light t)
+    (load-theme nh/theme-dark t)))
 
 (use-package spacemacs-theme
   :ensure t
   :defer t
-  :init (load-theme 'spacemacs-dark t))
+  :init (load-theme nh/theme-dark t))
 
 ;;* search and navigation (ivy, counsel, and friends)
 (use-package ivy
