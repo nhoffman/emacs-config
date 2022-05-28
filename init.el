@@ -64,7 +64,7 @@
   (interactive)
   (message (format "** setting default font to %s" font-name))
   (condition-case nil
-      ; (set-default-font font-name)
+      ;; (set-default-font font-name)
       (set-face-attribute 'default nil :font font-name)
     (error (message (format "** Error: could not set to font %s" font-name)))))
 
@@ -345,7 +345,7 @@ Assumes that the frame is only split into two."
 (setq make-backup-files nil)
 (global-auto-revert-mode t)
 (unless (< emacs-major-version 27)
-    (setq auto-revert-avoid-polling t))
+  (setq auto-revert-avoid-polling t))
 
 ;; save buffers automatically
 (use-package super-save
@@ -717,7 +717,7 @@ selection if none is active"
     "hydra-launcher"
     ("C-g" redraw-display "<quit>")
     ("RET" redraw-display "<quit>")
-	("b" hydra-bookmarks/body "hyrda for bookmarks")
+    ("b" hydra-bookmarks/body "hyrda for bookmarks")
     ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
     ("c" nh/toggle-theme "toggle light/dark mode")
     ("d" nh/insert-date "nh/insert-date")
@@ -753,13 +753,13 @@ selection if none is active"
     ("u" nh/init-file-use-package-occur "occur use-package declarations"))
 
   (defun nh/set-bookmark-for-function ()
-	(interactive)
-	(let* ((tag (read-string "project tag: "))
-		   (funcname (which-function))
-		   (name (format "%s %s" tag funcname)))
-	  (if (y-or-n-p (format "set bookmark '%s'? " name))
-		  (bookmark-set name)))
-	)
+    (interactive)
+    (let* ((tag (read-string "project tag: "))
+	   (funcname (which-function))
+	   (name (format "%s %s" tag funcname)))
+      (if (y-or-n-p (format "set bookmark '%s'? " name))
+	  (bookmark-set name)))
+    )
 
   ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Bookmarks.html
   (defhydra hydra-bookmarks (:color blue :columns 4 :post (redraw-display))
@@ -908,11 +908,12 @@ the path."
               ("M-<left>" . nil))
   :init  (setq markdown-command "multimarkdown")
   :config
-  (set-face-background 'markdown-pre-face "grey20")
-  (set-face-background 'markdown-markup-face "grey20")
-  (set-face-background 'markdown-code-face "grey20")
-  (set-face-background 'markdown-inline-code-face "grey20")
-  (set-face-foreground 'markdown-markup-face "lavender"))
+  ;; (set-face-background 'markdown-pre-face "grey20")
+  ;; (set-face-background 'markdown-markup-face "grey20")
+  ;; (set-face-background 'markdown-code-face "grey20")
+  ;; (set-face-background 'markdown-inline-code-face "grey20")
+  ;; (set-face-foreground 'markdown-markup-face "lavender")
+  )
 
 ;; https://plantarum.ca/2021/10/03/emacs-tutorial-rmarkdown/
 (use-package poly-markdown
@@ -970,10 +971,10 @@ the path."
   (yas-minor-mode t))
 
 (use-package org
-    :mode
-    ("\\.org\\'" . org-mode)
-    ("\\.org\\.txt\\'" . org-mode)
-    :hook (org-mode . nh/org-mode-hooks))
+  :mode
+  ("\\.org\\'" . org-mode)
+  ("\\.org\\.txt\\'" . org-mode)
+  :hook (org-mode . nh/org-mode-hooks))
 
 ;; work around difficulties installing org-plus-contrib on linux
 ;; (probably due to the age of the system)
@@ -1021,27 +1022,27 @@ the path."
         (browse-url-of-file image-dir)
       (warn (format "Directory %s does not exist" image-dir)))))
 
-  ;; https://emacs.stackexchange.com/questions/3981/how-to-copy-links-out-of-org-mode
-  (defun nh/org-link-at-point ()
-    ;; Return absolute path of link at point
-    (let* ((link (org-element-lineage (org-element-context) '(link) t))
-           (type (org-element-property :type link))
-           (url (org-element-property :path link)))
-      (if (equal type "file")
-          (file-truename url)
-        (error (format "%s is not a regular file" link)))))
+;; https://emacs.stackexchange.com/questions/3981/how-to-copy-links-out-of-org-mode
+(defun nh/org-link-at-point ()
+  ;; Return absolute path of link at point
+  (let* ((link (org-element-lineage (org-element-context) '(link) t))
+         (type (org-element-property :type link))
+         (url (org-element-property :path link)))
+    (if (equal type "file")
+        (file-truename url)
+      (error (format "%s is not a regular file" link)))))
 
-  (defun nh/org-link-file-delete ()
-    ;; Remove link and delete the associated file
-    (interactive)
-    (let ((link (nh/org-link-at-point)))
-      (if (y-or-n-p (format "Delete %s?" link))
-          (progn
-            (delete-file link)
-            (if (org-in-regexp org-link-bracket-re 1)
-                (save-excursion
-                  (apply 'delete-region (list (match-beginning 0) (match-end 0)))
-                  ))))))
+(defun nh/org-link-file-delete ()
+  ;; Remove link and delete the associated file
+  (interactive)
+  (let ((link (nh/org-link-at-point)))
+    (if (y-or-n-p (format "Delete %s?" link))
+        (progn
+          (delete-file link)
+          (if (org-in-regexp org-link-bracket-re 1)
+              (save-excursion
+                (apply 'delete-region (list (match-beginning 0) (match-end 0)))
+                ))))))
 
 (use-package org-download
   :ensure t
