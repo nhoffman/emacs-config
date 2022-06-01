@@ -879,20 +879,18 @@ the path."
 	 (shell-command-to-string
 	  "which ml > /dev/null && (ml R; which R) || which R"))))
 
-;; (use-package ess
-;;   :ensure t
-;;   :init (require 'ess-site)
-;;   :config
-;;   (add-hook 'ess-mode-hook
-;;             (lambda()
-;;               (message "** Loading ess-mode hooks")
-;;               ;; leave my underscore key alone!
-;;               (setq ess-S-assign "_")
-;; 	      (ess-toggle-underscore nil)
-;;               ;; set ESS indentation style [GNU, BSD, K&R, CLB, C++]
-;;               (ess-set-style 'GNU 'quiet)
-;; 	      (nh/set-inferior-ess-r-program-name)
-;; 	      )))
+(use-package ess
+  :ensure t
+  :pin melpa
+  :defer t
+  :config
+  (setq ess-S-assign "_")
+  (add-hook 'ess-mode-hook
+            (lambda()
+              (message "** Loading ess-mode hooks")
+	      (ess-toggle-underscore nil)
+              (ess-set-style 'GNU 'quiet)
+	      (nh/set-inferior-ess-r-program-name))))
 
 ;; (use-package poly-R
 ;;   :ensure t)
