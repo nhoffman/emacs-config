@@ -888,9 +888,9 @@ the path."
   (add-hook 'ess-mode-hook
             (lambda()
               (message "** Loading ess-mode hooks")
-	      (ess-toggle-underscore nil)
+	          (ess-toggle-underscore nil)
               (ess-set-style 'GNU 'quiet)
-	      (nh/set-inferior-ess-r-program-name))))
+	          (nh/set-inferior-ess-r-program-name))))
 
 ;; (use-package poly-R
 ;;   :ensure t)
