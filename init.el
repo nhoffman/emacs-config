@@ -939,26 +939,20 @@ the path."
   ;; org-babel
 
   ;; enable a subset of languages for evaluation in code blocks
-  (setq nh/org-babel-load-languages
-	'((R . t)
-	  (latex . t)
-	  (python . t)
-	  (sql . t)
-	  (sqlite . t)
-	  (emacs-lisp . t)
-	  (dot . t)
-	  (verb . t)))
-
-  ;; use "shell" for org-mode versions 9 and above
-  (add-to-list 'nh/org-babel-load-languages
-	       (if (>= (string-to-number (substring (org-version) 0 1)) 9)
-		   '(shell . t) '(sh . t)))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((R . t)
+	 (latex . t)
+	 (python . t)
+	 (sql . t)
+	 (sqlite . t)
+	 (emacs-lisp . t)
+	 (dot . t)
+	 (verb . t)
+     (shell . t)))
 
   ;; org-open-at-point uses system app for png
   (add-to-list 'org-file-apps '("\\.png\\'" . system))
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages nh/org-babel-load-languages)
 
   (defadvice org-todo-list (after org-todo-list-bottom ())
     "Move to bottom of page after entering org-todo-list"
