@@ -1,3 +1,7 @@
+;;* elisp dependencies
+;; provides string-trim
+(eval-when-compile (require 'subr-x))
+
 ;;* appearance and GUI
 (blink-cursor-mode 1)
 (set-cursor-color "red")
@@ -153,7 +157,6 @@
 ;; fix errors with connection to package repositories
 ;; see https://github.com/melpa/melpa/issues/7238
 ;; suppress on Ubuntu 18.04 to prevent errors
-(require 'subr-x) ;; for string-trim
 (unless
     (equal (string-trim (shell-command-to-string "lsb_release -rs")) "18.04")
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
@@ -862,20 +865,7 @@ interpreter. On systems using 'modules'
 the path."
   (interactive)
   (setq inferior-ess-r-program-name
-	(replace-regexp-in-string
-	 "\n" ""
-	 (shell-command-to-string
-	  "which ml > /dev/null && (ml R; which R) || which R"))))
-
-(defun nh/set-inferior-ess-r-program-name ()
-  "Set `inferior-ess-r-program-name' as the absolute path to the R
-interpreter. On systems using 'modules'
-(http://modules.sourceforge.net/), load the R module before defining
-the path."
-  (interactive)
-  (setq inferior-ess-r-program-name
-	(replace-regexp-in-string
-	 "\n" ""
+	(string-trim
 	 (shell-command-to-string
 	  "which ml > /dev/null && (ml R; which R) || which R"))))
 
@@ -888,9 +878,9 @@ the path."
   (add-hook 'ess-mode-hook
             (lambda()
               (message "** Loading ess-mode hooks")
-	      (ess-toggle-underscore nil)
+	          (ess-toggle-underscore nil)
               (ess-set-style 'GNU 'quiet)
-	      (nh/set-inferior-ess-r-program-name))))
+	          (nh/set-inferior-ess-r-program-name))))
 
 ;; (use-package poly-R
 ;;   :ensure t)
@@ -939,26 +929,20 @@ the path."
   ;; org-babel
 
   ;; enable a subset of languages for evaluation in code blocks
-  (setq nh/org-babel-load-languages
-	'((R . t)
-	  (latex . t)
-	  (python . t)
-	  (sql . t)
-	  (sqlite . t)
-	  (emacs-lisp . t)
-	  (dot . t)
-	  (verb . t)))
-
-  ;; use "shell" for org-mode versions 9 and above
-  (add-to-list 'nh/org-babel-load-languages
-	       (if (>= (string-to-number (substring (org-version) 0 1)) 9)
-		   '(shell . t) '(sh . t)))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((R . t)
+	 (latex . t)
+	 (python . t)
+	 (sql . t)
+	 (sqlite . t)
+	 (emacs-lisp . t)
+	 (dot . t)
+	 (verb . t)
+     (shell . t)))
 
   ;; org-open-at-point uses system app for png
   (add-to-list 'org-file-apps '("\\.png\\'" . system))
-
-  (org-babel-do-load-languages
-   'org-babel-load-languages nh/org-babel-load-languages)
 
   (defadvice org-todo-list (after org-todo-list-bottom ())
     "Move to bottom of page after entering org-todo-list"
