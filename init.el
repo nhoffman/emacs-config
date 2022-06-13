@@ -738,7 +738,7 @@ selection if none is active"
     ("p" hydra-python/body "python menu")
     ("P" package-list-packages "package-list-packages")
     ("s" nh/ssh-refresh "ssh-refresh")
-    ("t" org-todo-list "org-todo-list")
+    ("t" nh/org-show-todos-move-down "org-todo-list")
     ("T" nh/transpose-buffers "transpose-buffers")
     ("u" untabify "untabify")
     ("w" hydra-web-mode/body "web-mode commands")
@@ -796,7 +796,8 @@ selection if none is active"
 
   (defun nh/org-show-todos-move-down ()
     (interactive)
-    (org-show-todo-tree nil)
+    (find-file nh/org-index)
+    (org-show-todo-tree "TODO")
     (end-of-buffer))
 
   (defhydra hydra-org-navigation
