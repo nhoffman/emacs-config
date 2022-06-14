@@ -46,7 +46,7 @@
   "/Users/nhoffman/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync"
   "Base directory for files stored in icloud")
 
-;; path utilities
+;; file and path utilities
 (defun nh/path-join (&rest x)
   "Join elements of x with a path separator and apply `expand-file-name'"
   (expand-file-name
@@ -57,6 +57,13 @@
 (defun nh/emacs-dir-path (name)
   "Return absolute path to a file in the same directory as `user-init-file'"
   (expand-file-name name user-emacs-directory))
+
+(defun nh/safename (str)
+  "Remove non-alphanum characters and downcase"
+  (let ((exprs '(("^\\W+" "") ("\\W+$" "") ("\\W+" "-"))))
+    (dolist (e exprs)
+      (setq str (replace-regexp-in-string (nth 0 e) (nth 1 e) str)))
+    (downcase str)))
 
 ;; save customizations here instead of init.el
 (setq custom-file (nh/emacs-dir-path "custom.el"))
@@ -911,88 +918,60 @@ the path."
   :mode (("\\.Rmd" . poly-gfm+r-mode)))
 
 ;;* org-mode
-(defun nh/org-mode-hooks ()
-  (message "Loading org-mode hooks")
-  ;; (font-lock-mode)
-  (setq org-confirm-babel-evaluate nil)
-  (setq org-src-fontify-natively t)
-  (setq org-edit-src-content-indentation 0)
-  (setq org-adapt-indentation nil)  ;; all headlines are flush left
-  (setq org-babel-python-command "python3")
-  (define-key org-mode-map (kbd "M-<right>") 'forward-word)
-  (define-key org-mode-map (kbd "M-<left>") 'backward-word)
-  ;; provides key mapping for the above; replaces default
-  ;; key bindings for org-promote/demote-subtree
-  (define-key org-mode-map (kbd "M-S-<right>") 'org-do-demote)
-  (define-key org-mode-map (kbd "M-S-<left>") 'org-do-promote)
-  (define-key org-mode-map (kbd "C-c C-v") verb-command-map)
-  (visual-line-mode)
-  ;; org-babel
-
-  ;; enable a subset of languages for evaluation in code blocks
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((R . t)
-	 (latex . t)
-	 (python . t)
-	 (sql . t)
-	 (sqlite . t)
-	 (emacs-lisp . t)
-	 (dot . t)
-	 (verb . t)
-     (shell . t)))
-
-  ;; org-open-at-point uses system app for png
-  (add-to-list 'org-file-apps '("\\.png\\'" . system))
-
-  (defadvice org-todo-list (after org-todo-list-bottom ())
+(use-package org
+  :preface
+  (defun nh/org-mode-hooks ()
+    (visual-line-mode)
+    (yas-minor-mode t))
+  (defadvice org-todo-list-bottom (after nh/org-todo-list ())
     "Move to bottom of page after entering org-todo-list"
     (progn (end-of-buffer) (recenter-top-bottom)))
-  (ad-activate 'org-todo-list)
-
-  ;; minor modes
-  (yas-minor-mode t))
-
-(use-package org
+  (defadvice org-download-screenshot (before nh/org-download-screenshot-advice ())
+    "Remove extra lines before inserted screenshot and check for pngpaste"
+    (if (executable-find "pngpaste")
+        (progn (delete-blank-lines) (org-delete-backward-char 1))
+      (error "pngpaste is not installed")))
   :mode
   ("\\.org\\'" . org-mode)
   ("\\.org\\.txt\\'" . org-mode)
-  :hook (org-mode . nh/org-mode-hooks))
+  :bind
+  (("M-<right>" . forward-word)
+   ("M-<left>" . backward-word)
+   ("M-S-<right>" . org-do-demote)
+   ("M-S-<left>" . org-do-promote)
+   ("C-c C-v" . verb-command-map))
+  :config
+  (setq org-agenda-files `(,nh/org-index))
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-fontify-natively t)
+  (setq org-edit-src-content-indentation 0)
+  (setq org-adapt-indentation nil)  ;; headlines are flush left
+  (setq org-babel-python-command "python3")
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((R . t)
+     (latex . t)
+     (python . t)
+     (sql . t)
+     (sqlite . t)
+     (emacs-lisp . t)
+     (dot . t)
+     (verb . t)
+     (shell . t)))
+  ;; org-open-at-point uses system app for png
+  (add-to-list 'org-file-apps '("\\.png\\'" . system))
+  (ad-activate 'org-todo-list-bottom)
+  (ad-activate 'org-download-screenshot)
+  :hook
+  (org-mode . nh/org-mode-hooks))
 
-;; work around difficulties installing org-plus-contrib on linux
-;; (probably due to the age of the system)
-;; (if (eq system-type 'darwin)
-;;     (use-package org
-;;       :ensure org-plus-contrib
-;;       :mode
-;;       ("\\.org\\'" . org-mode)
-;;       ("\\.org\\.txt\\'" . org-mode)
-;;       :hook (org-mode . nh/org-mode-hooks))
-;;   (use-package org
-;;     :mode
-;;     ("\\.org\\'" . org-mode)
-;;     ("\\.org\\.txt\\'" . org-mode)
-;;     :hook (org-mode . nh/org-mode-hooks)))
-
-(use-package ox-minutes
-  :ensure t
-  :after (org))
-
-(use-package org-re-reveal
-  :ensure t
-  :after (org))
-
-(use-package verb
-  :ensure t
-  :pin melpa
-  :after (org))
-
+(defvar nh/org-index (concat (file-name-as-directory nh/icloud) "notes/index.org"))
 ;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
 ;; requires pngpaste (install with homebrew)
 (defvar nh/org-download-image-dir "images")
 
 (defun nh/org-download-add-caption (link)
-  ;; Annotate link with caption, enter RET for no output
+  "Annotate link with caption, enter RET for no output"
   (interactive)
   (let ((caption (read-string "Caption: ")))
     (if (> (length caption) 0) (format "#+CAPTION: %s" caption))))
@@ -1007,7 +986,7 @@ the path."
 
 ;; https://emacs.stackexchange.com/questions/3981/how-to-copy-links-out-of-org-mode
 (defun nh/org-link-at-point ()
-  ;; Return absolute path of link at point
+  "Return absolute path of link at point"
   (let* ((link (org-element-lineage (org-element-context) '(link) t))
          (type (org-element-property :type link))
          (url (org-element-property :path link)))
@@ -1016,7 +995,7 @@ the path."
       (error (format "%s is not a regular file" link)))))
 
 (defun nh/org-link-file-delete ()
-  ;; Remove link and delete the associated file
+  "Remove link and delete the associated file"
   (interactive)
   (let ((link (nh/org-link-at-point)))
     (if (y-or-n-p (format "Delete %s?" link))
@@ -1027,44 +1006,19 @@ the path."
                 (apply 'delete-region (list (match-beginning 0) (match-end 0)))
                 ))))))
 
-(use-package org-download
-  :ensure t
-  :after org
-  :defer nil
-  :custom
-  (org-download-method 'directory)
-  (org-download-image-dir nh/org-download-image-dir)
-  (org-download-heading-lvl nil)
-  (org-download-timestamp "%Y-%m-%d-%H%M%S_")
-  (org-image-actual-width 600)
-  (org-download-screenshot-method (format "%s %%s" (executable-find "pngpaste")))
-  ;; (org-download-annotate-function 'nh/org-download-add-caption)
-  (org-download-annotate-function (lambda (link) ""))
-  :config
-  (require 'org-download))
-
-(defadvice org-download-screenshot (before nh/org-download-screenshot-advice ())
-  "Remove extra lines before inserted screenshot and check for pngpaste"
-  (if (executable-find "pngpaste")
-      (progn (delete-blank-lines) (org-delete-backward-char 1))
-    (error "pngpaste is not installed")))
-(ad-activate 'org-download-screenshot)
-
 (defun nh/org-babel-tangle-block()
-  ;; Tangle only the block at point
+  "Tangle only the block at point"
   (interactive)
   (let ((current-prefix-arg '(4)))
     (call-interactively 'org-babel-tangle)))
 
 (defun nh/org-add-entry (&optional filename time-format)
-  ;; Add an entry to an org-file with today's timestamp.
+  "Add an entry to an org-file with today's timestamp."
   (interactive)
   (find-file (or filename buffer-file-name))
   (end-of-buffer)
   (delete-blank-lines)
   (insert (format-time-string (or time-format "\n* <%Y-%m-%d %a> "))))
-
-(defvar nh/org-index (concat (file-name-as-directory nh/icloud) "notes/index.org"))
 
 (defun nh/org-add-entry-to-index ()
   (interactive)
@@ -1078,13 +1032,6 @@ the path."
   "Copy org-table cell at point to the kill-ring."
   (interactive)
   (kill-new (string-trim (org-table-get-field)) t))
-
-(defun nh/safename (str)
-  "Remove non-alphanum characters and downcase"
-  (let ((exprs '(("^\\W+" "") ("\\W+$" "") ("\\W+" "-"))))
-    (dolist (e exprs)
-      (setq str (replace-regexp-in-string (nth 0 e) (nth 1 e) str)))
-    (downcase str)))
 
 (defun nh/org-element-as-docx ()
   "Export the contents of the element at point to a file and
@@ -1106,6 +1053,36 @@ convert to .docx with pandoc"
         (shell-command (format "open %s" docx)))
     (message "wrote %s" docx)
     ))
+
+;;* org-mode helper packages
+(use-package ox-minutes
+  :ensure t
+  :after (org))
+
+(use-package org-re-reveal
+  :ensure t
+  :after (org))
+
+(use-package verb
+  :ensure t
+  :pin melpa
+  :after (org))
+
+(use-package org-download
+  :ensure t
+  :after org
+  :defer nil
+  :custom
+  (org-download-method 'directory)
+  (org-download-image-dir nh/org-download-image-dir)
+  (org-download-heading-lvl nil)
+  (org-download-timestamp "%Y-%m-%d-%H%M%S_")
+  (org-image-actual-width 600)
+  (org-download-screenshot-method (format "%s %%s" (executable-find "pngpaste")))
+  ;; (org-download-annotate-function 'nh/org-download-add-caption)
+  (org-download-annotate-function (lambda (link) ""))
+  :config
+  (require 'org-download))
 
 ;;* sh-mode
 
