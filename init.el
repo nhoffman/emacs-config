@@ -841,7 +841,7 @@ selection if none is active"
     "hydra-python"
     ("RET" redraw-display "<quit>")
     ("c" nh/python-flycheck-select-flake8 "activate flake8")
-    ("d" lsp-describe-thing-at-point "lsp-describe-thing-at-point")
+    ("d" eldoc-doc-buffer "eldoc-doc-buffer")
     ("e" flycheck-list-errors "flycheck-list-errors")
     ("E" nh/venv-activate-eglot "activate eglot")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
