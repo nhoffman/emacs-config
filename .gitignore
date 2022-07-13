@@ -25,3 +25,6 @@ transient/
 url
 var/
 .DS_Store
+*~
+el-get/
+undohist/
