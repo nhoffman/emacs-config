@@ -935,11 +935,12 @@ the path."
   ("\\.org\\'" . org-mode)
   ("\\.org\\.txt\\'" . org-mode)
   :bind
-  (("M-<right>" . forward-word)
-   ("M-<left>" . backward-word)
-   ("M-S-<right>" . org-do-demote)
-   ("M-S-<left>" . org-do-promote)
-   ("C-c C-v" . verb-command-map))
+  (:map org-mode-map
+        ("M-<right>" . forward-word)
+        ("M-<left>" . backward-word)
+        ("M-S-<right>" . org-do-demote)
+        ("M-S-<left>" . org-do-promote)
+        ("C-c C-v" . verb-command-map))
   :config
   (setq org-agenda-files `(,nh/org-index))
   (setq org-confirm-babel-evaluate nil)
