@@ -371,6 +371,7 @@ Assumes that the frame is only split into two."
 (use-package undohist
   :ensure t
   :config
+  (setq undohist-ignored-files '("COMMIT_EDITMSG"))
   (undohist-initialize))
 
 ;;* choose a theme
