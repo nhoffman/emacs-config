@@ -2,51 +2,42 @@
 ;; provides string-trim
 (eval-when-compile (require 'subr-x))
 
-;;* appearance and GUI
-(blink-cursor-mode 1)
-(set-cursor-color "red")
+;;* Package management
+(require 'package)
+(setq package-archives
+      '(("ELPA" . "https://tromey.com/elpa/")
+        ("gnu" . "https://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
-(menu-bar-mode -1)   ;; hide menu bar
-(scroll-bar-mode -1) ;; hide scroll bar
-(tool-bar-mode -1)   ;; hide tool bar
+(setq package-archive-priorities
+      '(("melpa-stable" . 20)
+        ("gnu" . 10)
+        ("melpa" . 5)))
 
-(setq column-number-mode t)
-(setq ediff-split-window-function 'split-window-horizontally)
-;; prevent windows from being split vertically
-(setq split-height-threshold nil)
+(setq package-native-compile t)
+(setq package-menu-hide-low-priority t)
+(setq package-check-signature nil) ;; TODO: fix this properly
+(package-initialize)
 
-;; show matching parens
-(show-paren-mode 1)
+;; bootstrap use-package
+(unless (package-installed-p 'use-package)
+  (if (yes-or-no-p "use-package is not installed yet - install it? ")
+      (progn
+        (message "** installing use-package")
+        (package-refresh-contents)
+        (package-install 'use-package))
+    (message "** defining fake use-package macro")
+    (defmacro use-package (pkg &rest args)
+      (warn
+       "use-package is not installed - could not activate %s" (symbol-name pkg))
+      )))
 
-(put 'downcase-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
-
-;; Default 'untabify converts a tab to equivalent number of spaces
-;; before deleting a single character.
-(setq backward-delete-char-untabify-method "all")
-(setq-default indent-tabs-mode nil)
-
-;; use 'ls --dired' if available
-(setq dired-use-ls-dired
-      (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
-	  t nil))
-;; dired performs file renaming using underlying version control system
-(setq dired-vc-rename-file t)
-
-;; Let a period followed by a single space be treated as end of sentence
-(setq sentence-end-double-space nil)
-(setq-default fill-column 80)
-;; File path in title bar.
-(setq frame-title-format
-      (list (format "%s %%S: %%j " (system-name))
-            '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
-
+;;* file and path utilities
 (defvar nh/icloud
   "/Users/nhoffman/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync"
   "Base directory for files stored in icloud")
 
-;; file and path utilities
 (defun nh/path-join (&rest x)
   "Join elements of x with a path separator and apply `expand-file-name'"
   (expand-file-name
@@ -71,6 +62,7 @@
   (write-region "" nil custom-file))
 (load custom-file)
 
+;;* startup and shutdown
 (defun nh/set-default-font-verbosely (font-name)
   (interactive)
   (message (format "** setting default font to %s" font-name))
@@ -103,7 +95,6 @@
          (message "** running in terminal mode"))))
 (nh/fix-frame)
 
-;;* startup and shutdown
 (setq inhibit-splash-screen t)
 (setq initial-scratch-message nil)
 (setq require-final-newline t)
@@ -122,7 +113,7 @@
 ;; kill buffer without asking which one by default
 (global-set-key (kbd "C-x k") 'kill-this-buffer)
 
-;; desktop
+;;* desktop
 (defun nh/desktop-save-no-p ()
   "Save desktop without prompting (replaces `desktop-save-in-desktop-dir')"
   (interactive)
@@ -135,6 +126,57 @@
     (require 'desktop)
     (desktop-save-mode 1)
     (add-hook 'auto-save-hook 'nh/desktop-save-no-p)))
+
+;;* appearance and GUI
+(blink-cursor-mode 1)
+(set-cursor-color "red")
+
+(menu-bar-mode -1)   ;; hide menu bar
+(scroll-bar-mode -1) ;; hide scroll bar
+(tool-bar-mode -1)   ;; hide tool bar
+
+(setq column-number-mode t)
+(setq ediff-split-window-function 'split-window-horizontally)
+;; prevent windows from being split vertically
+(setq split-height-threshold nil)
+
+;; File path in title bar.
+(setq frame-title-format
+      (list (format "%s %%S: %%j " (system-name))
+            '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
+
+;; show matching parens
+(show-paren-mode 1)
+
+(use-package rainbow-delimiters
+  :ensure t)
+
+;; use list-faces-display to show preview of all faces for the current theme
+;; use M-x customize-group to modify theme elements in specific modes
+
+(defvar nh/theme-dark 'spacemacs-dark)
+(defvar nh/theme-light 'spacemacs-light)
+
+(defun nh/hex-to-rgb (hexcolor)
+  "Return a list of decimal RGB values from a hex color name"
+  (mapcar (lambda (start)
+            (string-to-number
+             (substring-no-properties hexcolor start (+ start 2)) 16))
+          '(1 3 5)))
+
+(defun nh/toggle-theme ()
+  "Toggle theme between preferred light and dark themes"
+  (interactive)
+  ;; sum the RGB values of the current theme's background color and guess that
+  ;; the current theme is dark if < 300
+  (if (< (apply '+ (nh/hex-to-rgb (face-attribute 'default :background))) 300)
+      (load-theme nh/theme-light t)
+    (load-theme nh/theme-dark t)))
+
+(use-package spacemacs-theme
+  :ensure t
+  :defer t
+  :init (load-theme nh/theme-dark t))
 
 ;;* execution environment
 (defun nh/ssh-refresh ()
@@ -168,7 +210,28 @@
     (equal (string-trim (shell-command-to-string "lsb_release -rs")) "18.04")
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 
+;;* dired
+;; use 'ls --dired' if available
+(setq dired-use-ls-dired
+      (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
+	  t nil))
+;; dired performs file renaming using underlying version control system
+(setq dired-vc-rename-file t)
+
 ;;* other settings
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+
+;; Default 'untabify converts a tab to equivalent number of spaces
+;; before deleting a single character.
+(setq backward-delete-char-untabify-method "all")
+(setq-default indent-tabs-mode nil)
+
+;; Let a period followed by a single space be treated as end of sentence
+(setq sentence-end-double-space nil)
+(setq-default fill-column 80)
+
 (setq suggest-key-bindings 4)
 
 (setq mouse-wheel-scroll-amount '(3 ((shift) . 3))) ;; number of lines at a time
@@ -320,37 +383,6 @@ Assumes that the frame is only split into two."
   (interactive)
   (load user-init-file))
 
-;;* Package management
-(require 'package)
-(setq package-archives
-      '(("ELPA" . "https://tromey.com/elpa/")
-        ("gnu" . "https://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")))
-
-(setq package-archive-priorities
-      '(("melpa-stable" . 20)
-        ("gnu" . 10)
-        ("melpa" . 5)))
-
-(setq package-native-compile t)
-(setq package-menu-hide-low-priority t)
-(setq package-check-signature nil) ;; TODO: fix this properly
-(package-initialize)
-
-;; bootstrap use-package
-(unless (package-installed-p 'use-package)
-  (if (yes-or-no-p "use-package is not installed yet - install it? ")
-      (progn
-        (message "** installing use-package")
-        (package-refresh-contents)
-        (package-install 'use-package))
-    (message "** defining fake use-package macro")
-    (defmacro use-package (pkg &rest args)
-      (warn
-       "use-package is not installed - could not activate %s" (symbol-name pkg))
-      )))
-
 ;;* saving
 (setq make-backup-files nil)
 (global-auto-revert-mode t)
@@ -373,34 +405,6 @@ Assumes that the frame is only split into two."
   :config
   (setq undohist-ignored-files '("COMMIT_EDITMSG"))
   (undohist-initialize))
-
-;;* choose a theme
-;; use list-faces-display to show preview of all faces for the current theme
-;; use M-x customize-group to modify theme elements in specific modes
-
-(defvar nh/theme-dark 'spacemacs-dark)
-(defvar nh/theme-light 'spacemacs-light)
-
-(defun nh/hex-to-rgb (hexcolor)
-  "Return a list of decimal RGB values from a hex color name"
-  (mapcar (lambda (start)
-            (string-to-number
-             (substring-no-properties hexcolor start (+ start 2)) 16))
-          '(1 3 5)))
-
-(defun nh/toggle-theme ()
-  "Toggle theme between preferred light and dark themes"
-  (interactive)
-  ;; sum the RGB values of the current theme's background color and guess that
-  ;; the current theme is dark if < 300
-  (if (< (apply '+ (nh/hex-to-rgb (face-attribute 'default :background))) 300)
-      (load-theme nh/theme-light t)
-    (load-theme nh/theme-dark t)))
-
-(use-package spacemacs-theme
-  :ensure t
-  :defer t
-  :init (load-theme nh/theme-dark t))
 
 ;;* search and navigation (ivy, counsel, and friends)
 (use-package ivy
@@ -529,55 +533,35 @@ Assumes that the frame is only split into two."
   "Return the path to an executable installed in `nh/py3-venv'"
   (nh/path-join nh/py3-venv "bin" name))
 
-(defun nh/python-flycheck-select-flake8 ()
-  (interactive)
-  (flycheck-mode t)
-  (flycheck-select-checker 'python-flake8)
-  (flycheck-list-errors))
-
-;;* jedi language server
-;; https://github.com/pappasam/jedi-language-server
-;; pip install -U jedi-language-server
-;; (use-package lsp-jedi
-;;   :ensure t
-;;   :pin melpa
-;;   :init
-;;   (setq lsp-jedi-executable-command (nh/py3-venv-bin "jedi-language-server"))
-;;   :config
-;;   (with-eval-after-load "lsp-mode"
-;;     (add-to-list 'lsp-disabled-clients 'pyls)
-;;     (add-to-list 'lsp-enabled-clients 'jedi)))
-
-;; Fix issue where python code block evaluation freezes on a mac in org-mode
-;; using :session. This as a bug in prompt detection in python.el: apparently
-;; the startup message for the python interpreter is not being recognized.
-;; Launching the interpreter with python -q suppresses the prompt, but the
-;; variable python-shell-interpreter-args does not appear to be respected. So
-;; the brute force solution is to advise the function that sets up
-;; inferior-python-mode to add -q:
-(defun nh/python-shell-make-comint (orig-fun &rest args)
-  (setq args (append '("python3 -q") (cdr args)))
-  (apply orig-fun args))
-
 (use-package python-mode
+  :preface
+  (defun nh/python-shell-make-comint (orig-fun &rest args)
+    "Fix issue where python code block evaluation freezes on a mac in
+     org-mode using :session. This as a bug in prompt detection
+     in python.el: apparently the startup message for the python
+     interpreter is not being recognized. Launching the
+     interpreter with python -q suppresses the prompt, but the
+     variable python-shell-interpreter-args does not appear to be
+     respected. So the brute force solution is to advise the
+     function that sets up inferior-python-mode to add -q:"
+    (setq args (append '("python3 -q") (cdr args)))
+    (apply orig-fun args))
+  (if (eq system-type 'darwin)
+      (progn
+        (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
+        (setq python-shell-completion-native-enable nil)))
   :mode
   ("\\.py$'" . python-mode)
   ("\\.wsgi$" . python-mode)
   ("\\.cgi$" . python-mode)
   ("SConstruct" . python-mode)
   ("SConscript" . python-mode)
-  :init
+  :config
   (setq python-shell-interpreter "python3")
   (setq tab-width 4)
   (setq python-indent-guess-indent-offset t)
   (setq python-indent-guess-indent-offset-verbose nil)
-  (if (eq system-type 'darwin)
-      (progn
-        (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
-        (setq python-shell-completion-native-enable nil)))
-  :config
   (setq python-indent-offset tab-width)
-  (setq py-smart-indentation t)
   :hook
   (python-mode . (lambda ()
 		   (setq display-fill-column-indicator-column 80))))
@@ -598,12 +582,15 @@ Assumes that the frame is only split into two."
              (split-string (shell-command-to-string (format fstr pth)) "\n")))
     ))
 
+(defun nh/pylsp-installed-p ()
+  (= 0 (shell-command "python -c 'import pylsp' 2>/dev/null")))
+
 (defun nh/venv-activate-eglot ()
   "Activate eglot in the selected virtualenv, installing
 dependencies if necessary."
   (interactive)
   (nh/venv-activate)
-  (unless (= 0 (shell-command "python -c 'import pylsp'"))
+  (unless (nh/pylsp-installed-p)
     (save-excursion (nh/venv-setup)))
   (eglot-ensure))
 
@@ -617,58 +604,50 @@ if there is more than one option."
 	 (venv (ivy-read "choose a virtualenv: " venvs)))
     (pyvenv-activate venv)
     (message "Activated virtualenv %s (%s)"
-	     venv (string-trim (shell-command-to-string "python3 --version")))
-    ;; is jedi smart enough to respect the active virtualenv?
-    ;; (setq lsp-jedi-executable-command
-    ;; 	  (concat (file-name-as-directory venv) "bin/jedi-language-server"))
-    ))
+	     venv (string-trim (shell-command-to-string "python3 --version")))))
 
 (defun nh/venv-setup ()
-  "Install or update dependencies specified in
-`nh/venv-setup-packages' to the active virtualenv. Prompts for a
-selection if none is active"
+  "Install or update packages specified in `nh/venv-setup-packages'
+to the active virtualenv. Prompts for a selection if no
+virtualenv is active."
   (interactive)
   (unless pyvenv-virtual-env (nh/venv-activate))
-  (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
-      (let ((bufname nil)
-	    (packages (mapconcat 'identity nh/venv-setup-packages " ")))
-	(setq bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
-	(unless (= 0 (call-process-shell-command
-	              (format "%sbin/pip install -U %s" pyvenv-virtual-env packages)
-	              nil bufname t))
-          (switch-to-buffer bufname))
-        (message "installation complete, see output in %s" bufname))))
-
-;; https://vxlabs.com/2018/11/19/configuring-emacs-lsp-mode-and-microsofts-visual-studio-code-python-language-server/
-;; apparently including ":after yasnippet" prevents the python-mode hook from running
-;; TODO: make this work on linux
-;; (when (eq system-type 'darwin)
-;;   (use-package lsp-python-ms
-;;     :ensure t
-;;     :pin melpa
-;;     :config
-;;     (setq lsp-python-ms-python-executable-cmd "python3")
-;;     :bind (("M-." . lsp-find-definition))
-;;     :hook
-;;     (python-mode . (lambda ()
-;; 		     (require 'lsp-python-ms)
-;; 		     (lsp-deferred)))
-;;     ))
+  (let ((bufname nil)
+	(packages (mapconcat 'identity nh/venv-setup-packages " ")))
+    (if (nh/pylsp-installed-p)
+        (message "dependencies already installed")
+      (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
+          (progn (setq bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
+                 (unless (= 0 (call-process-shell-command
+	                       (format "%sbin/pip install -U %s" pyvenv-virtual-env packages)
+	                       nil bufname t))
+                   (switch-to-buffer bufname))
+                 (message "installation complete, see output in %s" bufname))))))
 
 (use-package flycheck
   :ensure t
   :pin melpa
   :config
-  (setq flycheck-python-flake8-executable
-	(nh/py3-venv-bin "flake8"))
-  (setq flycheck-flake8rc
-	(nh/emacs-dir-path "flake8.conf"))
-  (setq flycheck-python-pylint-executable
-	(nh/py3-venv-bin "pylint"))
-  (setq flycheck-pylintrc
-	(nh/emacs-dir-path "python-pylint.conf"))
+  (setq flycheck-flake8rc (nh/emacs-dir-path "flake8.conf"))
+  (setq flycheck-pylintrc (nh/emacs-dir-path "python-pylint.conf"))
   :hook
   (python-mode . flycheck-mode))
+
+(defun nh/python-flycheck-select-checker (checker)
+  (interactive)
+  (flycheck-reset-enabled-checker checker)
+  (flycheck-disable-checker checker t)
+  (flycheck-select-checker checker))
+
+(defun nh/python-flycheck-select-checkers ()
+  (interactive)
+  (nh/venv-setup)
+  (flycheck-mode t)
+  ;; checkers are run in reverse order of activation in lines below
+  (nh/python-flycheck-select-checker 'python-pylint)
+  (nh/python-flycheck-select-checker 'python-flake8)
+  ;; (flycheck-verify-setup)
+  )
 
 ;; function to reformat using yapf
 (defun nh/yapf-region-or-buffer ()
@@ -841,7 +820,7 @@ selection if none is active"
   (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
     "hydra-python"
     ("RET" redraw-display "<quit>")
-    ("c" nh/python-flycheck-select-flake8 "activate flake8")
+    ("c" nh/python-flycheck-select-checkers "activate flycheck checkers")
     ("d" eldoc-doc-buffer "eldoc-doc-buffer")
     ("e" flycheck-list-errors "flycheck-list-errors")
     ("E" nh/venv-activate-eglot "activate eglot")
@@ -851,6 +830,7 @@ selection if none is active"
     ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
     ("v" nh/venv-activate "nh/venv-activate")
+    ("x" eglot-shutdown "eglot-shutdown")
     ("V" nh/venv-setup "nh/venv-setup")
     ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer"))
 
