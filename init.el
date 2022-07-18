@@ -1,6 +1,29 @@
-;;* elisp dependencies
+;;* dependencies
 ;; provides string-trim
 (eval-when-compile (require 'subr-x))
+
+;;* file and path utilities
+(defvar nh/icloud
+  "/Users/nhoffman/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync"
+  "Base directory for files stored in icloud")
+
+(defun nh/path-join (&rest x)
+  "Join elements of x with a path separator and apply `expand-file-name'"
+  (expand-file-name
+   (concat
+    (mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
+    (elt x (- (length x) 1)))))
+
+(defun nh/emacs-dir-path (name)
+  "Return absolute path to a file in the same directory as `user-init-file'"
+  (expand-file-name name user-emacs-directory))
+
+(defun nh/safename (str)
+  "Remove non-alphanum characters and downcase"
+  (let ((exprs '(("^\\W+" "") ("\\W+$" "") ("\\W+" "-"))))
+    (dolist (e exprs)
+      (setq str (replace-regexp-in-string (nth 0 e) (nth 1 e) str)))
+    (downcase str)))
 
 ;;* Package management
 (require 'package)
@@ -30,31 +53,7 @@
     (message "** defining fake use-package macro")
     (defmacro use-package (pkg &rest args)
       (warn
-       "use-package is not installed - could not activate %s" (symbol-name pkg))
-      )))
-
-;;* file and path utilities
-(defvar nh/icloud
-  "/Users/nhoffman/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync"
-  "Base directory for files stored in icloud")
-
-(defun nh/path-join (&rest x)
-  "Join elements of x with a path separator and apply `expand-file-name'"
-  (expand-file-name
-   (concat
-    (mapconcat 'file-name-as-directory (seq-take x (- (length x) 1)) "")
-    (elt x (- (length x) 1)))))
-
-(defun nh/emacs-dir-path (name)
-  "Return absolute path to a file in the same directory as `user-init-file'"
-  (expand-file-name name user-emacs-directory))
-
-(defun nh/safename (str)
-  "Remove non-alphanum characters and downcase"
-  (let ((exprs '(("^\\W+" "") ("\\W+$" "") ("\\W+" "-"))))
-    (dolist (e exprs)
-      (setq str (replace-regexp-in-string (nth 0 e) (nth 1 e) str)))
-    (downcase str)))
+       "use-package is not installed - could not activate %s" (symbol-name pkg)))))
 
 ;; save customizations here instead of init.el
 (setq custom-file (nh/emacs-dir-path "custom.el"))
@@ -491,35 +490,14 @@ Assumes that the frame is only split into two."
   :ensure t
   :defer t)
 
-;;* lsp-mode
-;; (use-package lsp-mode
-;;   :ensure t
-;;   :pin melpa
-;;   :config
-;;   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
-;;   )
+;;* elisp
 
-;; (use-package lsp-mode
-;;   :ensure t
-;;   :pin melpa
-;;   :hook
-;;   ((python-mode . lsp-deferred))
-;;   :config
-;;   (setq lsp-enable-snippet nil) ;; prevent warning on lsp-python-mode startup
-;;   )
-
-;; (use-package lsp-ui
-;;   :ensure t
-;;   :config
-;;   (setq lsp-ui-sideline-enable nil
-;;         lsp-ui-sideline-show-code-actions nil
-;;         lsp-ui-sideline-show-hover nil
-;;         lsp-ui-doc-enable t
-;;         lsp-ui-doc-include-signature nil
-;;         lsp-eldoc-enable-hover nil ; Disable eldoc displays in minibuffer
-;;         lsp-ui-doc-position 'at-point
-;;         lsp-ui-sideline-ignore-duplicate t)
-;;   )
+(use-package paredit
+  :ensure t
+  :bind
+  (:map paredit-mode-map
+        ("C-<left>" . nh/back-window)
+        ("C-<right>" . other-window)))
 
 ;;* python
 (defcustom nh/py3-venv
