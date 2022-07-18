@@ -126,6 +126,15 @@
     (desktop-save-mode 1)
     (add-hook 'auto-save-hook 'nh/desktop-save-no-p)))
 
+;;* bookmarks
+(defun nh/set-bookmark-for-function ()
+  (interactive)
+  (let* ((tag (read-string "project tag: "))
+	 (funcname (which-function))
+	 (name (format "%s %s" tag funcname)))
+    (if (y-or-n-p (format "set bookmark '%s'? " name))
+	(bookmark-set name))))
+
 ;;* appearance and GUI
 (blink-cursor-mode 1)
 (set-cursor-color "red")
@@ -491,7 +500,6 @@ Assumes that the frame is only split into two."
   :defer t)
 
 ;;* elisp
-
 (use-package paredit
   :ensure t
   :bind
@@ -676,153 +684,6 @@ virtualenv is active."
             (make-local-variable 'js-indent-level)
             (setq js-indent-level 2)))
 
-;;* hydra
-
-(use-package hydra
-  :ensure t
-  :config
-  (defhydra hydra-launcher (:color teal :columns 4 :post (redraw-display))
-    "hydra-launcher"
-    ("C-g" redraw-display "<quit>")
-    ("RET" redraw-display "<quit>")
-    ("b" hydra-bookmarks/body "hyrda for bookmarks")
-    ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
-    ("c" nh/toggle-theme "toggle light/dark mode")
-    ("d" nh/insert-date "nh/insert-date")
-    ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
-    ("f" nh/fix-frame "fix-frame")
-    ("g" hydra-toggle-mode/body "toggle mode")
-    ("i" hydra-init-file/body "hydra for init file")
-    ("l" hydra-org-links/body "hydra-org-links")
-    ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
-    ("n" nh/org-find-index "nh/org-find-index")
-    ("N" nh/org-add-entry-to-index "nh/org-add-entry-to-index")
-    ("m" magit-status "magit-status")
-    ("o" hydra-org-navigation/body "hydra-org-navigation")
-    ("O" nh/copy-region-or-line-other-window "copy-region-or-line-other-window")
-    ("p" hydra-python/body "python menu")
-    ("P" package-list-packages "package-list-packages")
-    ("s" nh/ssh-refresh "ssh-refresh")
-    ("t" nh/org-show-todos-move-down "org-todo-list")
-    ("T" nh/transpose-buffers "transpose-buffers")
-    ("u" untabify "untabify")
-    ("w" hydra-web-mode/body "web-mode commands")
-    ("y" hydra-yasnippet/body "yasnippet commands"))
-  (global-set-key (kbd "C-\\") 'hydra-launcher/body)
-
-  (defhydra hydra-init-file (:color blue :columns 4 :post (redraw-display))
-    "hydra-init-file"
-    ("RET" redraw-display "<quit>")
-    ("C-g" redraw-display "<quit>")
-    ("i" nh/init-file-edit "edit init file")
-    ("l" nh/init-file-load "reload init file")
-    ("h" nh/init-file-header-occur "occur headers")
-    ("H" nh/init-file-header-insert "insert header")
-    ("u" nh/init-file-use-package-occur "occur use-package declarations"))
-
-  (defun nh/set-bookmark-for-function ()
-    (interactive)
-    (let* ((tag (read-string "project tag: "))
-	   (funcname (which-function))
-	   (name (format "%s %s" tag funcname)))
-      (if (y-or-n-p (format "set bookmark '%s'? " name))
-	  (bookmark-set name)))
-    )
-
-  ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Bookmarks.html
-  (defhydra hydra-bookmarks (:color blue :columns 4 :post (redraw-display))
-    "hydra-bookmarks"
-    ("RET" redraw-display "<quit>")
-    ("C-g" redraw-display "<quit>")
-    ("l" list-bookmarks "list bookmarks")
-    ("j" bookmark-jump "jump to bookmark")
-    ("s" bookmark-set "set bookmark")
-    ("d" bookmark-delete "delete bookmark")
-    ("f" nh/set-bookmark-for-function "bookmark this function"))
-
-  (defhydra hydra-toggle-mode (:color blue :columns 4 :post (redraw-display))
-    "hydra-toggle-mode"
-    ("RET" redraw-display "<quit>")
-    ;; ("c" csv-mode "csv-mode")
-    ("e" emacs-lisp-mode "emacs-lisp-mode")
-    ("h" html-mode "html-mode")
-    ("j" jinja2-mode "jinja2-mode")
-    ("k" markdown-mode "markdown-mode")
-    ("l" lineum-mode "lineum-mode")
-    ("m" moinmoin-mode "moinmoin-mode")
-    ("o" org-mode "org-mode")
-    ("p" python-mode "python-mode")
-    ("r" R-mode "R-mode")
-    ("s" sql-mode "sql-mode")
-    ("t" text-mode "text-mode")
-    ("v" visual-line-mode "visual-line-mode")
-    ("w" web-mode "web-mode")
-    ("y" yaml-mode "yaml-mode"))
-
-  (defun nh/org-show-todos-move-down ()
-    (interactive)
-    (find-file nh/org-index)
-    (org-show-todo-tree "TODO")
-    (end-of-buffer))
-
-  (defhydra hydra-org-navigation
-    (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
-    "hydra-org-navigation"
-    ("RET" nil "<quit>")
-    ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
-    ("c" nh/org-table-copy-cell "nh/org-table-copy-cell" :color blue)
-    ("i" org-previous-item "org-previous-item")
-    ("k" org-next-item "org-next-item")
-    ("<right>" org-next-block "org-next-block")
-    ("<left>" org-previous-block "org-previous-block")
-    ("<down>" outline-next-visible-heading "outline-next-visible-heading")
-    ("<up>" outline-previous-visible-heading "outline-previous-visible-heading")
-    ("t" nh/org-show-todos-move-down "show todos" :color blue)
-    ("S-<down>" org-forward-paragraph "org-forward-paragraph")
-    ("S-<up>" org-backward-paragraph "org-backward-paragraph")
-    ("s" (org-insert-structure-template "src") "add src block" :color blue)
-    ("w" nh/org-element-as-docx "nh/org-element-as-docx" :color blue)
-    ("q" nil "<quit>"))
-
-  (defhydra hydra-org-links
-    (:exit t :foreign-keys warn :columns 4 :post (redraw-display))
-    "hydra-org-links"
-    ("RET" nil "<quit>")
-    ("d" nh/org-open-org-download-dir "nh/org-open-org-download-dir")
-    ("i" org-download-screenshot "insert screenshot from clipboard")
-    ("t" org-toggle-inline-images "org-toggle-inline-images")
-    ("n" nh/org-add-entry "nh/org-add-entry")
-    ("o" org-open-at-point "org-open-at-point (also C-l C-o)")
-    ("x" nh/org-link-file-delete "delete linked file"))
-
-  (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
-    "hydra-python"
-    ("RET" redraw-display "<quit>")
-    ("c" nh/python-flycheck-select-checkers "activate flycheck checkers")
-    ("d" eldoc-doc-buffer "eldoc-doc-buffer")
-    ("e" flycheck-list-errors "flycheck-list-errors")
-    ("E" nh/venv-activate-eglot "activate eglot")
-    ("f" flycheck-verify-setup "flycheck-verify-setup")
-    ("j" (swiper "class\\|def\\b") "jump to function or class")
-    ("n" flycheck-next-error "flycheck-next-error" :color red)
-    ("p" flycheck-previous-error "flycheck-previous-error" :color red)
-    ("P" python-mode "python-mode")
-    ("v" nh/venv-activate "nh/venv-activate")
-    ("x" eglot-shutdown "eglot-shutdown")
-    ("V" nh/venv-setup "nh/venv-setup")
-    ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer"))
-
-  (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
-    "hydra-yasnippet"
-    ("RET" redraw-display "<quit>")
-    ("i" yas-insert-snippet "yas-insert-snippet"))
-
-  (defhydra hydra-expand-region (:color red :columns 1)
-    "hydra-expand-region"
-    ("." er/expand-region "er/expand-region")
-    ("," er/contract-region "er/contract-region"))
-  ) ;; end hydra config
-
 ;;* ESS (R language support)
 
 (defun nh/set-inferior-ess-r-program-name ()
@@ -929,6 +790,13 @@ the path."
 ;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
 ;; requires pngpaste (install with homebrew)
 (defvar nh/org-download-image-dir "images")
+
+(defun nh/org-show-todos-move-down ()
+  "Show TODOs in main notes file"
+  (interactive)
+  (find-file nh/org-index)
+  (org-show-todo-tree "TODO")
+  (end-of-buffer))
 
 (defun nh/org-download-add-caption (link)
   "Annotate link with caption, enter RET for no output"
@@ -1134,4 +1002,150 @@ convert to .docx with pandoc"
 	 ("C--" . er/contract-region)
 	 ("C-M-." . hydra-expand-region/body)))
 
+;;* hydra
+(use-package hydra
+  :ensure t
+  :config
+  (defhydra hydra-launcher (:color teal :columns 4 :post (redraw-display))
+    "hydra-launcher"
+    ("C-g" redraw-display "<quit>")
+    ("RET" redraw-display "<quit>")
+    ("b" hydra-bookmarks/body "hyrda for bookmarks")
+    ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
+    ("c" nh/toggle-theme "toggle light/dark mode")
+    ("d" nh/insert-date "nh/insert-date")
+    ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
+    ("f" nh/fix-frame "fix-frame")
+    ("g" hydra-toggle-mode/body "toggle mode")
+    ("i" hydra-init-file/body "hydra for init file")
+    ("l" hydra-org-links/body "hydra-org-links")
+    ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
+    ("n" nh/org-find-index "nh/org-find-index")
+    ("N" nh/org-add-entry-to-index "nh/org-add-entry-to-index")
+    ("m" magit-status "magit-status")
+    ("o" hydra-org-navigation/body "hydra-org-navigation")
+    ("O" nh/copy-region-or-line-other-window "copy-region-or-line-other-window")
+    ("p" hydra-python/body "python menu")
+    ("P" package-list-packages "package-list-packages")
+    ("s" nh/ssh-refresh "ssh-refresh")
+    ("t" nh/org-show-todos-move-down "org-todo-list")
+    ("T" nh/transpose-buffers "transpose-buffers")
+    ("u" untabify "untabify")
+    ("w" hydra-web-mode/body "web-mode commands")
+    ("y" hydra-yasnippet/body "yasnippet commands")
+    ("(" hydra-paredit/body "paredit commands"))
+  (global-set-key (kbd "C-\\") 'hydra-launcher/body)
 
+  (defhydra hydra-init-file (:color blue :columns 4 :post (redraw-display))
+    "hydra-init-file"
+    ("RET" redraw-display "<quit>")
+    ("C-g" redraw-display "<quit>")
+    ("i" nh/init-file-edit "edit init file")
+    ("l" nh/init-file-load "reload init file")
+    ("h" nh/init-file-header-occur "occur headers")
+    ("H" nh/init-file-header-insert "insert header")
+    ("u" nh/init-file-use-package-occur "occur use-package declarations"))
+
+  ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Bookmarks.html
+  (defhydra hydra-bookmarks (:color blue :columns 4 :post (redraw-display))
+    "hydra-bookmarks"
+    ("RET" redraw-display "<quit>")
+    ("C-g" redraw-display "<quit>")
+    ("l" list-bookmarks "list bookmarks")
+    ("j" bookmark-jump "jump to bookmark")
+    ("s" bookmark-set "set bookmark")
+    ("d" bookmark-delete "delete bookmark")
+    ("f" nh/set-bookmark-for-function "bookmark this function"))
+
+  (defhydra hydra-toggle-mode (:color blue :columns 4 :post (redraw-display))
+    "hydra-toggle-mode"
+    ("RET" redraw-display "<quit>")
+    ;; ("c" csv-mode "csv-mode")
+    ("e" emacs-lisp-mode "emacs-lisp-mode")
+    ("h" html-mode "html-mode")
+    ("j" jinja2-mode "jinja2-mode")
+    ("k" markdown-mode "markdown-mode")
+    ("l" lineum-mode "lineum-mode")
+    ("m" moinmoin-mode "moinmoin-mode")
+    ("o" org-mode "org-mode")
+    ("p" python-mode "python-mode")
+    ("r" R-mode "R-mode")
+    ("s" sql-mode "sql-mode")
+    ("t" text-mode "text-mode")
+    ("v" visual-line-mode "visual-line-mode")
+    ("w" web-mode "web-mode")
+    ("y" yaml-mode "yaml-mode"))
+
+  (defhydra hydra-org-navigation
+    (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
+    "hydra-org-navigation"
+    ("RET" nil "<quit>")
+    ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
+    ("c" nh/org-table-copy-cell "nh/org-table-copy-cell" :color blue)
+    ("i" org-previous-item "org-previous-item")
+    ("k" org-next-item "org-next-item")
+    ("<right>" org-next-block "org-next-block")
+    ("<left>" org-previous-block "org-previous-block")
+    ("<down>" outline-next-visible-heading "outline-next-visible-heading")
+    ("<up>" outline-previous-visible-heading "outline-previous-visible-heading")
+    ("t" nh/org-show-todos-move-down "show todos" :color blue)
+    ("S-<down>" org-forward-paragraph "org-forward-paragraph")
+    ("S-<up>" org-backward-paragraph "org-backward-paragraph")
+    ("s" (org-insert-structure-template "src") "add src block" :color blue)
+    ("w" nh/org-element-as-docx "nh/org-element-as-docx" :color blue)
+    ("q" nil "<quit>"))
+
+  (defhydra hydra-org-links
+    (:exit t :foreign-keys warn :columns 4 :post (redraw-display))
+    "hydra-org-links"
+    ("RET" nil "<quit>")
+    ("d" nh/org-open-org-download-dir "nh/org-open-org-download-dir")
+    ("i" org-download-screenshot "insert screenshot from clipboard")
+    ("t" org-toggle-inline-images "org-toggle-inline-images")
+    ("n" nh/org-add-entry "nh/org-add-entry")
+    ("o" org-open-at-point "org-open-at-point (also C-l C-o)")
+    ("x" nh/org-link-file-delete "delete linked file"))
+
+  (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
+    "hydra-python"
+    ("RET" redraw-display "<quit>")
+    ("c" nh/python-flycheck-select-checkers "activate flycheck checkers")
+    ("d" eldoc-doc-buffer "eldoc-doc-buffer")
+    ("e" flycheck-list-errors "flycheck-list-errors")
+    ("E" nh/venv-activate-eglot "activate eglot")
+    ("f" flycheck-verify-setup "flycheck-verify-setup")
+    ("j" (swiper "class\\|def\\b") "jump to function or class")
+    ("n" flycheck-next-error "flycheck-next-error" :color red)
+    ("p" flycheck-previous-error "flycheck-previous-error" :color red)
+    ("P" python-mode "python-mode")
+    ("v" nh/venv-activate "nh/venv-activate")
+    ("x" eglot-shutdown "eglot-shutdown")
+    ("V" nh/venv-setup "nh/venv-setup")
+    ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer"))
+
+  (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
+    "hydra-yasnippet"
+    ("RET" redraw-display "<quit>")
+    ("i" yas-insert-snippet "yas-insert-snippet"))
+
+  (defhydra hydra-expand-region (:color red :columns 1)
+    "hydra-expand-region"
+    ("." er/expand-region "er/expand-region")
+    ("," er/contract-region "er/contract-region"))
+
+  (defhydra hydra-paredit
+    (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
+    "hydra-paredit"
+    ("RET" nil "<quit>")
+    ("<right>" right-char "right-char")
+    ("<left>" left-char "left-char")
+    ("<down>" next-line "next-line")
+    ("<up>" previous-line "previous-line")
+    ("." paredit-forward-slurp-sexp "paredit-forward-slurp-sexp")
+    ("," paredit-backward-slurp-sexp "paredit-backward-slurp-sexp")
+    (">" paredit-forward-barf-sexp "paredit-forward-barf-sexp")
+    ("<" paredit-backward-barf-sexp "paredit-backward-barf-sexp")
+    ("C-/" undo "undo")
+    ("q" nil "<quit>"))
+
+  ) ;; end hydra config
