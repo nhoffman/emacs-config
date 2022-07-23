@@ -1,11 +1,17 @@
 if [[ $(uname) == 'Darwin' ]]; then
-    EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
-    EMACSCLIENT=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
+    if [[ $(uname -m) == 'arm64' ]]; then
+        # assume we are using emacs-plus
+        EMACS=/opt/homebrew/bin/emacs
+        EMACS_BIN=/opt/homebrew/bin/emacsclient
+    else
+        EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+        EMACS_BIN=/Applications/Emacs.app/Contents/MacOS/bin
+    fi
     alias emacs="$EMACS"
-    alias emacsclient="$EMACSCLIENT"
+    # provides emacsclient
+    export PATH=$EMACS_BIN:$PATH
 else
-    EMACS=emacs
-    EMACSCLIENT=emacsclient
+    EMACS=$(readlink -f emacs)
 fi
 
 edaemon(){
@@ -14,20 +20,20 @@ edaemon(){
 }
 
 ec(){
-    "$EMACSCLIENT" -c "$@" &
+    emacsclient -c "$@" &
 }
 
 enw(){
-    "$EMACSCLIENT" -nw "$@"
+    emacsclient -nw "$@"
 }
 
 e(){
     # open file in an existing server process
     re='^[0-9]+$'
     if [[ $2 =~ $re ]]; then
-	"$EMACSCLIENT" -n +$2:0 $1
+	emacsclient -n +$2:0 $1
     else
-	"$EMACSCLIENT" -n "$@"
+	emacsclient -n "$@"
     fi
 }
 
