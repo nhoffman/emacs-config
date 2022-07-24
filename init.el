@@ -140,7 +140,7 @@
 (set-cursor-color "red")
 
 (menu-bar-mode -1)   ;; hide menu bar
-;; (scroll-bar-mode -1) ;; hide scroll bar - incompatible with homebrew emacs 28
+(scroll-bar-mode -1) ;; hide scroll bar
 (tool-bar-mode -1)   ;; hide tool bar
 
 (setq column-number-mode t)
