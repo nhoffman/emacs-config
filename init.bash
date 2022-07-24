@@ -5,9 +5,9 @@ if [[ $(uname) == 'Darwin' ]]; then
         EMACS_BIN=/opt/homebrew/bin/emacsclient
     else
         EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+        alias emacs="$EMACS"
         EMACS_BIN=/Applications/Emacs.app/Contents/MacOS/bin
     fi
-    alias emacs="$EMACS"
     # provides emacsclient
     export PATH=$EMACS_BIN:$PATH
 else
