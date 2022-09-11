@@ -1121,6 +1121,7 @@ convert to .docx with pandoc"
     ("n" flycheck-next-error "flycheck-next-error" :color red)
     ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
+    ("r" eglot-rename "eglot-rename")
     ("v" nh/venv-activate "nh/venv-activate")
     ("x" eglot-shutdown "eglot-shutdown")
     ("V" nh/venv-setup "nh/venv-setup")
