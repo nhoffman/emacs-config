@@ -497,7 +497,9 @@ Assumes that the frame is only split into two."
 ;; * elgot
 (use-package eglot
   :ensure t
-  :defer t)
+  :defer t
+  :config
+  (setq eldoc-echo-area-use-multiline-p nil))
 
 ;;* elisp
 (use-package paredit
