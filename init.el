@@ -514,7 +514,7 @@ Assumes that the frame is only split into two."
   (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
 (defcustom nh/venv-setup-packages
-  '("pip" "wheel" "'python-lsp-server[all]'")
+  '("pip" "wheel" "'python-lsp-server[all]'" "autoflake")
   "packages to install using `nh/venv-setup'")
 
 (defun nh/py3-venv-bin (name)
