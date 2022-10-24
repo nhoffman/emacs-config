@@ -448,6 +448,7 @@ Assumes that the frame is only split into two."
   (setq projectile-completion-system 'ivy)
   :config
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (add-to-list 'projectile-globally-ignored-modes "fundamental-mode")
   (projectile-mode +1))
 
 (use-package avy
