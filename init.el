@@ -238,7 +238,7 @@
 
 ;; Let a period followed by a single space be treated as end of sentence
 (setq sentence-end-double-space nil)
-(setq-default fill-column 80)
+;; (setq-default fill-column 80)
 
 (setq suggest-key-bindings 4)
 
