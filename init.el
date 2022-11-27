@@ -562,7 +562,7 @@ Assumes that the frame is only split into two."
   "Return a list of paths to virtualenvs in 'basedir' or nil if
  none can be found"
   (interactive)
-  (let ((fstr "find %s -path '*bin/activate' -maxdepth 3")
+  (let ((fstr "find %s -path '*bin/activate' -maxdepth 5")
         (pth (replace-regexp-in-string "/$" "" basedir)))
     (mapcar (lambda (string)
               (replace-regexp-in-string "/bin/activate$" "" string))
@@ -589,7 +589,10 @@ dependencies if necessary."
 if there is more than one option."
   (interactive)
   (let* ((thisdir (or (projectile-project-root) default-directory))
-	 (venvs (append (nh/venv-list thisdir) `(,nh/py3-venv)))
+	 (venvs (append
+                 (nh/venv-list thisdir)
+                 (nh/venv-list (expand-file-name "~/.pyenv/versions"))
+                 `(,nh/py3-venv)))
 	 (venv (ivy-read "choose a virtualenv: " venvs)))
     (pyvenv-activate venv)
     (message "Activated virtualenv %s (%s)"
@@ -606,9 +609,11 @@ virtualenv is active."
     (if (nh/pylsp-installed-p)
         (message "dependencies already installed")
       (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
-          (progn (setq bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
+          (progn (setq bufname (generate-new-buffer
+                                (format "*%s*" pyvenv-virtual-env)))
                  (unless (= 0 (call-process-shell-command
-	                       (format "%sbin/pip install -U %s" pyvenv-virtual-env packages)
+	                       (format "%sbin/pip install -U %s"
+                                       pyvenv-virtual-env packages)
 	                       nil bufname t))
                    (switch-to-buffer bufname))
                  (message "installation complete, see output in %s" bufname))))))
