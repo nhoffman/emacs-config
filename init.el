@@ -611,12 +611,24 @@ virtualenv is active."
       (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
           (progn (setq bufname (generate-new-buffer
                                 (format "*%s*" pyvenv-virtual-env)))
-                 (unless (= 0 (call-process-shell-command
+                 (if (= 0 (call-process-shell-command
 	                       (format "%sbin/pip install -U %s"
                                        pyvenv-virtual-env packages)
 	                       nil bufname t))
-                   (switch-to-buffer bufname))
-                 (message "installation complete, see output in %s" bufname))))))
+                     (message "installation complete, see output in %s" bufname)
+                   (switch-to-buffer bufname)))))))
+
+(defun nh/pip-install (package)
+  "Pip install a python package in a virtualenv. Prompts for a
+selection if no virtualenv is active."
+  (interactive "sPackage name: ")
+  (unless pyvenv-virtual-env (nh/venv-activate))
+  (let ((bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
+        (command (format "%sbin/pip install -U %s"
+                         pyvenv-virtual-env package)))
+    (if (= 0 (call-process-shell-command command nil bufname t))
+        (message "installation complete, see output in %s" bufname)
+      (switch-to-buffer bufname))))
 
 (use-package flycheck
   :ensure t
@@ -1125,6 +1137,7 @@ convert to .docx with pandoc"
     ("e" flycheck-list-errors "flycheck-list-errors")
     ("E" nh/venv-activate-eglot "activate eglot")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
+    ("i" nh/pip-install "pip install package")
     ("j" (swiper "class\\|def\\b") "jump to function or class")
     ("n" flycheck-next-error "flycheck-next-error" :color red)
     ("p" flycheck-previous-error "flycheck-previous-error" :color red)
