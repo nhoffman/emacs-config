@@ -462,6 +462,11 @@ Assumes that the frame is only split into two."
   :config
   (counsel-projectile-mode))
 
+(use-package rg
+  :ensure t
+  :config
+  (rg-enable-menu))
+
 (when (boundp 'grep-find-ignored-directories)
   (add-to-list 'grep-find-ignored-directories ".eggs")
   (add-to-list 'grep-find-ignored-directories "src"))
@@ -1047,6 +1052,7 @@ convert to .docx with pandoc"
     ("O" nh/copy-region-or-line-other-window "copy-region-or-line-other-window")
     ("p" hydra-python/body "python menu")
     ("P" package-list-packages "package-list-packages")
+    ("r" rg-menu "rg-menu")
     ("s" nh/ssh-refresh "ssh-refresh")
     ("t" nh/org-show-todos-move-down "org-todo-list")
     ("T" nh/transpose-buffers "transpose-buffers")
