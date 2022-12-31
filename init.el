@@ -414,38 +414,199 @@ Assumes that the frame is only split into two."
   (setq undohist-ignored-files '("COMMIT_EDITMSG"))
   (undohist-initialize))
 
+;;* search and navigation (vertico, consult)
+
+(use-package vertico
+  :ensure t
+  :init
+  (vertico-mode)
+  ;; Different scroll margin
+  ;; (setq vertico-scroll-margin 0)
+
+  ;; Show more candidates
+  (setq vertico-count 20)
+
+  ;; Grow and shrink the Vertico minibuffer
+  (setq vertico-resize t)
+
+  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+  ;; (setq vertico-cycle t)
+  )
+
+(use-package orderless
+  :ensure t
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
+  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion))))
+  )
+
+(use-package consult
+  :ensure t
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind (
+         ;; replacements for default bindings
+         ("C-s" . consult-line)
+         ("C-x b" . consult-buffer)
+         ("M-g M-g" . consult-goto-line)
+         ("M-g g" . consult-goto-line)
+         ("M-y" . consult-yank-pop)
+
+         ;; C-c bindings (mode-specific-map)
+  ;;        ("C-c h" . consult-history)
+  ;;        ("C-c m" . consult-mode-command)
+  ;;        ("C-c k" . consult-kmacro)
+  ;;        ;; C-x bindings (ctl-x-map)
+  ;;        ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+  ;;        ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+  ;;        ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+  ;;        ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+  ;;        ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+  ;;        ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+  ;;        ;; Custom M-# bindings for fast register access
+  ;;        ("M-#" . consult-register-load)
+  ;;        ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+  ;;        ("C-M-#" . consult-register)
+  ;;        ;; Other custom bindings
+  ;;        ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+  ;;        ;; M-g bindings (goto-map)
+  ;;        ("M-g e" . consult-compile-error)
+  ;;        ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+  ;;        ("M-g g" . consult-goto-line)             ;; orig. goto-line
+  ;;        ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+  ;;        ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+  ;;        ("M-g m" . consult-mark)
+  ;;        ("M-g k" . consult-global-mark)
+  ;;        ("M-g i" . consult-imenu)
+  ;;        ("M-g I" . consult-imenu-multi)
+  ;;        ;; M-s bindings (search-map)
+  ;;        ("M-s d" . consult-find)
+  ;;        ("M-s D" . consult-locate)
+  ;;        ("M-s g" . consult-grep)
+  ;;        ("M-s G" . consult-git-grep)
+  ;;        ("M-s r" . consult-ripgrep)
+  ;;        ("M-s l" . consult-line)
+  ;;        ("C-s" . consult-line)
+  ;;        ("M-s L" . consult-line-multi)
+  ;;        ("M-s m" . consult-multi-occur)
+  ;;        ("M-s k" . consult-keep-lines)
+  ;;        ("M-s u" . consult-focus-lines)
+  ;;        ;; Isearch integration
+  ;;        ("M-s e" . consult-isearch-history)
+  ;;        :map isearch-mode-map
+  ;;        ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+  ;;        ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+  ;;        ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+  ;;        ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+  ;;        ;; Minibuffer history
+  ;;        :map minibuffer-local-map
+  ;;        ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+  ;;        ("M-r" . consult-history)                ;; orig. previous-matching-history-element
+  )
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key (kbd "M-."))
+  ;; (setq consult-preview-key (list (kbd "<S-down>") (kbd "<S-up>")))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key (kbd "M-.")
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; (kbd "C-+")
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; By default `consult-project-function' uses `project-root' from project.el.
+  ;; Optionally configure a different project root function.
+  ;; There are multiple reasonable alternatives to chose from.
+  ;;;; 1. project.el (the default)
+  ;; (setq consult-project-function #'consult--default-project--function)
+  ;;;; 2. projectile.el (projectile-project-root)
+  ;; (autoload 'projectile-project-root "projectile")
+  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+  ;;;; 3. vc.el (vc-root-dir)
+  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+  ;;;; 4. locate-dominating-file
+  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+)
+
+(use-package marginalia
+  :ensure t
+  ;; Either bind `marginalia-cycle' globally or only in the minibuffer
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :init (marginalia-mode))
+
 ;;* search and navigation (ivy, counsel, and friends)
-(use-package ivy
-  :ensure t
-  :pin melpa
-  :config
-  (ivy-mode 1)
-  (setq enable-recursive-minibuffers t)
-  (setq ivy-count-format "%d/%d ")
-  (setq ivy-height 30)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume))
+;; (use-package ivy
+;;   :ensure t
+;;   :pin melpa
+;;   :config
+;;   (ivy-mode 1)
+;;   (setq enable-recursive-minibuffers t)
+;;   (setq ivy-count-format "%d/%d ")
+;;   (setq ivy-height 30)
+;;   (global-set-key (kbd "C-c C-r") 'ivy-resume))
 
-(use-package counsel
-  :ensure t
-  :pin melpa
-  :bind (("M-x" . counsel-M-x)
-         ("C-x C-f" . counsel-find-file)
-         ("C-c g" . counsel-git)
-         ("C-c j" . counsel-git-grep)
-         ("C-c a" . counsel-ag)
-         ("M-y" . counsel-yank-pop))
-  :config
-  (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
+;; (use-package counsel
+;;   :ensure t
+;;   :pin melpa
+;;   :bind (("M-x" . counsel-M-x)
+;;          ("C-x C-f" . counsel-find-file)
+;;          ("C-c g" . counsel-git)
+;;          ("C-c j" . counsel-git-grep)
+;;          ("C-c a" . counsel-ag)
+;;          ("M-y" . counsel-yank-pop))
+;;   :config
+;;   (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
-(use-package swiper
-  :ensure t
-  :config
-  (global-set-key (kbd "C-s") 'swiper))
+;; (use-package swiper
+;;   :ensure t
+;;   :config
+;;   (global-set-key (kbd "C-s") 'swiper))
 
 (use-package projectile
   :ensure t
   :init
-  (setq projectile-completion-system 'ivy)
+  ;; (setq projectile-completion-system 'ivy)
   :config
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (add-to-list 'projectile-globally-ignored-modes "fundamental-mode")
@@ -457,10 +618,10 @@ Assumes that the frame is only split into two."
 	 ("C-M-SPC" . avy-goto-char-timer)))
 
 ;; see https://github.com/ericdanan/counsel-projectile
-(use-package counsel-projectile
-  :ensure t
-  :config
-  (counsel-projectile-mode))
+;; (use-package counsel-projectile
+;;   :ensure t
+;;   :config
+;;   (counsel-projectile-mode))
 
 (use-package rg
   :ensure t
@@ -488,17 +649,17 @@ Assumes that the frame is only split into two."
 ;; (advice-add 'counsel-projectile-grep :before #'nh/grep-ignore-venv-current-project)
 
 ;;* auto-complete using company-mode
-(use-package company
-  :ensure t
-  :defer t
-  :config
-  (setq company-minimum-prefix-length 1
-	company-idle-delay 0
-	company-tooltip-limit 10
-	company-transformers nil
-	company-show-numbers t)
-  (global-company-mode)
-  :hook (python-mode . company-mode))
+;; (use-package company
+;;   :ensure t
+;;   :defer t
+;;   :config
+;;   (setq company-minimum-prefix-length 1
+;; 	company-idle-delay 0
+;; 	company-tooltip-limit 10
+;; 	company-transformers nil
+;; 	company-show-numbers t)
+;;   (global-company-mode)
+;;   :hook (python-mode . company-mode))
 
 ;; * elgot
 (use-package eglot
@@ -598,7 +759,8 @@ if there is more than one option."
                  (nh/venv-list thisdir)
                  (nh/venv-list (expand-file-name "~/.pyenv/versions"))
                  `(,nh/py3-venv)))
-	 (venv (ivy-read "choose a virtualenv: " venvs)))
+         ;; maybe use completing-read
+	 (venv (completing-read "choose a virtualenv: " venvs)))
     (pyvenv-activate venv)
     (message "Activated virtualenv %s (%s)"
 	     venv (string-trim (shell-command-to-string "python3 --version")))))
@@ -811,10 +973,14 @@ the path."
   :hook
   (org-mode . nh/org-mode-hooks))
 
-(defvar nh/org-index (concat (file-name-as-directory nh/icloud) "notes/index.org"))
+(defvar nh/org-index
+  (concat (file-name-as-directory nh/icloud) "notes/index.org")
+  "Path to primary org-mode notes file")
+
 ;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
 ;; requires pngpaste (install with homebrew)
-(defvar nh/org-download-image-dir "images")
+(defvar nh/org-download-image-dir "images"
+  "Directory name for storing images downloaded by `org-download'")
 
 (defun nh/org-show-todos-move-down ()
   "Show TODOs in main notes file"
@@ -1017,8 +1183,7 @@ convert to .docx with pandoc"
   :ensure t
   :mode ("Dockerfile" . dockerfile-mode))
 
-;; see https://github.com/defunkt/gist.el
-(use-package gist
+(use-package yagist
   :ensure t)
 
 (use-package expand-region
@@ -1043,6 +1208,7 @@ convert to .docx with pandoc"
     ("f" nh/fix-frame "fix-frame")
     ("g" hydra-toggle-mode/body "toggle mode")
     ("i" hydra-init-file/body "hydra for init file")
+    ("j" consult-imenu "consult-imenu")
     ("l" hydra-org-links/body "hydra-org-links")
     ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
     ("n" nh/org-find-index "nh/org-find-index")
@@ -1117,6 +1283,7 @@ convert to .docx with pandoc"
     ("<left>" org-previous-block "org-previous-block")
     ("<down>" outline-next-visible-heading "outline-next-visible-heading")
     ("<up>" outline-previous-visible-heading "outline-previous-visible-heading")
+    ("o" consult-outline "consult-outline" :color blue)
     ("t" nh/org-show-todos-move-down "show todos" :color blue)
     ("S-<down>" org-forward-paragraph "org-forward-paragraph")
     ("S-<up>" org-backward-paragraph "org-backward-paragraph")
@@ -1144,7 +1311,8 @@ convert to .docx with pandoc"
     ("E" nh/venv-activate-eglot "activate eglot")
     ("f" flycheck-verify-setup "flycheck-verify-setup")
     ("i" nh/pip-install "pip install package")
-    ("j" (swiper "class\\|def\\b") "jump to function or class")
+    ;; ("j" (swiper "class\\|def\\b") "jump to function or class")
+    ("j" consult-imenu "consult-imenu")
     ("n" flycheck-next-error "flycheck-next-error" :color red)
     ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
