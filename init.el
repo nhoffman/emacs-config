@@ -449,7 +449,7 @@ Assumes that the frame is only split into two."
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (
          ;; replacements for default bindings
-         ("C-s" . consult-line)
+         ;; ("C-s" . consult-line) ;; swiper is better
          ("C-x b" . consult-buffer)
          ("M-g M-g" . consult-goto-line)
          ("M-g g" . consult-goto-line)
@@ -598,10 +598,10 @@ Assumes that the frame is only split into two."
 ;;   :config
 ;;   (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
-;; (use-package swiper
-;;   :ensure t
-;;   :config
-;;   (global-set-key (kbd "C-s") 'swiper))
+(use-package swiper
+  :ensure t
+  :config
+  (global-set-key (kbd "C-s") 'swiper))
 
 (use-package projectile
   :ensure t
