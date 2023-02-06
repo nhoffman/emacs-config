@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: postgres-local
+# key: org
+# --
+
+#+begin_src sql :engine postgresql :database $1
+
+#+end_src
