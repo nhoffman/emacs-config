@@ -28,3 +28,4 @@ var/
 *~
 el-get/
 undohist/
+__pycache__

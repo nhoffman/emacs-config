@@ -1192,6 +1192,25 @@ convert to .docx with pandoc"
 	 ("C--" . er/contract-region)
 	 ("C-M-." . hydra-expand-region/body)))
 
+;;* OpenAI tools
+;; python helper scripts must be installed to nh/py3-venv
+;; inspired by https://cundy.me/post/using_codex_in_emacs/
+
+(defun nh/openai-edit (begin end)
+  "Interactively asks for INSTRUCTIONS and submits code or text in
+region to the OpenAI edit API, see
+https://platform.openai.com/docs/api-reference/edits/create"
+  (interactive "r")
+  (if (use-region-p)
+      (let ((cmd (nh/path-join nh/py3-venv "bin/openai-edit"))
+            (instructions (read-string "Instructions: "))
+            (engine (completing-read "completion mode: " '("text" "code"))))
+        (shell-command-on-region
+         begin end
+         (format "%s --engine %s --instructions '%s'" cmd engine instructions)
+         nil t "* OpenAI Edit API Error *"))
+    (message "No region is active.")))
+
 ;;* hydra
 (use-package hydra
   :ensure t
