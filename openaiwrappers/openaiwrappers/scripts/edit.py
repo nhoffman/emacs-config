@@ -24,17 +24,23 @@ def main():
 
     openai.api_key = get_api_key()
 
-    engine = {
-        'code': 'code-davinci-edit-001',
-        'text': 'text-davinci-edit-001',
+    params = {
+        'code': {
+            'engine': 'code-davinci-edit-001',
+            'temperature': 0,
+            'top_p': 1,
+        },
+        'text': {
+            'engine': 'text-davinci-edit-001',
+            'temperature': 0.2,
+            'top_p': 1,
+        }
     }[args.engine]
 
     response = openai.Edit.create(
-        engine=engine,
         input=sys.stdin.read(),
         instruction=args.instructions,
-        temperature=0,
-        top_p=1
+        **params
     )
 
     response_text = response.choices[0].text

@@ -1205,11 +1205,24 @@ https://platform.openai.com/docs/api-reference/edits/create"
       (let ((cmd (nh/path-join nh/py3-venv "bin/openai-edit"))
             (instructions (read-string "Instructions: "))
             (engine (completing-read "completion mode: " '("text" "code"))))
+        ;; (message instructions)
         (shell-command-on-region
          begin end
          (format "%s --engine %s --instructions '%s'" cmd engine instructions)
          nil t "* OpenAI Edit API Error *"))
     (message "No region is active.")))
+
+(defun nh/openai-complete (instructions)
+  "Interactively asks for INSTRUCTIONS and inserts a response from the
+OpenAI completions API at point, see
+https://platform.openai.com/docs/api-reference/completions/create"
+  (interactive "sInstructions: ")
+  (let ((cmd (nh/path-join nh/py3-venv "bin/openai-complete"))
+        (engine (completing-read "completion mode: " '("text" "code"))))
+    (insert
+     (shell-command-to-string
+      (format "%s --engine %s --instructions '%s'" cmd engine instructions))
+     )))
 
 ;;* hydra
 (use-package hydra
