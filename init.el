@@ -955,6 +955,7 @@ the path."
   (setq org-edit-src-content-indentation 0)
   (setq org-adapt-indentation nil)  ;; headlines are flush left
   (setq org-babel-python-command "python3")
+  (setq org-not-done-regexp "TODO|WAITING")
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -986,7 +987,7 @@ the path."
   "Show TODOs in main notes file"
   (interactive)
   (find-file nh/org-index)
-  (org-show-todo-tree "TODO")
+  (org-show-todo-tree nil)
   (end-of-buffer))
 
 (defun nh/org-download-add-caption (link)
