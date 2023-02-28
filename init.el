@@ -1122,6 +1122,21 @@ convert to .docx with pandoc"
             (if nh/enable-flyspell-p (flyspell-mode))
             (define-key rst-mode-map (kbd "C-c C-a") 'rst-adjust)))
 
+;;* mermaid-mode
+
+;; https://github.com/abrochard/mermaid-mode
+;; available tags for dockerized mermaid cli:
+;; https://github.com/mermaid-js/mermaid-cli/pkgs/container/mermaid-cli%2Fmermaid-cli/versions?filters%5Bversion_type%5D=tagged
+
+(use-package mermaid-mode
+  :ensure t
+  :config
+  (setq mermaid-mmdc-location "docker")
+  (setq mermaid-flags
+        (concat (format "run -u %s " (user-real-uid))
+                "-v /tmp:/tmp "
+                "ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:9.4.0")))
+
 ;;* tramp
 
 (condition-case nil
