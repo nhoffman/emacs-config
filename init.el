@@ -1240,6 +1240,18 @@ https://platform.openai.com/docs/api-reference/completions/create"
       (format "%s --engine %s --instructions '%s'" cmd engine instructions))
      )))
 
+(defun nh/get-netrc-val (machine key)
+  "Return the value corresponding to key from ~/.netrc for a
+specified machine.
+
+eg (nh/get-netrc-val \"openai\" \"password\")"
+  (cdr (assoc key (netrc-machine (netrc-parse "~/.netrc") machine))))
+
+(use-package gptel
+  :ensure t
+  :pin melpa
+  :config (setq gptel-api-key (nh/get-netrc-val "openai" "password")))
+
 ;;* hydra
 (use-package hydra
   :ensure t
