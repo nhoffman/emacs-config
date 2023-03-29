@@ -1245,15 +1245,17 @@ convert to .docx with pandoc"
 specified machine.
 
 eg (nh/get-netrc-val \"openai\" \"password\")"
-  (cdr (assoc key (netrc-machine (netrc-parse "~/.netrc") machine))))
+  (let ((credentials (netrc-parse "~/.netrc")))
+    (cdr (assoc key (netrc-machine credentials machine)))))
 
 (use-package gptel
   :ensure t
   :pin melpa
   :config
-  (setq gptel-api-key (nh/get-netrc-val "openai" "password"))
   (setq gptel-default-mode 'org-mode)
-  (setq gptel-prompt-string ": "))
+  :custom
+  (gptel-api-key (nh/get-netrc-val "openai" "password"))
+  (gptel-model "gpt-4"))
 
 ;;* hydra
 (use-package hydra
