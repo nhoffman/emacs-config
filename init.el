@@ -1259,6 +1259,7 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
   (gptel-model "gpt-4"))
 
 ;;* ielm
+;; ielm is an elisp REPL. Open a new repl with "M-x ielm"
 
 ;; adapted from https://www.n16f.net/blog/making-ielm-more-comfortable/
 (use-package ielm
