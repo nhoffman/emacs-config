@@ -1240,6 +1240,7 @@ convert to .docx with pandoc"
 ;;       (format "%s --engine %s --instructions '%s'" cmd engine instructions))
 ;;      )))
 
+(require 'netrc)
 (defun nh/get-netrc-val (machine key)
   "Return the value corresponding to 'key' from ~/.netrc for a
 specified machine.
@@ -1256,6 +1257,29 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
   :custom
   (gptel-api-key (nh/get-netrc-val "openai" "password"))
   (gptel-model "gpt-4"))
+
+;;* ielm
+
+;; adapted from https://www.n16f.net/blog/making-ielm-more-comfortable/
+(use-package ielm
+  :preface
+  (defun nh/ielm-init-history ()
+    (let ((path (expand-file-name "ielm/history" user-emacs-directory)))
+      (make-directory (file-name-directory path) t)
+      (setq-local comint-input-ring-file-name path))
+    (setq-local comint-input-ring-size 10000)
+    (setq-local comint-input-ignoredups t)
+    (comint-read-input-ring))
+
+  (defun nh/ielm-write-history (&rest _args)
+    (with-file-modes #o600
+      (comint-write-input-ring)))
+  :config
+  (advice-add 'ielm-send-input :after 'nh/ielm-write-history)
+  :hook
+  (ielm-mode . eldoc-mode)
+  (ielm-mode . nh/ielm-init-history)
+  :bind (("C-r" . consult-history)))
 
 ;;* hydra
 (use-package hydra
