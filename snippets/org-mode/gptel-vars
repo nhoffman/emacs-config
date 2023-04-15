@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: gptel-vars
+# key: gptel-vars
+# --
+- model: `(format "%s" gptel-model)`
+- temperature: `(format "%s" gptel-temperature)`

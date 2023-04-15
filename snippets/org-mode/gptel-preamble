@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: gptel-preamble
+# key: gptel-preamble
+# --
+#+TITLE: `(format-time-string "%Y-%m-%d")` `(format "%s" title)`
+#+OPTIONS: ^:nil
+
+*** $0

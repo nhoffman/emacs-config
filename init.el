@@ -1209,36 +1209,6 @@ convert to .docx with pandoc"
 	 ("C-M-." . hydra-expand-region/body)))
 
 ;;* OpenAI tools
-;; python helper scripts must be installed to nh/py3-venv
-;; inspired by https://cundy.me/post/using_codex_in_emacs/
-
-;; (defun nh/openai-edit (begin end)
-;;   "Interactively asks for INSTRUCTIONS and submits code or text in
-;; region to the OpenAI edit API, see
-;; https://platform.openai.com/docs/api-reference/edits/create"
-;;   (interactive "r")
-;;   (if (use-region-p)
-;;       (let ((cmd (nh/path-join nh/py3-venv "bin/openai-edit"))
-;;             (instructions (read-string "Instructions: "))
-;;             (engine (completing-read "completion mode: " '("text" "code"))))
-;;         ;; (message instructions)
-;;         (shell-command-on-region
-;;          begin end
-;;          (format "%s --engine %s --instructions '%s'" cmd engine instructions)
-;;          nil t "* OpenAI Edit API Error *"))
-;;     (message "No region is active.")))
-
-;; (defun nh/openai-complete (instructions)
-;;   "Interactively asks for INSTRUCTIONS and inserts a response from the
-;; OpenAI completions API at point, see
-;; https://platform.openai.com/docs/api-reference/completions/create"
-;;   (interactive "sInstructions: ")
-;;   (let ((cmd (nh/path-join nh/py3-venv "bin/openai-complete"))
-;;         (engine (completing-read "completion mode: " '("text" "code"))))
-;;     (insert
-;;      (shell-command-to-string
-;;       (format "%s --engine %s --instructions '%s'" cmd engine instructions))
-;;      )))
 
 (require 'netrc)
 (defun nh/get-netrc-val (machine key)
@@ -1249,6 +1219,12 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
   (let ((credentials (netrc-parse "~/.netrc")))
     (cdr (assoc key (netrc-machine credentials machine)))))
 
+(defvar nh/onedrive
+  (expand-file-name "~/Library/CloudStorage/OneDrive-UW"))
+
+(defvar nh/gptel-chats
+  (nh/path-join nh/onedrive "gptel-chats"))
+
 (use-package gptel
   :ensure t
   :pin melpa
@@ -1257,6 +1233,24 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
   :custom
   (gptel-api-key (nh/get-netrc-val "openai" "password"))
   (gptel-model "gpt-4"))
+
+(defun nh/gptel-new-chat (title)
+  (interactive "sTitle: ")
+  (let* ((date (format-time-string "%Y-%m-%d"))
+         (fname (format "%s-%s.org" date (nh/safename title)))
+         (path (nh/path-join nh/gptel-chats fname)))
+    (make-directory nh/gptel-chats t)
+    (find-file path)
+    (gptel-mode)
+    (yas-expand-snippet (yas-lookup-snippet "gptel-preamble"))))
+
+(defun nh/gptel-open-chat ()
+  (interactive)
+  (let ((chat (completing-read
+               "select a chat: "
+               (directory-files nh/gptel-chats nil ".org$"))))
+    (find-file (nh/path-join nh/gptel-chats chat))
+    (gptel-mode)))
 
 ;;* ielm
 ;; ielm is an elisp REPL. Open a new repl with "M-x ielm"
@@ -1297,6 +1291,7 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
     ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("f" nh/fix-frame "fix-frame")
     ("g" hydra-toggle-mode/body "toggle mode")
+    ("G" hydra-gptel/body "gptel")
     ("i" hydra-init-file/body "hydra for init file")
     ("j" consult-imenu "consult-imenu")
     ("l" hydra-org-links/body "hydra-org-links")
@@ -1436,5 +1431,13 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
     ("<" paredit-backward-barf-sexp "paredit-backward-barf-sexp")
     ("C-/" undo "undo")
     ("q" nil "<quit>"))
+
+  (defhydra hydra-gptel (:color blue :columns 4 :post (redraw-display))
+    "hydra-gptel"
+    ("RET" redraw-display "<quit>")
+    ("d" (dired nh/gptel-chat-dir) "open chat dir")
+    ("g" gptel "new gptel buffer")
+    ("n" nh/gptel-new-chat "nh/gptel-new-chat")
+    ("o" nh/gptel-open-chat "nh/gptel-open-chat"))
 
   ) ;; end hydra config
