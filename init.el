@@ -211,6 +211,13 @@
 (nh/prepend-path (nh/emacs-dir-path "bin"))
 (add-to-list 'exec-path (nh/emacs-dir-path "bin"))
 
+;;* other utility function
+
+(defun nh/advice-unadvice (sym)
+  "Remove all advices from symbol SYM."
+  (interactive "aFunction symbol: ")
+  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+
 ;; fix errors with connection to package repositories
 ;; see https://github.com/melpa/melpa/issues/7238
 ;; suppress on Ubuntu 18.04 to prevent errors
@@ -956,6 +963,7 @@ the path."
   (setq org-adapt-indentation nil)  ;; headlines are flush left
   (setq org-babel-python-command "python3")
   (setq org-not-done-regexp "TODO|WAITING")
+  (setq org-image-actual-width nil)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -966,7 +974,8 @@ the path."
      (emacs-lisp . t)
      (dot . t)
      (verb . t)
-     (shell . t)))
+     (shell . t)
+     (mermaid . t)))
   ;; org-open-at-point uses system app for png
   (add-to-list 'org-file-apps '("\\.png\\'" . system))
   (ad-activate 'org-todo-list-bottom)
@@ -1104,10 +1113,26 @@ convert to .docx with pandoc"
   :config
   (require 'org-download))
 
+(use-package ob-mermaid
+  :preface
+  ;; ensure that images are displayed
+  (nh/advice-unadvice 'org-babel-execute-src-block)
+  (advice-add 'org-babel-execute-src-block :after
+              (lambda (original-fun &optional rest)
+                (org-display-inline-images nil t (point) (point-max))))
+  :ensure t
+  :after org)
+
 ;;* sh-mode
 
 (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
 (add-to-list 'auto-mode-alist '("\\.bash\\'" . sh-mode))
+
+(use-package flymake-shellcheck
+  :ensure t
+  :commands flymake-shellcheck-load
+  :init
+  (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
 
 ;;* text-mode
 
@@ -1136,7 +1161,7 @@ convert to .docx with pandoc"
   (setq mermaid-flags
         (concat (format "run -u %s " (user-real-uid))
                 "-v /tmp:/tmp "
-                "ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:9.4.0")))
+                "ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest")))
 
 ;;* tramp
 
