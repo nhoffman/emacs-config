@@ -390,7 +390,7 @@ Or nil when nothing is found."
 
 (defun nh/delete-surround-at-point ()
   (interactive)
-  (let ((range (my-delete-surround-at-point--find-brackets (point))))
+  (let ((range (nh/delete-surround-at-point--find-brackets (point))))
     (unless range
       (user-error "No surrounding brackets"))
     (pcase-let ((`(,beg ,end) range))
