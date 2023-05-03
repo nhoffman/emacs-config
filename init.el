@@ -4,8 +4,12 @@
 
 ;;* file and path utilities
 (defvar nh/icloud
-  "/Users/nhoffman/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync"
+  (expand-file-name "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/sync")
   "Base directory for files stored in icloud")
+
+(defvar nh/onedrive
+  (expand-file-name "~/Library/CloudStorage/OneDrive-UW/emacs-sync")
+  "Base directory for files stored in OneDrive")
 
 (defun nh/path-join (&rest x)
   "Join elements of x with a path separator and apply `expand-file-name'"
@@ -1039,7 +1043,7 @@ the path."
   (org-mode . nh/org-mode-hooks))
 
 (defvar nh/org-index
-  (concat (file-name-as-directory nh/icloud) "notes/index.org")
+  (concat (file-name-as-directory nh/onedrive) "notes/index.org")
   "Path to primary org-mode notes file")
 
 ;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
@@ -1298,9 +1302,6 @@ specified machine.
 eg (nh/get-netrc-val \"openai\" \"password\")"
   (let ((credentials (netrc-parse "~/.netrc")))
     (cdr (assoc key (netrc-machine credentials machine)))))
-
-(defvar nh/onedrive
-  (expand-file-name "~/Library/CloudStorage/OneDrive-UW"))
 
 (defvar nh/gptel-chats
   (nh/path-join nh/onedrive "gptel-chats"))
