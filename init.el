@@ -1312,7 +1312,7 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
   :config
   (setq gptel-default-mode 'org-mode)
   :custom
-  (gptel-api-key (nh/get-netrc-val "openai" "password"))
+  (gptel-api-key (nh/get-netrc-val "openai.com" "password"))
   (gptel-model "gpt-4"))
 
 (defun nh/gptel-new-chat (title)
