@@ -1052,18 +1052,18 @@ convert to .docx with pandoc"
          (header (plist-get sec ':title))
          (fname (nh/safename header))
          (basedir
-          (shell-quote-argument
+          (expand-file-name
 	   (read-directory-name
-	    "Output directory: " (expand-file-name "~/Downloads"))))
+	    "Output directory: " "~/Downloads")))
          (orgfile (make-temp-file fname nil ".org"))
-         (docx (concat (file-name-as-directory basedir) fname ".docx")))
+         (docx (shell-quote-argument (concat (nh/path-join basedir fname) ".docx"))))
+
     (write-region
      (plist-get sec ':begin) (plist-get sec ':end) orgfile)
     (call-process-shell-command (format "pandoc %s -o %s" orgfile docx))
     (if (y-or-n-p "open file?")
         (shell-command (format "open %s" docx)))
-    (message "wrote %s" docx)
-    ))
+    (message "wrote %s" docx)))
 
 ;;* org-mode helper packages
 (use-package ox-minutes
