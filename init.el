@@ -1243,13 +1243,30 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
       (gptel-mode)
       (yas-expand-snippet (yas-lookup-snippet "gptel-preamble"))))
 
+  (defun nh/gptel-save-chat (title)
+    "Save an in-progress chat buffer to `nh/gptel-chats'"
+    (interactive "sTitle: ")
+    (let* ((date (format-time-string "%Y-%m-%d"))
+           (fname (format "%s-%s.org" date (nh/safename title)))
+           (path (nh/path-join nh/gptel-chats fname)))
+      (write-region (point-min) (point-max) path)
+      (kill-buffer (current-buffer))
+      (find-file path)
+      (gptel-mode)
+      ))
+
+  ;; TODO: figure out how to force completing-read to respect the sort
+  ;; order
   (defun nh/gptel-open-chat ()
     (interactive)
     (let ((chat (completing-read
                  "select a chat: "
-                 (directory-files nh/gptel-chats nil ".org$"))))
+                 (cl-sort
+                  (directory-files nh/gptel-chats nil ".org$" nil)
+                  'string-greaterp :key 'downcase))))
       (find-file (nh/path-join nh/gptel-chats chat))
       (gptel-mode)))
+
   :config
   (setq gptel-default-mode 'org-mode)
   :custom
@@ -1442,6 +1459,7 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
     ("d" (dired nh/gptel-chat-dir) "open chat dir")
     ("g" gptel "new gptel buffer")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
-    ("o" nh/gptel-open-chat "nh/gptel-open-chat"))
+    ("o" nh/gptel-open-chat "nh/gptel-open-chat")
+    ("s" nh/gptel-save-chat "nh/gptel-save-chat"))
 
   ) ;; end hydra config
