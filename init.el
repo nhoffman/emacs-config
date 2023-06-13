@@ -1359,13 +1359,13 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
     ("v" visual-line-mode "visual-line-mode")
     ("w" web-mode "web-mode")
     ("y" yaml-mode "yaml-mode"))
-
   (defhydra hydra-org-navigation
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
     "hydra-org-navigation"
     ("RET" nil "<quit>")
     ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
     ("c" nh/org-table-copy-cell "nh/org-table-copy-cell" :color blue)
+    ("e" (org-insert-structure-template "example") "add example block" :color blue)
     ("i" org-previous-item "org-previous-item")
     ("k" org-next-item "org-next-item")
     ("<right>" org-next-block "org-next-block")
