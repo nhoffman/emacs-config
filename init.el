@@ -1232,29 +1232,29 @@ eg (nh/get-netrc-val \"openai\" \"password\")"
 (use-package gptel
   :ensure t
   :pin melpa
+  :preface
+  (defun nh/gptel-new-chat (title)
+    (interactive "sTitle: ")
+    (let* ((date (format-time-string "%Y-%m-%d"))
+           (fname (format "%s-%s.org" date (nh/safename title)))
+           (path (nh/path-join nh/gptel-chats fname)))
+      (make-directory nh/gptel-chats t)
+      (find-file path)
+      (gptel-mode)
+      (yas-expand-snippet (yas-lookup-snippet "gptel-preamble"))))
+
+  (defun nh/gptel-open-chat ()
+    (interactive)
+    (let ((chat (completing-read
+                 "select a chat: "
+                 (directory-files nh/gptel-chats nil ".org$"))))
+      (find-file (nh/path-join nh/gptel-chats chat))
+      (gptel-mode)))
   :config
   (setq gptel-default-mode 'org-mode)
   :custom
-  (gptel-api-key (nh/get-netrc-val "openai" "password"))
+  (gptel-api-key (nh/get-netrc-val "openai.com" "password"))
   (gptel-model "gpt-4"))
-
-(defun nh/gptel-new-chat (title)
-  (interactive "sTitle: ")
-  (let* ((date (format-time-string "%Y-%m-%d"))
-         (fname (format "%s-%s.org" date (nh/safename title)))
-         (path (nh/path-join nh/gptel-chats fname)))
-    (make-directory nh/gptel-chats t)
-    (find-file path)
-    (gptel-mode)
-    (yas-expand-snippet (yas-lookup-snippet "gptel-preamble"))))
-
-(defun nh/gptel-open-chat ()
-  (interactive)
-  (let ((chat (completing-read
-               "select a chat: "
-               (directory-files nh/gptel-chats nil ".org$"))))
-    (find-file (nh/path-join nh/gptel-chats chat))
-    (gptel-mode)))
 
 ;;* ielm
 ;; ielm is an elisp REPL. Open a new repl with "M-x ielm"
