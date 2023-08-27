@@ -1248,8 +1248,12 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
   (nh/path-join nh/onedrive "gptel-chats"))
 
 (use-package gptel
-  :ensure t
-  :pin melpa
+  ;; :straight t
+  :straight '(gptel :type git
+                    :host github
+                    :repo "karthink/gptel"
+                    :fork (:host github :repo "doctorguile/gptel"))
+  ;; :pin melpa
   :preface
   (defun nh/gptel-new-chat (title)
     (interactive "sTitle: ")
