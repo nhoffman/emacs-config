@@ -29,3 +29,7 @@ var/
 el-get/
 undohist/
 __pycache__
+eln-cache/
+ielm/
+straight/
+projects
