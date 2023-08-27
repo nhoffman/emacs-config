@@ -47,7 +47,8 @@
 (setq package-check-signature nil) ;; TODO: fix this properly
 (package-initialize)
 
-;; bootstrap use-package
+;; bootstrap use-package use-package is built in as of emacs 29; at
+;; some point this can be removed
 (unless (package-installed-p 'use-package)
   (if (yes-or-no-p "use-package is not installed yet - install it? ")
       (progn
@@ -57,7 +58,24 @@
     (message "** defining fake use-package macro")
     (defmacro use-package (pkg &rest args)
       (warn
-       "use-package is not installed - could not activate %s" (symbol-name pkg)))))
+       "use-package is not installed - could not activate %s"
+       (symbol-name pkg)))))
+
+;; bootstrap straight
+;; from https://github.com/radian-software/straight.el
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
 ;; save customizations here instead of init.el
 (setq custom-file (nh/emacs-dir-path "custom.el"))
