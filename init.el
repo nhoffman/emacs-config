@@ -1289,11 +1289,29 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
       (find-file (nh/path-join nh/gptel-chats chat))
       (gptel-mode)))
 
+  (defun nh/gptel-set-endpoint (name)
+    (interactive)
+    (message "setting endpoint to %s" name)
+    (cond
+     ((string-equal name "openai")
+      (progn
+        (setq gptel-host "api.openai.com")
+        (setq gptel-use-azure-openai nil)))
+     ((string-equal name "azure")
+      (progn
+        (setq gptel-host "openai.dlmp.uw.edu")
+        (setq gptel-use-azure-openai t)
+        (setq gptel-azure-openai-api-version "2023-07-01-preview")
+        ;; TODO: use gpt-model to infer deployment name?
+        (setq gptel-azure-openai-deployment "gpt-4")))
+     (t (error "choose 'openai' or 'azure'")))
+    (setq gptel-api-key (nh/get-netrc-val gptel-host "password")))
+
   :config
   (setq gptel-default-mode 'org-mode)
-  :custom
-  (gptel-api-key (nh/get-netrc-val "openai.com" "password"))
-  (gptel-model "gpt-4"))
+  (setq gptel-model "gpt-4")
+  (nh/gptel-set-endpoint "azure")
+  )
 
 ;;* ielm
 ;; ielm is an elisp REPL. Open a new repl with "M-x ielm"
@@ -1479,6 +1497,12 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
     "hydra-gptel"
     ("RET" redraw-display "<quit>")
     ("d" (dired nh/gptel-chat-dir) "open chat dir")
+    ("e"
+     (lambda ()
+       (interactive)
+       (nh/gptel-set-endpoint
+        (completing-read "choose an endpoint" '("azure" "openai"))))
+     "choose an endpoint")
     ("g" gptel "new gptel buffer")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
