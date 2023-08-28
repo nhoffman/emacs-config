@@ -1289,6 +1289,42 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
       (find-file (nh/path-join nh/gptel-chats chat))
       (gptel-mode)))
 
+  (defun nh/gptel-refactor (bounds &optional directive)
+    "Replace selected region plus an accompanying directive with the
+response. User is prompted for the directive when called
+interactively. Adapted from https://github.com/karthink/gptel/wiki"
+    (interactive
+     (list
+      (cond
+       ((use-region-p) (cons (region-beginning) (region-end)))
+       ((derived-mode-p 'text-mode)
+        (list (bounds-of-thing-at-point 'sentence)))
+       (t (cons (line-beginning-position) (line-end-position))))
+      (read-string "ChatGPT Directive: "
+                   "Refactor the provided code. Respond with code only and no explanation.")))
+    (gptel-request
+     (buffer-substring-no-properties (car bounds) (cdr bounds)) ;the prompt
+     :system (or directive "Refactor the provided code. Respond with code only and no explanation.")
+     :buffer (current-buffer)
+     :context (cons (set-marker (make-marker) (car bounds))
+                    (set-marker (make-marker) (cdr bounds)))
+     :callback
+     (lambda (response info)
+       (if (not response)
+           (message "ChatGPT response failed with: %s" (plist-get info :status))
+         (let* ((bounds (plist-get info :context))
+                (beg (car bounds))
+                (end (cdr bounds))
+                (buf (plist-get info :buffer)))
+           (with-current-buffer buf
+             (save-excursion
+               (goto-char beg)
+               (kill-region beg end)
+               (insert response)
+               (set-marker beg nil)
+               (set-marker end nil)
+               (message "Rewrote line. Original region saved to kill-ring."))))))))
+
   (defun nh/gptel-set-endpoint (name)
     (interactive)
     (message "setting endpoint to %s" name)
@@ -1507,6 +1543,7 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
     ("m" gptel-menu "gptel-menu")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
+    ("r" nh/gptel-refactor "nh/gptel-refactor")
     ("s" nh/gptel-save-chat "nh/gptel-save-chat"))
 
   ) ;; end hydra config
