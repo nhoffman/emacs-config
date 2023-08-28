@@ -1504,6 +1504,7 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
         (completing-read "choose an endpoint" '("azure" "openai"))))
      "choose an endpoint")
     ("g" gptel "new gptel buffer")
+    ("m" gptel-menu "gptel-menu")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
     ("s" nh/gptel-save-chat "nh/gptel-save-chat"))
