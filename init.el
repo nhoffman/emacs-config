@@ -1328,19 +1328,18 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (defun nh/gptel-set-endpoint (name)
     (interactive)
     (message "setting endpoint to %s" name)
-    (cond
-     ((string-equal name "openai")
-      (progn
-        (setq gptel-host "api.openai.com")
-        (setq gptel-use-azure-openai nil)))
-     ((string-equal name "azure")
-      (progn
-        (setq gptel-host "openai.dlmp.uw.edu")
-        (setq gptel-use-azure-openai t)
-        (setq gptel-azure-openai-api-version "2023-07-01-preview")
-        ;; TODO: use gpt-model to infer deployment name?
-        (setq gptel-azure-openai-deployment "gpt-4")))
-     (t (error "choose 'openai' or 'azure'")))
+    (pcase name
+      ("openai"
+       (setq gptel-host "api.openai.com")
+       (setq gptel-use-azure-openai nil))
+      ("azure"
+       (setq gptel-host "openai.dlmp.uw.edu")
+       (setq gptel-use-azure-openai t)
+       (setq gptel-azure-openai-api-version "2023-07-01-preview")
+       ;; model and deployment names are not identical in our deployment
+       (setq gptel-azure-openai-deployment
+             (replace-regexp-in-string "3.5" "35" gpt-model)))
+      (_ (error "choose 'openai' or 'azure'")))
     (setq gptel-api-key (nh/get-netrc-val gptel-host "password")))
 
   :config
