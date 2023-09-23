@@ -688,7 +688,7 @@ Or nil when nothing is found."
   (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
 (defcustom nh/venv-setup-packages
-  '("pip" "wheel" "'python-lsp-server[all]'" "autoflake")
+  '("pip" "wheel" "'python-lsp-server[all]'" "autoflake" "mypy")
   "packages to install using `nh/venv-setup'")
 
 (defun nh/py3-venv-bin (name)
@@ -824,6 +824,7 @@ selection if no virtualenv is active."
   (nh/venv-setup)
   (flycheck-mode t)
   ;; checkers are run in reverse order of activation in lines below
+  (nh/python-flycheck-select-checker 'python-mypy)
   (nh/python-flycheck-select-checker 'python-pylint)
   (nh/python-flycheck-select-checker 'python-flake8)
   ;; (flycheck-verify-setup)
