@@ -1326,27 +1326,33 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
                (set-marker end nil)
                (message "Rewrote line. Original region saved to kill-ring."))))))))
 
-  (defun nh/gptel-set-endpoint (name)
+  (defun nh/gptel-get-api-key ()
+    (nh/get-netrc-val gptel-host "password"))
+
+  (defun nh/gptel-set-endpoint (service-name model)
     (interactive)
-    (message "setting endpoint to %s" name)
-    (pcase name
-      ("openai"
-       (setq gptel-host "api.openai.com")
-       (setq gptel-use-azure-openai nil))
-      ("azure"
-       (setq gptel-host "openai.dlmp.uw.edu")
-       (setq gptel-use-azure-openai t)
-       (setq gptel-azure-openai-api-version "2023-07-01-preview")
-       ;; model and deployment names are not identical in our deployment
-       (setq gptel-azure-openai-deployment
-             (replace-regexp-in-string "3.5" "35" gpt-model)))
-      (_ (error "choose 'openai' or 'azure'")))
-    (setq gptel-api-key (nh/get-netrc-val gptel-host "password")))
+    (let ((name (or service-name (completing-read
+                 "choose an endpoint" '("azure" "openai")))))
+      (message "setting endpoint to %s" name)
+      (pcase name
+        ("openai"
+         (setq gptel-host "api.openai.com")
+         (setq gptel-use-azure-openai nil))
+        ("azure"
+         (setq gptel-host "openai.dlmp.uw.edu")
+         (setq gptel-use-azure-openai t)
+         (setq gptel-azure-openai-api-version "2023-07-01-preview")
+         ;; model and deployment names are not identical in our deployment
+         (setq gptel-azure-openai-deployment
+               (replace-regexp-in-string "3.5" "35" model)))
+        (_ (error "choose 'openai' or 'azure'")))
+      ))
 
   :config
   (setq gptel-default-mode 'org-mode)
   (setq gptel-model "gpt-4")
-  (nh/gptel-set-endpoint "azure")
+  (nh/gptel-set-endpoint "azure" "gpt-4")
+  (setq gptel-api-key 'nh/gptel-get-api-key)
   )
 
 ;;* ielm
@@ -1452,6 +1458,7 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
     ("v" visual-line-mode "visual-line-mode")
     ("w" web-mode "web-mode")
     ("y" yaml-mode "yaml-mode"))
+
   (defhydra hydra-org-navigation
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
     "hydra-org-navigation"
@@ -1536,10 +1543,15 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
     ("e"
      (lambda ()
        (interactive)
-       (nh/gptel-set-endpoint
-        (completing-read "choose an endpoint" '("azure" "openai"))))
+       (nh/gptel-set-endpoint nil gptel-model))
      "choose an endpoint")
-    ("g" gptel "new gptel buffer")
+    ("g"
+     (lambda ()
+       (interactive)
+       (switch-to-buffer
+        (gptel
+         (generate-new-buffer-name gptel-default-session) gptel-api-key)))
+     "new gptel buffer")
     ("m" gptel-menu "gptel-menu")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
