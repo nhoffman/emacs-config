@@ -1251,7 +1251,7 @@ convert to .docx with pandoc"
   "Return the value corresponding to 'key' from ~/.netrc for a
 specified machine.
 
-eg (nh/get-netrc-val \"openai.com\" \"password\")"
+eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
   (let ((credentials (netrc-parse "~/.netrc")))
     (cdr (assoc key (netrc-machine credentials machine)))))
 
