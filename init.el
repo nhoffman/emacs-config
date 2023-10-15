@@ -1348,6 +1348,11 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
         (_ (error "choose 'openai' or 'azure'")))
       ))
 
+  (defun nh/gptel-kill-all-gptel-buffers ()
+    (interactive)
+    (if (y-or-n-p "Kill all ChatGPT buffers")
+        (kill-matching-buffers "^\\*ChatGPT" nil t)))
+
   :config
   (setq gptel-default-mode 'org-mode)
   (setq gptel-model "gpt-4")
@@ -1552,6 +1557,7 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
         (gptel
          (generate-new-buffer-name gptel-default-session) gptel-api-key)))
      "new gptel buffer")
+    ("k" nh/gptel-kill-all-gptel-buffers "kill all gptel buffers")
     ("m" gptel-menu "gptel-menu")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
