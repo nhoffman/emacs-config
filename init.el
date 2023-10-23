@@ -29,6 +29,16 @@
       (setq str (replace-regexp-in-string (nth 0 e) (nth 1 e) str)))
     (downcase str)))
 
+(defun nh/iterm2-open-project-dir ()
+  "Open the current project root in a new tab in iTerm2"
+  (interactive)
+  (let* ((interpreter (getenv "IT2PY"))
+         (home (getenv "HOME"))
+         (script
+          (nh/path-join home "dotfiles" "mac" "bin" "iterm2_create_tab.py"))
+         (thisdir (or (projectile-project-root) home)))
+    (shell-command (format "\"%s\" \"%s\" \"%s\"" interpreter script thisdir))))
+
 ;;* Package management
 (require 'package)
 (setq package-archives
@@ -1396,6 +1406,7 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
     ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
     ("c" nh/toggle-theme "toggle light/dark mode")
     ("d" nh/insert-date "nh/insert-date")
+    ("D" nh/iterm2-open-project-dir "nh/iterm2-open-project-dir")
     ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("f" nh/fix-frame "fix-frame")
     ("g" hydra-toggle-mode/body "toggle mode")
