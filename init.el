@@ -1268,11 +1268,10 @@ eg (nh/get-netrc-val \"openai.com\" \"password\")"
   (nh/path-join nh/onedrive "gptel-chats"))
 
 (use-package gptel
-  ;; :straight t
   :straight '(gptel :type git
                     :host github
-                    :repo "karthink/gptel"
-                    :fork (:host github :repo "doctorguile/gptel"))
+                    :repo "karthink/gptel")
+  ;; :ensure t
   ;; :pin melpa
   :preface
   (defun nh/gptel-new-chat (title)
@@ -1346,26 +1345,27 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
                (message "Rewrote line. Original region saved to kill-ring."))))))))
 
   (defun nh/gptel-get-api-key ()
-    (nh/get-netrc-val gptel-host "password"))
+    (nh/get-netrc-val
+     (gptel-backend-host gptel-backend) "password"))
 
-  (defun nh/gptel-set-endpoint (service-name model)
-    (interactive)
-    (let ((name (or service-name (completing-read
-                 "choose an endpoint" '("azure" "openai")))))
-      (message "setting endpoint to %s" name)
-      (pcase name
-        ("openai"
-         (setq gptel-host "api.openai.com")
-         (setq gptel-use-azure-openai nil))
-        ("azure"
-         (setq gptel-host "openai.dlmp.uw.edu")
-         (setq gptel-use-azure-openai t)
-         (setq gptel-azure-openai-api-version "2023-07-01-preview")
-         ;; model and deployment names are not identical in our deployment
-         (setq gptel-azure-openai-deployment
-               (replace-regexp-in-string "3.5" "35" model)))
-        (_ (error "choose 'openai' or 'azure'")))
-      ))
+  ;; (defun nh/gptel-set-endpoint (service-name model)
+  ;;   (interactive)
+  ;;   (let ((name (or service-name (completing-read
+  ;;                "choose an endpoint" '("azure" "openai")))))
+  ;;     (message "setting endpoint to %s" name)
+  ;;     (pcase name
+  ;;       ("openai"
+  ;;        (setq gptel-host "api.openai.com")
+  ;;        (setq gptel-use-azure-openai nil))
+  ;;       ("azure"
+  ;;        (setq gptel-host "openai.dlmp.uw.edu")
+  ;;        (setq gptel-use-azure-openai t)
+  ;;        (setq gptel-azure-openai-api-version "2023-07-01-preview")
+  ;;        ;; model and deployment names are not identical in our deployment
+  ;;        (setq gptel-azure-openai-deployment
+  ;;              (replace-regexp-in-string "3.5" "35" model)))
+  ;;       (_ (error "choose 'openai' or 'azure'")))
+  ;;     ))
 
   (defun nh/gptel-kill-all-gptel-buffers ()
     (interactive)
@@ -1373,10 +1373,10 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
         (kill-matching-buffers "^\\*ChatGPT" nil t)))
 
   :config
-  (setq gptel-default-mode 'org-mode)
-  (setq gptel-model "gpt-4")
-  (nh/gptel-set-endpoint "azure" "gpt-4")
-  (setq gptel-api-key 'nh/gptel-get-api-key)
+  (setq-default gptel-default-mode 'org-mode)
+  (setq-default gptel-model "gpt-4-1106-preview")
+  ;; (nh/gptel-set-endpoint "azure" "gpt-4")
+  (setq-default gptel-api-key 'nh/gptel-get-api-key)
   )
 
 ;;* ielm
