@@ -243,7 +243,7 @@
 (nh/prepend-path (nh/emacs-dir-path "bin"))
 (add-to-list 'exec-path (nh/emacs-dir-path "bin"))
 
-;;* other utility function
+;;* other utility functions
 
 (defun nh/advice-unadvice (sym)
   "Remove all advices from symbol SYM."
@@ -692,6 +692,15 @@ Or nil when nothing is found."
   (:map paredit-mode-map
         ("C-<left>" . nh/back-window)
         ("C-<right>" . other-window)))
+
+;;* debugging emacs
+(use-package explain-pause-mode
+  :straight (explain-pause-mode
+             :type git
+             :host github
+             :repo "lastquestion/explain-pause-mode")
+  :config
+  (explain-pause-mode))
 
 ;;* python
 (defcustom nh/py3-venv
