@@ -501,13 +501,6 @@ Or nil when nothing is found."
 (setq undo-strong-limit 12000000)
 (setq undo-outer-limit 120000000)
 
-;; persistent undo history
-(use-package undohist
-  :ensure t
-  :config
-  (setq undohist-ignored-files '("COMMIT_EDITMSG"))
-  (undohist-initialize))
-
 ;;* search and navigation (vertico, consult)
 
 (use-package vertico
