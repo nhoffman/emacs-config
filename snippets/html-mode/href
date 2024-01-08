@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: href
+# key: href
+# expand-env: ((yas-wrap-around-region t))
+# --
+<a href="$1">$0</a>
