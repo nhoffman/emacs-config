@@ -1372,6 +1372,39 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (setq-default gptel-api-key 'nh/gptel-get-api-key)
   )
 
+;;* GitHub copilot
+
+;; https://github.com/copilot-emacs/copilot.el
+
+(use-package transient
+  :ensure t)
+
+(use-package copilot
+  :preface
+  (transient-define-prefix nh/copilot-menu ()
+    "copilot Menu"
+    [["Completions"
+      ("c" "complete at point" copilot-complete :transient t)
+      ("<right>" "next completion" copilot-next-completion :transient t)
+      ("<left>" "previous completion" copilot-previous-completion :transient t)
+      ("a" "accept completion" copilot-accept-completion)
+      ("w" "accept word" copilot-accept-completion-by-word :transient t)
+      ("l" "accept line" copilot-accept-completion-by-line :transient t)
+      ("x" "clear overlay" copilot-clear-overlay)
+      ]
+     ["Mode actions"
+      ("m" "copilot mode" copilot-mode)
+      ("L" "log in" copilot-login)
+      ("X" "log out" copilot-logout)
+      ]]
+    )
+  :straight
+  (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :ensure t
+  :hook (prog-mode . copilot-mode)
+  :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu))))
+  :after transient)
+
 ;;* ielm
 ;; ielm is an elisp REPL. Open a new repl with "M-x ielm"
 
