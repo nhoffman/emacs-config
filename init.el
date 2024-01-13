@@ -1136,6 +1136,12 @@ convert to .docx with pandoc"
   :ensure t
   :after org)
 
+;;* quarto-mode
+
+(use-package quarto-mode
+  :ensure t
+  :mode (("\\.Rmd" . poly-quarto-mode)))
+
 ;;* sh-mode
 
 (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
