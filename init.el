@@ -1402,13 +1402,22 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
       ("m" "copilot mode" copilot-mode)
       ("L" "log in" copilot-login)
       ("X" "log out" copilot-logout)
-      ]]
-    )
+      ]])
+  (defun nh/copilot-tab ()
+    "Complete with copilot if a completion is
+available. Otherwise will try normal tab-indent."
+    (interactive)
+    (or (copilot-accept-completion)
+        (indent-for-tab-command)))
   :straight
   (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
   :ensure t
+  :config (add-to-list 'copilot--indentation-alist
+                       '(sql-mode sql-indent-offset))
   :hook (prog-mode . copilot-mode)
-  :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu))))
+  :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu)))
+         :map copilot-mode-map
+         ("<tab>" . #'nh/copilot-tab))
   :after transient)
 
 ;;* ielm
