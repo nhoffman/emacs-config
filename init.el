@@ -1182,6 +1182,15 @@ convert to .docx with pandoc"
                 "-v /tmp:/tmp "
                 "ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest")))
 
+;;* sql-mode
+
+(use-package sql-indent
+  :ensure t
+  :hook (sql-mode . sqlind-minor-mode)
+  :after sql
+  :config
+  (setq sql-indent-offset 2))
+
 ;;* tramp
 
 (condition-case nil
