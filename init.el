@@ -1431,7 +1431,7 @@ available. Otherwise will try normal tab-indent."
   :hook (prog-mode . copilot-mode)
   :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu)))
          :map copilot-mode-map
-         ("<tab>" . #'nh/copilot-tab))
+         ("M-<tab>" . #'nh/copilot-tab))
   :after transient)
 
 ;;* ielm
