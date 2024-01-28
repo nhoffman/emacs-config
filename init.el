@@ -1387,7 +1387,7 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
 
   :config
   (setq-default gptel-default-mode 'org-mode)
-  (setq-default gptel-model "gpt-4-1106-preview")
+  (setq-default gptel-model "gpt-4-turbo-preview")
   ;; (nh/gptel-set-endpoint "azure" "gpt-4")
   (setq-default gptel-api-key 'nh/gptel-get-api-key)
   )
