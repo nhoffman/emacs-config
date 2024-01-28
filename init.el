@@ -1191,6 +1191,11 @@ convert to .docx with pandoc"
   :config
   (setq sql-indent-offset 2))
 
+;;* csv-mode
+
+(use-package csv-mode
+  :ensure t)
+
 ;;* tramp
 
 (condition-case nil
@@ -1515,7 +1520,7 @@ available. Otherwise will try normal tab-indent."
   (defhydra hydra-toggle-mode (:color blue :columns 4 :post (redraw-display))
     "hydra-toggle-mode"
     ("RET" redraw-display "<quit>")
-    ;; ("c" csv-mode "csv-mode")
+    ("c" csv-mode "csv-mode")
     ("e" emacs-lisp-mode "emacs-lisp-mode")
     ("h" html-mode "html-mode")
     ("g" groovy-mode "groovy-mode")
@@ -1540,7 +1545,8 @@ available. Otherwise will try normal tab-indent."
     ("RET" nil "<quit>")
     ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
     ("c" nh/org-table-copy-cell "nh/org-table-copy-cell" :color blue)
-    ("e" (org-insert-structure-template "example") "add example block" :color blue)
+    ("e" (org-insert-structure-template "example")
+     "add example block" :color blue)
     ("i" org-previous-item "org-previous-item")
     ("k" org-next-item "org-next-item")
     ("<right>" org-next-block "org-next-block")
