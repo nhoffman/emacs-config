@@ -913,7 +913,6 @@ the path."
   (add-hook 'ess-mode-hook
             (lambda()
               (message "** Loading ess-mode hooks")
-	          (ess-toggle-underscore nil)
               (ess-set-style 'GNU 'quiet)
 	          (nh/set-inferior-ess-r-program-name))))
 
