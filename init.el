@@ -1425,7 +1425,7 @@ available. Otherwise will try normal tab-indent."
   :straight
   (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
   :ensure t
-  :config (add-to-list 'copilot--indentation-alist
+  :config (add-to-list 'copilot-indentation-alist
                        '(sql-mode sql-indent-offset))
   :hook (prog-mode . copilot-mode)
   :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu)))
