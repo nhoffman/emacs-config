@@ -1630,7 +1630,7 @@ available. Otherwise will try normal tab-indent."
        (interactive)
        (switch-to-buffer
         (gptel
-         (generate-new-buffer-name gptel-default-session) gptel-api-key)))
+         (generate-new-buffer-name "*gptel*") gptel-api-key)))
      "new gptel buffer")
     ("k" nh/gptel-kill-all-gptel-buffers "kill all gptel buffers")
     ("m" gptel-menu "gptel-menu")
