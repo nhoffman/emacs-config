@@ -1267,14 +1267,18 @@ convert to .docx with pandoc"
 
 ;;* OpenAI tools
 
-(require 'netrc)
 (defun nh/get-netrc-val (machine key)
   "Return the value corresponding to 'key' from ~/.netrc for a
 specified machine.
 
 eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
-  (let ((credentials (netrc-parse "~/.netrc")))
-    (cdr (assoc key (netrc-machine credentials machine)))))
+  (let ((credentials (auth-source-netrc-parse-all "~/.netrc")))
+    (car
+     (remq nil (mapcar
+                (lambda (x)
+                  (if (string= (cdr (assoc "machine" x)) machine)
+                      (cdr (assoc key x))))
+                credentials)))))
 
 (defvar nh/gptel-chats
   (nh/path-join nh/onedrive "gptel-chats"))
