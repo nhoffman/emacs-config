@@ -687,13 +687,13 @@ Or nil when nothing is found."
         ("C-<right>" . other-window)))
 
 ;;* debugging emacs
-(use-package explain-pause-mode
-  :straight (explain-pause-mode
-             :type git
-             :host github
-             :repo "lastquestion/explain-pause-mode")
-  :config
-  (explain-pause-mode))
+;; (use-package explain-pause-mode
+;;   :straight (explain-pause-mode
+;;              :type git
+;;              :host github
+;;              :repo "lastquestion/explain-pause-mode")
+;;   :config
+;;   (explain-pause-mode))
 
 ;;* python
 (defcustom nh/py3-venv
@@ -1283,6 +1283,8 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
 (defvar nh/gptel-chats
   (nh/path-join nh/onedrive "gptel-chats"))
 
+(defvar nh/gptel-buffer-name "gptel")
+
 (use-package gptel
   :straight '(gptel :type git
                     :host github
@@ -1386,21 +1388,25 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (defun nh/gptel-kill-all-gptel-buffers ()
     (interactive)
     (if (y-or-n-p "Kill all ChatGPT buffers")
-        (kill-matching-buffers "^\\*ChatGPT" nil t)))
+        (kill-matching-buffers
+         (format "^\\*%s" nh/gptel-buffer-name) nil t)))
 
   :config
   (setq-default gptel-default-mode 'org-mode)
   (setq-default gptel-model "gpt-4-turbo-preview")
-  ;; (nh/gptel-set-endpoint "azure" "gpt-4")
-  (setq-default gptel-api-key 'nh/gptel-get-api-key)
+  (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
+  (gptel-make-ollama "Ollama"
+    :host "localhost:11434"
+    :stream t
+    :models '("llama2:latest" "mistral:latest"))
   )
 
 ;;* GitHub copilot
 
-;; https://github.com/copilot-emacs/copilot.el
-
 (use-package transient
   :ensure t)
+
+;; https://github.com/copilot-emacs/copilot.el
 
 (use-package copilot
   :preface
@@ -1634,7 +1640,7 @@ available. Otherwise will try normal tab-indent."
        (interactive)
        (switch-to-buffer
         (gptel
-         (generate-new-buffer-name "*gptel*") gptel-api-key)))
+         (generate-new-buffer-name format("*%s*" nh/gptel-buffer-name)))))
      "new gptel buffer")
     ("k" nh/gptel-kill-all-gptel-buffers "kill all gptel buffers")
     ("m" gptel-menu "gptel-menu")
