@@ -1399,7 +1399,8 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
     :host "localhost:11434"
     :stream t
     :models '("llama2:latest" "mistral:latest"))
-  )
+  (gptel-make-anthropic "Claude"
+    :stream t))
 
 ;;* GitHub copilot
 
