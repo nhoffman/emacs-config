@@ -1267,7 +1267,7 @@ convert to .docx with pandoc"
 
 ;;* OpenAI tools
 
-(defun nh/get-netrc-val (machine key)
+(defun nh/get-netrc-password (machine)
   "Return the value corresponding to 'key' from ~/.netrc for a
 specified machine.
 
@@ -1277,7 +1277,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
      (remq nil (mapcar
                 (lambda (x)
                   (if (string= (cdr (assoc "machine" x)) machine)
-                      (cdr (assoc key x))))
+                      (cdr (assoc "password" x))))
                 credentials)))))
 
 (defvar nh/gptel-chats
@@ -1395,12 +1395,16 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (setq-default gptel-default-mode 'org-mode)
   (setq-default gptel-model "gpt-4-turbo-preview")
   (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
+  ;; gptel-api-key-from-auth-source does not seem to retrieve keys
+  ;; from ~/.netrc other than for api.openai.com, so use
+  ;; nh/get-netrc-password instead
+  (gptel-make-anthropic "Claude"
+    :stream t
+    :key (lambda () (nh/get-netrc-password "api.anthropic.com")))
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
-    :models '("llama2:latest" "mistral:latest"))
-  (gptel-make-anthropic "Claude"
-    :stream t))
+    :models '("llama2:latest" "mistral:latest")))
 
 ;;* GitHub copilot
 
@@ -1641,7 +1645,7 @@ available. Otherwise will try normal tab-indent."
        (interactive)
        (switch-to-buffer
         (gptel
-         (generate-new-buffer-name format("*%s*" nh/gptel-buffer-name)))))
+         (generate-new-buffer-name (format "*%s*" nh/gptel-buffer-name)))))
      "new gptel buffer")
     ("k" nh/gptel-kill-all-gptel-buffers "kill all gptel buffers")
     ("m" gptel-menu "gptel-menu")
