@@ -1442,7 +1442,13 @@ available. Otherwise will try normal tab-indent."
   :ensure t
   :config (add-to-list 'copilot-indentation-alist
                        '(sql-mode sql-indent-offset))
-  :hook (prog-mode . copilot-mode)
+  :hook (python-mode
+         elisp-mode
+         css-mode
+         mhtml-mode
+         html-mode
+         dockerfile-mode
+         sql-mode)
   :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu)))
          :map copilot-mode-map
          ("M-<tab>" . #'nh/copilot-tab))
