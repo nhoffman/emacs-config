@@ -1404,7 +1404,13 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
-    :models '("llama2:latest" "mistral:latest")))
+    :models '("llama2:latest" "mistral:latest"))
+  (gptel-make-openai "Groq"
+    :host "api.groq.com"
+    :endpoint "/openai/v1/chat/completions"
+    :stream t
+    :key (lambda () (nh/get-netrc-password "api.groq.com"))
+    :models '("llama3-70b-8192" "llama3-8b-8192" "mixtral-8x7b-32768")))
 
 ;;* GitHub copilot
 
