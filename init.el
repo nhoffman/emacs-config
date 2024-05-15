@@ -1393,7 +1393,7 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
 
   :config
   (setq-default gptel-default-mode 'org-mode)
-  (setq-default gptel-model "gpt-4-turbo-preview")
+  (setq-default gptel-model "gpt-4o")
   (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
   ;; gptel-api-key-from-auth-source does not seem to retrieve keys
   ;; from ~/.netrc other than for api.openai.com, so use
