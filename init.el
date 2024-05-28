@@ -957,6 +957,23 @@ the path."
     (if (executable-find "pngpaste")
         (progn (delete-blank-lines) (org-delete-backward-char 1))
       (error "pngpaste is not installed")))
+  (defun nh/org-mode-add-tag ()
+    "Add a tag to the current headline"
+    (interactive)
+    (end-of-line)
+    (delete-horizontal-space)
+    (insert " :")
+    (completion-at-point))
+  (defun nh/org-mode-list-tags ()
+    (let ((all-tags '()))
+      (org-map-entries
+       (lambda ()
+         (let ((tag-string (car (last (org-heading-components)))))
+           (when tag-string
+             (setq all-tags
+                   (append all-tags (split-string tag-string ":" t))))))
+       t nil)
+      (delq nil (delete-dups all-tags))))
   :mode
   ("\\.org\\'" . org-mode)
   ("\\.org\\.txt\\'" . org-mode)
@@ -1569,12 +1586,14 @@ available. Otherwise will try normal tab-indent."
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
     "hydra-org-navigation"
     ("RET" nil "<quit>")
+    ("a" nh/org-mode-add-tag "nh/org-mode-add-tag" :color blue)
     ("b" nh/org-babel-tangle-block "nh/org-babel-tangle-block" :color blue)
     ("c" nh/org-table-copy-cell "nh/org-table-copy-cell" :color blue)
     ("e" (org-insert-structure-template "example")
      "add example block" :color blue)
     ("i" org-previous-item "org-previous-item")
     ("k" org-next-item "org-next-item")
+    ("l" org-tags-view "org-tags-view" :color blue)
     ("<right>" org-next-block "org-next-block")
     ("<left>" org-previous-block "org-previous-block")
     ("<down>" outline-next-visible-heading "outline-next-visible-heading")
