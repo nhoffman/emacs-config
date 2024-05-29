@@ -962,8 +962,8 @@ the path."
     (interactive)
     (end-of-line)
     (delete-horizontal-space)
-    (insert " :")
-    (completion-at-point))
+    (insert
+     (format " :%s:" (completing-read "Tag: " (nh/org-mode-list-tags)))))
   (defun nh/org-mode-list-tags ()
     (let ((all-tags '()))
       (org-map-entries
