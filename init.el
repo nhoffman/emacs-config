@@ -1404,7 +1404,11 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
-    :models '("llama2:latest" "mistral:latest"))
+    :models '("codellama:latest"
+              "llama2:latest"
+              "llama3:8b-instruct-q8_0"
+              "llama3:latest"
+              "mistral:latest"))
   (gptel-make-openai "Groq"
     :host "api.groq.com"
     :endpoint "/openai/v1/chat/completions"
