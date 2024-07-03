@@ -891,6 +891,12 @@ selection if no virtualenv is active."
             (make-local-variable 'js-indent-level)
             (setq js-indent-level 2)))
 
+(straight-use-package
+ '(tsx-mode
+   :type git
+   :host github
+   :repo "orzechowskid/tsx-mode.el"))
+
 ;;* ESS (R language support)
 
 (defun nh/set-inferior-ess-r-program-name ()
