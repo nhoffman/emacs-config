@@ -1288,6 +1288,10 @@ convert to .docx with pandoc"
 	 ("C--" . er/contract-region)
 	 ("C-M-." . hydra-expand-region/body)))
 
+(use-package anki-editor
+  :defer t
+  :straight (:repo "anki-editor/anki-editor"))
+
 ;;* OpenAI tools
 
 (defun nh/get-netrc-password (machine)
@@ -1519,6 +1523,7 @@ available. Otherwise will try normal tab-indent."
     "hydra-launcher"
     ("C-g" redraw-display "<quit>")
     ("RET" redraw-display "<quit>")
+    ("a" hydra-anki-editor/body "hyrda for anki-editor")
     ("b" hydra-bookmarks/body "hyrda for bookmarks")
     ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
     ("c" nh/toggle-theme "toggle light/dark mode")
@@ -1676,6 +1681,7 @@ available. Otherwise will try normal tab-indent."
   (defhydra hydra-gptel (:color blue :columns 4 :post (redraw-display))
     "hydra-gptel"
     ("RET" redraw-display "<quit>")
+    ("a" gptel-add "gptel-add")
     ("d" (dired nh/gptel-chat-dir) "open chat dir")
     ("e"
      (lambda ()
@@ -1694,6 +1700,19 @@ available. Otherwise will try normal tab-indent."
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
     ("r" nh/gptel-refactor "nh/gptel-refactor")
-    ("s" nh/gptel-save-chat "nh/gptel-save-chat"))
+    ("s" nh/gptel-save-chat "nh/gptel-save-chat")
+    ("x" gptel-send "gptel-send"))
+
+  (defhydra hydra-anki-editor
+    (:exit nil :foreign-keys warn :columns 4 :post (redraw-display) :color blue)
+    "hydra-anki-editor"
+    ("RET" nil "<quit>")
+    ("P" anki-editor-push-notes "push notes")
+    ("b" anki-editor-gui-browse "open note in Anki")
+    ("c" anki-editor-cloze-dwim "cloze DWIM")
+    ("n" anki-editor-push-note-at-point "push note at point")
+    ("p" anki-editor-push-new-notes "push new notes")
+    ("t" anki-editor-mode "toggle anki-editor-mode")
+    ("q" nil "<quit>"))
 
   ) ;; end hydra config
