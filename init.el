@@ -1417,7 +1417,8 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   :config
   (setq-default gptel-default-mode 'org-mode)
   (setq-default gptel-model "gpt-4o")
-  (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
+  ;; (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
+  (setq-default gptel-api-key (lambda () (nh/get-netrc-password "api.openai.com")))
   ;; gptel-api-key-from-auth-source does not seem to retrieve keys
   ;; from ~/.netrc other than for api.openai.com, so use
   ;; nh/get-netrc-password instead
