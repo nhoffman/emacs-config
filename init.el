@@ -1531,8 +1531,7 @@ available. Otherwise will try normal tab-indent."
     ("D" nh/iterm2-open-project-dir "nh/iterm2-open-project-dir")
     ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("f" nh/fix-frame "fix-frame")
-    ("g" hydra-toggle-mode/body "toggle mode")
-    ("G" hydra-gptel/body "gptel")
+    ("g" hydra-gptel/body "gptel")
     ("i" hydra-init-file/body "hydra for init file")
     ("j" consult-imenu "consult-imenu")
     ("l" hydra-org-links/body "hydra-org-links")
@@ -1540,6 +1539,7 @@ available. Otherwise will try normal tab-indent."
     ("n" nh/org-find-index "nh/org-find-index")
     ("N" nh/org-add-entry-to-index "nh/org-add-entry-to-index")
     ("m" magit-status "magit-status")
+    ("M" hydra-toggle-mode/body "toggle mode")
     ("o" hydra-org-navigation/body "hydra-org-navigation")
     ("O" nh/copy-region-or-line-other-window "copy-region-or-line-other-window")
     ("p" hydra-python/body "python menu")
@@ -1701,6 +1701,7 @@ available. Otherwise will try normal tab-indent."
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
     ("r" nh/gptel-refactor "nh/gptel-refactor")
     ("s" nh/gptel-save-chat "nh/gptel-save-chat")
+    ("w" gptel-rewrite-menu "gptel-rewrite-menu")
     ("x" gptel-send "gptel-send"))
 
   (defhydra hydra-anki-editor
