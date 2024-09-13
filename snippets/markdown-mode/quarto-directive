@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: quarto directive, see https://quarto.org/docs/authoring/article-layout.html
+# key: <q
+# --
+:::{.${1:$$(yas-auto-next (yas-completing-read "Directive: " '("column-margin" "column-body-outset", "column-page", "column-screen", "column-screen-inset", "column-screen-inset-shaded") nil nil nil nil "column-margin"))}}
+$2
+:::
+

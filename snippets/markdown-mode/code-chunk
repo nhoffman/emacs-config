@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: rmarkdown or quarto R code chunk
+# key: <r
+# --
+\`\`\`{$0}
+
+\`\`\`

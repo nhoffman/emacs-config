@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: rmarkdown R code chunk
-# key: <r
-# --
-\`\`\`{r}
-$0
-\`\`\`
