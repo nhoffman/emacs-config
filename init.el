@@ -1288,7 +1288,24 @@ convert to .docx with pandoc"
 	 ("C--" . er/contract-region)
 	 ("C-M-." . hydra-expand-region/body)))
 
+;; https://github.com/anki-editor/anki-editor
 (use-package anki-editor
+  :preface
+  (defun nh/anki-qa-to-note (beg end)
+    "Convert 'Q: a question' and 'A: an answer' lines within the region to a note format."
+    (interactive "r")
+    (save-restriction
+      (narrow-to-region beg end)
+      (goto-char (point-min))
+      (while (re-search-forward "^Q:[[:space:]]*\\(.*\\)$" nil t)
+        (let ((question (match-string 1)))
+          (replace-match "* note\n** Front\n" t t)
+          (insert question)))
+      (goto-char (point-min))
+      (while (re-search-forward "^A:[[:space:]]*\\(.*\\)$" nil t)
+        (let ((answer (match-string 1)))
+          (replace-match "** Back\n" t t)
+          (insert answer)))))
   :defer t
   :straight (:repo "anki-editor/anki-editor"))
 
@@ -1711,6 +1728,7 @@ available. Otherwise will try normal tab-indent."
     ("P" anki-editor-push-notes "push notes")
     ("b" anki-editor-gui-browse "open note in Anki")
     ("c" anki-editor-cloze-dwim "cloze DWIM")
+    ("m" nh/anki-qa-to-note "QA to note")
     ("n" anki-editor-push-note-at-point "push note at point")
     ("p" anki-editor-push-new-notes "push new notes")
     ("t" anki-editor-mode "toggle anki-editor-mode")
