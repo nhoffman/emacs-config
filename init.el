@@ -1309,6 +1309,10 @@ convert to .docx with pandoc"
   :defer t
   :straight (:repo "anki-editor/anki-editor"))
 
+(defun convert-qanda-region (start end)
+  (interactive "r")
+  (shell-command-on-region start end "~/.emacs.d/bin/convert-qanda.py" t t))
+
 ;;* OpenAI tools
 
 (defun nh/get-netrc-password (machine)
