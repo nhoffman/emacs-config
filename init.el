@@ -1291,27 +1291,11 @@ convert to .docx with pandoc"
 ;; https://github.com/anki-editor/anki-editor
 (use-package anki-editor
   :preface
-  (defun nh/anki-qa-to-note (beg end)
-    "Convert 'Q: a question' and 'A: an answer' lines within the region to a note format."
+  (defun nh/anki-qa-to-note (start end)
     (interactive "r")
-    (save-restriction
-      (narrow-to-region beg end)
-      (goto-char (point-min))
-      (while (re-search-forward "^Q:[[:space:]]*\\(.*\\)$" nil t)
-        (let ((question (match-string 1)))
-          (replace-match "* note\n** Front\n" t t)
-          (insert question)))
-      (goto-char (point-min))
-      (while (re-search-forward "^A:[[:space:]]*\\(.*\\)$" nil t)
-        (let ((answer (match-string 1)))
-          (replace-match "** Back\n" t t)
-          (insert answer)))))
+    (shell-command-on-region start end "~/.emacs.d/bin/convert-qanda.py" t t))
   :defer t
   :straight (:repo "anki-editor/anki-editor"))
-
-(defun convert-qanda-region (start end)
-  (interactive "r")
-  (shell-command-on-region start end "~/.emacs.d/bin/convert-qanda.py" t t))
 
 ;;* OpenAI tools
 
