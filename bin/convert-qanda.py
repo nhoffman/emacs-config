@@ -4,7 +4,17 @@ import sys
 
 
 def parse_lines(lines):
-    yield 'q', 'a'
+    q, a = "", ""
+    for line in lines:
+        if line.startswith("Q:"):
+            q = line[2:].strip()
+        elif line.startswith("A:"):
+            a = line[2:].strip()
+        elif line.strip() == "":
+            yield q, a
+            q, a = "", ""
+    if q or a:
+        yield q, a
 
 
 def main():
