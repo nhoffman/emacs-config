@@ -1293,7 +1293,7 @@ convert to .docx with pandoc"
   :preface
   (defun nh/anki-qa-to-note (start end)
     (interactive "r")
-    (shell-command-on-region start end "~/.emacs.d/bin/convert-qanda.py" t t))
+    (shell-command-on-region start end "~/.emacs.d/bin/anki-qa-to-note.py" t t))
   :defer t
   :straight (:repo "anki-editor/anki-editor"))
 
