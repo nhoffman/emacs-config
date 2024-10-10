@@ -50,12 +50,10 @@ def parse_lines(lines):
 def main():
     for q, a in parse_lines(sys.stdin):
         print(f"""
-* {q[:50]}
+* {q}
 :PROPERTIES:
 :ANKI_NOTE_TYPE: Basic
 :END:
-** Front
-{q}
 ** Back
 {a}
 """.strip() + "\n")
