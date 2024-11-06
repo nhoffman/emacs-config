@@ -1321,8 +1321,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
   :straight '(gptel :type git
                     :host github
                     :repo "karthink/gptel")
-  ;; :ensure t
-  ;; :pin melpa
+  :bind (("C-c C-g" . gptel-menu))
   :preface
   (defun nh/gptel-new-chat (title)
     (interactive "sTitle: ")
