@@ -798,7 +798,7 @@ virtualenv is active."
           (progn (setq bufname (generate-new-buffer
                                 (format "*%s*" pyvenv-virtual-env)))
                  (if (= 0 (call-process-shell-command
-	                       (format "%sbin/pip install -U %s"
+	                       (format "uv pip install -U --python %sbin/python %s"
                                        pyvenv-virtual-env packages)
 	                       nil bufname t))
                      (message "installation complete, see output in %s" bufname)
@@ -810,7 +810,7 @@ selection if no virtualenv is active."
   (interactive "sPackage name: ")
   (unless pyvenv-virtual-env (nh/venv-activate))
   (let ((bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
-        (command (format "%sbin/pip install -U %s"
+        (command (format "uv pip install -U --python %sbin/python %s"
                          pyvenv-virtual-env package)))
     (if (= 0 (call-process-shell-command command nil bufname t))
         (message "installation complete, see output in %s" bufname)
