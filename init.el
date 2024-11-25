@@ -822,6 +822,7 @@ selection if no virtualenv is active."
   :config
   (setq flycheck-flake8rc (nh/emacs-dir-path "flake8.conf"))
   (setq flycheck-pylintrc (nh/emacs-dir-path "python-pylint.conf"))
+  (setq flycheck-temp-prefix ".flycheck")
   :hook
   (python-mode . flycheck-mode))
 
