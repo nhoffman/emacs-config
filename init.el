@@ -1470,10 +1470,10 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (transient-define-prefix nh/copilot-menu ()
     "copilot Menu"
     [["Completions"
+      ("TAB" "accept completion" copilot-accept-completion)
       ("c" "complete at point" copilot-complete :transient t)
       ("<right>" "next completion" copilot-next-completion :transient t)
       ("<left>" "previous completion" copilot-previous-completion :transient t)
-      ("a" "accept completion" copilot-accept-completion)
       ("w" "accept word" copilot-accept-completion-by-word :transient t)
       ("l" "accept line" copilot-accept-completion-by-line :transient t)
       ("x" "clear overlay" copilot-clear-overlay)
@@ -1503,7 +1503,7 @@ available. Otherwise will try normal tab-indent."
          sql-mode)
   :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu)))
          :map copilot-mode-map
-         ("M-<tab>" . #'nh/copilot-tab))
+         ("M-TAB" . #'nh/copilot-tab))
   :after transient)
 
 ;;* ielm
