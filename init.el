@@ -1438,6 +1438,9 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
                 (lambda () (nh/get-netrc-password "api.openai.com")))
   (setq-default gptel-track-media t)
 
+  (setf (alist-get 'programming gptel-directives)
+        "You are a careful programmer. Provide code only with no markdown or code fences.")
+
   ;; gptel-api-key-from-auth-source does not seem to retrieve keys
   ;; from ~/.netrc other than for api.openai.com, so use
   ;; nh/get-netrc-password instead
