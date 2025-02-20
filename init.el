@@ -1329,7 +1329,8 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
   :straight '(gptel :type git
                     :host github
                     :repo "karthink/gptel")
-  :bind (("C-c C-g" . gptel-menu))
+  :bind (("C-c C-g" . gptel-menu)
+         ("C-c C-r" . gptel-rewrite))
   :preface
   (defun nh/gptel-new-chat (title)
     (interactive "sTitle: ")
@@ -1365,70 +1366,15 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
       (find-file (nh/path-join nh/gptel-chats chat))
       (gptel-mode)))
 
-  (defun nh/gptel-refactor (bounds &optional directive)
-    "Replace selected region plus an accompanying directive with the
-response. User is prompted for the directive when called
-interactively. Adapted from https://github.com/karthink/gptel/wiki"
-    (interactive
-     (list
-      (cond
-       ((use-region-p) (cons (region-beginning) (region-end)))
-       ((derived-mode-p 'text-mode)
-        (list (bounds-of-thing-at-point 'sentence)))
-       (t (cons (line-beginning-position) (line-end-position))))
-      (read-string "ChatGPT Directive: "
-                   "Refactor the provided code. Respond with code only and no explanation.")))
-    (gptel-request
-     (buffer-substring-no-properties (car bounds) (cdr bounds)) ;the prompt
-     :system (or directive "Refactor the provided code. Respond with code only and no explanation.")
-     :buffer (current-buffer)
-     :context (cons (set-marker (make-marker) (car bounds))
-                    (set-marker (make-marker) (cdr bounds)))
-     :callback
-     (lambda (response info)
-       (if (not response)
-           (message "ChatGPT response failed with: %s" (plist-get info :status))
-         (let* ((bounds (plist-get info :context))
-                (beg (car bounds))
-                (end (cdr bounds))
-                (buf (plist-get info :buffer)))
-           (with-current-buffer buf
-             (save-excursion
-               (goto-char beg)
-               (kill-region beg end)
-               (insert response)
-               (set-marker beg nil)
-               (set-marker end nil)
-               (message "Rewrote line. Original region saved to kill-ring."))))))))
-
-  (defun nh/gptel-get-api-key ()
-    (nh/get-netrc-val
-     (gptel-backend-host gptel-backend) "password"))
-
-  ;; (defun nh/gptel-set-endpoint (service-name model)
-  ;;   (interactive)
-  ;;   (let ((name (or service-name (completing-read
-  ;;                "choose an endpoint" '("azure" "openai")))))
-  ;;     (message "setting endpoint to %s" name)
-  ;;     (pcase name
-  ;;       ("openai"
-  ;;        (setq gptel-host "api.openai.com")
-  ;;        (setq gptel-use-azure-openai nil))
-  ;;       ("azure"
-  ;;        (setq gptel-host "openai.dlmp.uw.edu")
-  ;;        (setq gptel-use-azure-openai t)
-  ;;        (setq gptel-azure-openai-api-version "2023-07-01-preview")
-  ;;        ;; model and deployment names are not identical in our deployment
-  ;;        (setq gptel-azure-openai-deployment
-  ;;              (replace-regexp-in-string "3.5" "35" model)))
-  ;;       (_ (error "choose 'openai' or 'azure'")))
-  ;;     ))
-
   (defun nh/gptel-kill-all-gptel-buffers ()
     (interactive)
     (if (y-or-n-p "Kill all ChatGPT buffers")
         (kill-matching-buffers
          (format "^\\*%s" nh/gptel-buffer-name) nil t)))
+
+  (defun nh/gptel-get-api-key ()
+    (nh/get-netrc-val
+     (gptel-backend-host gptel-backend) "password"))
 
   :config
   (setq-default gptel-default-mode 'org-mode)
@@ -1437,7 +1383,7 @@ interactively. Adapted from https://github.com/karthink/gptel/wiki"
   (setq-default gptel-api-key
                 (lambda () (nh/get-netrc-password "api.openai.com")))
   (setq-default gptel-track-media t)
-
+  ;; replace default programming directive in gptel-rewrite
   (setf (alist-get 'programming gptel-directives)
         "You are a careful programmer. Provide code only with no markdown or code fences.")
 
@@ -1717,9 +1663,8 @@ available. Otherwise will try normal tab-indent."
     ("m" gptel-menu "gptel-menu")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
-    ("r" nh/gptel-refactor "nh/gptel-refactor")
+    ("r" gptel-rewrite gptel-rewrite)
     ("s" nh/gptel-save-chat "nh/gptel-save-chat")
-    ("w" gptel-rewrite-menu "gptel-rewrite-menu")
     ("x" gptel-send "gptel-send"))
 
   (defhydra hydra-anki-editor
