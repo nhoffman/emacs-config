@@ -1392,7 +1392,9 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
   ;; nh/get-netrc-password instead
   (gptel-make-anthropic "Claude"
     :stream t
-    :key (lambda () (nh/get-netrc-password "api.anthropic.com")))
+    :key (lambda () (nh/get-netrc-password "api.anthropic.com"))
+    :models '("claude-3-5-sonnet-20241022"
+              "claude-3-7-sonnet-20250219"))
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
