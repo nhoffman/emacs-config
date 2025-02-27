@@ -717,21 +717,21 @@ Or nil when nothing is found."
 (use-package python-mode
   ;; :after eglot
   :preface
-  ;; (defun nh/python-shell-make-comint (orig-fun &rest args)
-  ;;   "Fix issue where python code block evaluation freezes on a mac in
-  ;;    org-mode using :session. This as a bug in prompt detection
-  ;;    in python.el: apparently the startup message for the python
-  ;;    interpreter is not being recognized. Launching the
-  ;;    interpreter with python -q suppresses the prompt, but the
-  ;;    variable python-shell-interpreter-args does not appear to be
-  ;;    respected. So the brute force solution is to advise the
-  ;;    function that sets up inferior-python-mode to add -q:"
-  ;;   (setq args (append '("python3 -q") (cdr args)))
-  ;;   (apply orig-fun args))
-  ;; (if (eq system-type 'darwin)
-  ;;     (progn
-  ;;       (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
-  ;;       (setq python-shell-completion-native-enable nil)))
+  (defun nh/python-shell-make-comint (orig-fun &rest args)
+    "Fix issue where python code block evaluation freezes on a mac in
+     org-mode using :session. This as a bug in prompt detection
+     in python.el: apparently the startup message for the python
+     interpreter is not being recognized. Launching the
+     interpreter with python -q suppresses the prompt, but the
+     variable python-shell-interpreter-args does not appear to be
+     respected. So the brute force solution is to advise the
+     function that sets up inferior-python-mode to add -q:"
+    (setq args (append '("python3 -q") (cdr args)))
+    (apply orig-fun args))
+  (if (eq system-type 'darwin)
+      (progn
+        (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
+        (setq python-shell-completion-native-enable nil)))
   :mode
   ("\\.py$'" . python-mode)
   ("\\.wsgi$" . python-mode)
