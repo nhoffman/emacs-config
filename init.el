@@ -706,31 +706,32 @@ Or nil when nothing is found."
 (defcustom nh/py3-venv
   (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
-(defcustom nh/venv-setup-packages
-  '("pip" "wheel" "'python-lsp-server[all]'" "autoflake" "mypy")
-  "packages to install using `nh/venv-setup'")
+;; (defcustom nh/venv-setup-packages
+;;   '("pip" "wheel" "'python-lsp-server[all]'" "autoflake" "mypy")
+;;   "packages to install using `nh/venv-setup'")
 
 (defun nh/py3-venv-bin (name)
   "Return the path to an executable installed in `nh/py3-venv'"
   (nh/path-join nh/py3-venv "bin" name))
 
 (use-package python-mode
+  :after eglot
   :preface
-  (defun nh/python-shell-make-comint (orig-fun &rest args)
-    "Fix issue where python code block evaluation freezes on a mac in
-     org-mode using :session. This as a bug in prompt detection
-     in python.el: apparently the startup message for the python
-     interpreter is not being recognized. Launching the
-     interpreter with python -q suppresses the prompt, but the
-     variable python-shell-interpreter-args does not appear to be
-     respected. So the brute force solution is to advise the
-     function that sets up inferior-python-mode to add -q:"
-    (setq args (append '("python3 -q") (cdr args)))
-    (apply orig-fun args))
-  (if (eq system-type 'darwin)
-      (progn
-        (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
-        (setq python-shell-completion-native-enable nil)))
+  ;; (defun nh/python-shell-make-comint (orig-fun &rest args)
+  ;;   "Fix issue where python code block evaluation freezes on a mac in
+  ;;    org-mode using :session. This as a bug in prompt detection
+  ;;    in python.el: apparently the startup message for the python
+  ;;    interpreter is not being recognized. Launching the
+  ;;    interpreter with python -q suppresses the prompt, but the
+  ;;    variable python-shell-interpreter-args does not appear to be
+  ;;    respected. So the brute force solution is to advise the
+  ;;    function that sets up inferior-python-mode to add -q:"
+  ;;   (setq args (append '("python3 -q") (cdr args)))
+  ;;   (apply orig-fun args))
+  ;; (if (eq system-type 'darwin)
+  ;;     (progn
+  ;;       (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
+  ;;       (setq python-shell-completion-native-enable nil)))
   :mode
   ("\\.py$'" . python-mode)
   ("\\.wsgi$" . python-mode)
@@ -743,9 +744,11 @@ Or nil when nothing is found."
   (setq python-indent-guess-indent-offset t)
   (setq python-indent-guess-indent-offset-verbose nil)
   (setq python-indent-offset tab-width)
+  (add-to-list 'eglot-server-programs
+             '(python-mode . ("ruff-lsp")))
   :hook
-  (python-mode . (lambda ()
-		   (setq display-fill-column-indicator-column 80))))
+  ((python-mode . (lambda () (setq display-fill-column-indicator-column 80)))
+   (python-mode . #'eglot-ensure)))
 
 (use-package pyvenv
   :ensure t)
@@ -763,16 +766,16 @@ Or nil when nothing is found."
              (split-string (shell-command-to-string (format fstr pth)) "\n")))
     ))
 
-(defun nh/pylsp-installed-p ()
-  (= 0 (shell-command "python -c 'import pylsp' 2>/dev/null")))
+;; (defun nh/pylsp-installed-p ()
+;;   (= 0 (shell-command "python -c 'import pylsp' 2>/dev/null")))
 
 (defun nh/venv-activate-eglot ()
   "Activate eglot in the selected virtualenv, installing
 dependencies if necessary."
   (interactive)
   (nh/venv-activate)
-  (unless (nh/pylsp-installed-p)
-    (save-excursion (nh/venv-setup)))
+  ;; (unless (nh/pylsp-installed-p)
+  ;;   (save-excursion (nh/venv-setup)))
   (eglot-ensure))
 
 (defun nh/venv-activate ()
@@ -823,32 +826,32 @@ selection if no virtualenv is active."
         (message "installation complete, see output in %s" bufname)
       (switch-to-buffer bufname))))
 
-(use-package flycheck
-  :ensure t
-  :pin melpa
-  :config
-  (setq flycheck-flake8rc (nh/emacs-dir-path "flake8.conf"))
-  (setq flycheck-pylintrc (nh/emacs-dir-path "python-pylint.conf"))
-  (setq flycheck-temp-prefix ".flycheck")
-  :hook
-  (python-mode . flycheck-mode))
+;; (use-package flycheck
+;;   :ensure t
+;;   :pin melpa
+;;   :config
+;;   (setq flycheck-flake8rc (nh/emacs-dir-path "flake8.conf"))
+;;   (setq flycheck-pylintrc (nh/emacs-dir-path "python-pylint.conf"))
+;;   (setq flycheck-temp-prefix ".flycheck")
+;;   :hook
+;;   (python-mode . flycheck-mode))
 
-(defun nh/python-flycheck-select-checker (checker)
-  (interactive)
-  (flycheck-reset-enabled-checker checker)
-  (flycheck-disable-checker checker t)
-  (flycheck-select-checker checker))
+;; (defun nh/python-flycheck-select-checker (checker)
+;;   (interactive)
+;;   (flycheck-reset-enabled-checker checker)
+;;   (flycheck-disable-checker checker t)
+;;   (flycheck-select-checker checker))
 
-(defun nh/python-flycheck-select-checkers ()
-  (interactive)
-  (nh/venv-setup)
-  (flycheck-mode t)
-  ;; checkers are run in reverse order of activation in lines below
-  (nh/python-flycheck-select-checker 'python-mypy)
-  (nh/python-flycheck-select-checker 'python-pylint)
-  (nh/python-flycheck-select-checker 'python-flake8)
-  ;; (flycheck-verify-setup)
-  )
+;; (defun nh/python-flycheck-select-checkers ()
+;;   (interactive)
+;;   (nh/venv-setup)
+;;   (flycheck-mode t)
+;;   ;; checkers are run in reverse order of activation in lines below
+;;   (nh/python-flycheck-select-checker 'python-mypy)
+;;   (nh/python-flycheck-select-checker 'python-pylint)
+;;   (nh/python-flycheck-select-checker 'python-flake8)
+;;   ;; (flycheck-verify-setup)
+;;   )
 
 ;; function to reformat using yapf
 (defun nh/yapf-region-or-buffer ()
@@ -1602,16 +1605,16 @@ available. Otherwise will try normal tab-indent."
   (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
     "hydra-python"
     ("RET" redraw-display "<quit>")
-    ("c" nh/python-flycheck-select-checkers "activate flycheck checkers")
+    ;; ("c" nh/python-flycheck-select-checkers "activate flycheck checkers")
     ("d" eldoc-doc-buffer "eldoc-doc-buffer")
-    ("e" flycheck-list-errors "flycheck-list-errors")
+    ;; ("e" flycheck-list-errors "flycheck-list-errors")
     ("E" nh/venv-activate-eglot "activate eglot")
-    ("f" flycheck-verify-setup "flycheck-verify-setup")
+    ;; ("f" flycheck-verify-setup "flycheck-verify-setup")
     ("i" nh/pip-install "pip install package")
     ;; ("j" (swiper "class\\|def\\b") "jump to function or class")
     ("j" consult-imenu "consult-imenu")
-    ("n" flycheck-next-error "flycheck-next-error" :color red)
-    ("p" flycheck-previous-error "flycheck-previous-error" :color red)
+    ;; ("n" flycheck-next-error "flycheck-next-error" :color red)
+    ;; ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
     ("r" eglot-rename "eglot-rename")
     ("v" nh/venv-activate "nh/venv-activate")
