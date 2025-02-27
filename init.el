@@ -1665,7 +1665,7 @@ available. Otherwise will try normal tab-indent."
     ("m" gptel-menu "gptel-menu")
     ("n" nh/gptel-new-chat "nh/gptel-new-chat")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
-    ("r" gptel-rewrite gptel-rewrite)
+    ("r" gptel-rewrite "gptel-rewrite")
     ("s" nh/gptel-save-chat "nh/gptel-save-chat")
     ("x" gptel-send "gptel-send"))
 
