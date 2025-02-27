@@ -715,7 +715,7 @@ Or nil when nothing is found."
   (nh/path-join nh/py3-venv "bin" name))
 
 (use-package python-mode
-  :after eglot
+  ;; :after eglot
   :preface
   ;; (defun nh/python-shell-make-comint (orig-fun &rest args)
   ;;   "Fix issue where python code block evaluation freezes on a mac in
@@ -744,11 +744,13 @@ Or nil when nothing is found."
   (setq python-indent-guess-indent-offset t)
   (setq python-indent-guess-indent-offset-verbose nil)
   (setq python-indent-offset tab-width)
-  (add-to-list 'eglot-server-programs
-             '(python-mode . ("ruff-lsp")))
+  ;; (add-to-list 'eglot-server-programs
+  ;;              '(python-mode . ("ruff-lsp")))
   :hook
   ((python-mode . (lambda () (setq display-fill-column-indicator-column 80)))
-   (python-mode . #'eglot-ensure)))
+   ;; (python-mode . #'eglot-ensure)
+   )
+  )
 
 (use-package pyvenv
   :ensure t)
