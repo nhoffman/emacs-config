@@ -744,8 +744,8 @@ Or nil when nothing is found."
   (setq python-indent-guess-indent-offset t)
   (setq python-indent-guess-indent-offset-verbose nil)
   (setq python-indent-offset tab-width)
-  ;; (add-to-list 'eglot-server-programs
-  ;;              '(python-mode . ("ruff-lsp")))
+  (add-to-list 'eglot-server-programs
+               '(python-mode . ("ruff-lsp")))
   :hook
   ((python-mode . (lambda () (setq display-fill-column-indicator-column 80)))
    ;; (python-mode . #'eglot-ensure)
