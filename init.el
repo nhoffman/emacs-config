@@ -788,7 +788,6 @@ if there is more than one option."
   (let* ((thisdir (or (projectile-project-root) default-directory))
 	 (venvs (append
                  (nh/venv-list thisdir)
-                 (nh/venv-list (expand-file-name "~/.pyenv/versions"))
                  `(,nh/py3-venv)))
          ;; maybe use completing-read
 	 (venv (completing-read "choose a virtualenv: " venvs)))
