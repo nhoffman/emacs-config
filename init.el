@@ -966,14 +966,19 @@ the path."
   (defun nh/org-mode-hooks ()
     (visual-line-mode)
     (yas-minor-mode t))
-  (defadvice org-todo-list-bottom (after nh/org-todo-list ())
-    "Move to bottom of page after entering org-todo-list"
-    (progn (end-of-buffer) (recenter-top-bottom)))
-  (defadvice org-download-screenshot (before nh/org-download-screenshot-advice ())
-    "Remove extra lines before inserted screenshot and check for pngpaste"
-    (if (executable-find "pngpaste")
-        (progn (delete-blank-lines) (org-delete-backward-char 1))
-      (error "pngpaste is not installed")))
+  (advice-add 'org-todo-list :after
+              (lambda ()
+                "Move to bottom of page after entering org-todo-list"
+                (end-of-buffer)
+                (recenter-top-bottom)))
+  (advice-add 'org-download-screenshot :before
+              (lambda ()
+                "Remove extra lines before inserted screenshot and check for pngpaste"
+                (if (executable-find "pngpaste")
+                    (progn
+                      (delete-blank-lines)
+                      (org-delete-backward-char 1))
+                  (error "pngpaste is not installed"))))
   (defun nh/org-mode-add-tag ()
     "Add a tag to the current headline"
     (interactive)
