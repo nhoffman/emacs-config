@@ -142,7 +142,7 @@
 (global-set-key (kbd "C-x C-c") 'nh/ask-before-exit)
 
 ;; kill buffer without asking which one by default
-(global-set-key (kbd "C-x k") 'kill-this-buffer)
+(global-set-key (kbd "C-x k") 'kill-current-buffer)
 
 ;;* desktop
 (defun nh/desktop-save-no-p ()
