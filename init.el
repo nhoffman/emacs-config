@@ -793,10 +793,9 @@ dependencies if necessary."
 if there is more than one option."
   (interactive)
   (let* ((thisdir (or (projectile-project-root) default-directory))
-	 (venvs (append
+         (venvs (append
                  (nh/venv-list thisdir)
-                 `(,nh/py3-venv)))
-         ;; maybe use completing-read
+                 (list nh/py3-venv)))
 	 (venv (completing-read "choose a virtualenv: " venvs)))
     (pyvenv-activate venv)
     (message "Activated virtualenv %s (%s)"
