@@ -1392,7 +1392,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
 
   :config
   (setq-default gptel-default-mode 'org-mode)
-  (setq-default gptel-model "gpt-4o")
+  (setq-default gptel-model 'gpt-4o)
   ;; (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
   (setq-default gptel-api-key
                 (lambda () (nh/get-netrc-password "api.openai.com")))
