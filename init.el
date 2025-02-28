@@ -752,6 +752,13 @@ Or nil when nothing is found."
    )
   )
 
+(use-package ruff-format
+  :ensure t)
+
+(use-package flymake-ruff
+  :ensure t
+  :hook (python-mode . flymake-ruff-load))
+
 (use-package pyvenv
   :ensure t)
 
@@ -1189,8 +1196,7 @@ convert to .docx with pandoc"
 (use-package flymake-shellcheck
   :ensure t
   :commands flymake-shellcheck-load
-  :init
-  (add-hook 'sh-mode-hook 'flymake-shellcheck-load))
+  :hook (sh-mode . flymake-shellcheck-load))
 
 ;;* text-mode
 
@@ -1527,7 +1533,8 @@ available. Otherwise will try normal tab-indent."
     ("u" untabify "untabify")
     ("w" hydra-web-mode/body "web-mode commands")
     ("y" hydra-yasnippet/body "yasnippet commands")
-    ("(" hydra-paredit/body "paredit commands"))
+    ("(" hydra-paredit/body "paredit commands")
+    ("." hydra-flymake/body "flymake commands"))
   (global-set-key (kbd "C-\\") 'hydra-launcher/body)
 
   (defhydra hydra-init-file (:color blue :columns 4 :post (redraw-display))
@@ -1689,6 +1696,22 @@ available. Otherwise will try normal tab-indent."
     ("n" anki-editor-push-note-at-point "push note at point")
     ("p" anki-editor-push-new-notes "push new notes")
     ("t" anki-editor-mode "toggle anki-editor-mode")
+    ("q" nil "<quit>"))
+
+  (defhydra hydra-flymake
+    (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
+    "hydra-flymake"
+    ("RET" nil "<quit>")
+    ("b" flymake-show-buffer-diagnostics "show errors" :color blue)
+    ("l" (lambda ()
+           (interactive)
+           (setq flymake-show-diagnostics-at-end-of-line
+                 (not flymake-show-diagnostics-at-end-of-line))
+           (flymake-mode t)
+           ) "show errors at end of line" :color blue)
+    ("n" flymake-goto-next-error "next error")
+    ("p" flymake-goto-prev-error "previous error")
+    ("t" flymake-mode "toggle flymake-mode" :color blue)
     ("q" nil "<quit>"))
 
   ) ;; end hydra config
