@@ -881,6 +881,21 @@ selection if no virtualenv is active."
      t)                               ;; show error buffer?
     ))
 
+(defun nh/isort-region-or-buffer ()
+  "Apply isort to the current region or buffer"
+  (interactive)
+  (let* ((isort-cmd "isort -"))
+    (unless (region-active-p)
+      (mark-whole-buffer))
+    (shell-command-on-region
+     (region-beginning) (region-end)  ;; beginning and end of region or buffer
+     isort-cmd                        ;; command and parameters
+     (current-buffer)                 ;; output buffer
+     t                                ;; replace?
+     "*isort errors*"                 ;; name of the error buffer
+     t)                               ;; show error buffer?
+    ))
+
 ;; (defun nh/autopep8-and-ediff ()
 ;;   "Compare the current buffer to the output of autopep8 using ediff"
 ;;   (interactive)
@@ -1622,7 +1637,8 @@ available. Otherwise will try normal tab-indent."
     ;; ("e" flycheck-list-errors "flycheck-list-errors")
     ("E" nh/venv-activate-eglot "activate eglot")
     ;; ("f" flycheck-verify-setup "flycheck-verify-setup")
-    ("i" nh/pip-install "pip install package")
+    ("i" nh/isort-region-or-buffer "isort region or buffer")
+    ("I" nh/pip-install "pip install package")
     ;; ("j" (swiper "class\\|def\\b") "jump to function or class")
     ("j" consult-imenu "consult-imenu")
     ;; ("n" flycheck-next-error "flycheck-next-error" :color red)
