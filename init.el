@@ -1251,16 +1251,12 @@ convert to .docx with pandoc"
   (setq sql-indent-offset 2))
 
 ;;* csv-mode
-
 (use-package csv-mode
   :ensure t)
 
 ;;* tramp
-
-(condition-case nil
-    (require 'tramp)
-  (setq tramp-default-method "scp")
-  (error (message "** could not load tramp")))
+(use-package tramp-theme
+  :ensure t)
 
 ;;* misc packages
 (use-package yasnippet
