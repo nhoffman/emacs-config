@@ -114,7 +114,8 @@
            (set-keyboard-coding-system 'mac-roman)
            (setq mac-option-modifier 'meta)
            (setq mac-command-key-is-meta nil)
-           (nh/set-default-font-verbosely "Menlo-15")))
+           (nh/set-default-font-verbosely "Menlo-15")
+           (toggle-frame-maximized)))
         ((string= "x" window-system)
          (progn
            (message (format "** running %s windowing system" window-system))
