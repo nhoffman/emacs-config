@@ -1,8 +1,7 @@
 if [[ $(uname) == 'Darwin' ]]; then
-    if [[ $(uname -m) == 'arm64' ]]; then
-        # assume we are using emacs-plus
+    if [[ -f /opt/homebrew/bin/emacs ]]; then
         EMACS=/opt/homebrew/bin/emacs
-        EMACS_BIN=/opt/homebrew/bin/emacsclient
+        EMACS_BIN=/opt/homebrew/bin
     else
         EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
         alias emacs="$EMACS"
