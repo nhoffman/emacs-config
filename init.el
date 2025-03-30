@@ -986,6 +986,106 @@ the path."
 ;;* org-mode
 (use-package org
   :preface
+  (defvar nh/org-index
+    (concat (file-name-as-directory nh/onedrive) "notes/index.org")
+    "Path to primary org-mode notes file")
+
+  ;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
+  ;; requires pngpaste (install with homebrew)
+  (defvar nh/org-download-image-dir "images"
+    "Directory name for storing images downloaded by `org-download'")
+
+  (defun nh/org-show-todos-move-down ()
+    "Show TODOs in main notes file"
+    (interactive)
+    (find-file nh/org-index)
+    (org-show-todo-tree nil)
+    (end-of-buffer))
+
+  (defun nh/org-download-add-caption (link)
+    "Annotate link with caption, enter RET for no output"
+    (interactive)
+    (let ((caption (read-string "Caption: ")))
+      (if (> (length caption) 0) (format "#+CAPTION: %s" caption))))
+
+  (defun nh/org-open-org-download-dir ()
+    (interactive)
+    (let* ((buffer-file-dir (file-name-directory buffer-file-name))
+           (image-dir (concat buffer-file-dir nh/org-download-image-dir)))
+      (if (file-directory-p image-dir)
+          (browse-url-of-file image-dir)
+        (warn (format "Directory %s does not exist" image-dir)))))
+
+  ;; https://emacs.stackexchange.com/questions/3981/how-to-copy-links-out-of-org-mode
+  (defun nh/org-link-at-point ()
+    "Return absolute path of link at point"
+    (let* ((link (org-element-lineage (org-element-context) '(link) t))
+           (type (org-element-property :type link))
+           (url (org-element-property :path link)))
+      (if (equal type "file")
+          (file-truename url)
+        (error (format "%s is not a regular file" link)))))
+
+  (defun nh/org-link-file-delete ()
+    "Remove link and delete the associated file"
+    (interactive)
+    (let ((link (nh/org-link-at-point)))
+      (if (y-or-n-p (format "Delete %s?" link))
+          (progn
+            (delete-file link)
+            (if (org-in-regexp org-link-bracket-re 1)
+                (save-excursion
+                  (apply 'delete-region (list (match-beginning 0) (match-end 0)))
+                  ))))))
+
+  (defun nh/org-babel-tangle-block()
+    "Tangle only the block at point"
+    (interactive)
+    (let ((current-prefix-arg '(4)))
+      (call-interactively 'org-babel-tangle)))
+
+  (defun nh/org-add-entry (&optional filename time-format)
+    "Add an entry to an org-file with today's timestamp."
+    (interactive)
+    (find-file (or filename buffer-file-name))
+    (end-of-buffer)
+    (delete-blank-lines)
+    (insert (format-time-string (or time-format "\n* <%Y-%m-%d %a> "))))
+
+  (defun nh/org-add-entry-to-index ()
+    (interactive)
+    (nh/org-add-entry nh/org-index))
+
+  (defun nh/org-find-index ()
+    (interactive)
+    (find-file nh/org-index))
+
+  (defun nh/org-table-copy-cell ()
+    "Copy org-table cell at point to the kill-ring."
+    (interactive)
+    (kill-new (string-trim (org-table-get-field)) t))
+
+  (defun nh/org-element-as-docx ()
+    "Export the contents of the element at point to a file and
+convert to .docx with pandoc"
+    (interactive)
+    (let* ((sec (car (cdr (org-element-at-point))))
+           (header (plist-get sec ':title))
+           (fname (nh/safename header))
+           (basedir
+            (expand-file-name
+	     (read-directory-name
+	      "Output directory: " "~/Downloads")))
+           (orgfile (make-temp-file fname nil ".org"))
+           (docx (shell-quote-argument (concat (nh/path-join basedir fname) ".docx"))))
+
+      (write-region
+       (plist-get sec ':begin) (plist-get sec ':end) orgfile)
+      (call-process-shell-command (format "pandoc %s -o %s" orgfile docx))
+      (if (y-or-n-p "open file?")
+          (shell-command (format "open %s" docx)))
+      (message "wrote %s" docx)))
+
   (defun nh/org-mode-hooks ()
     (visual-line-mode)
     (yas-minor-mode t))
@@ -994,14 +1094,7 @@ the path."
                 "Move to bottom of page after entering org-todo-list"
                 (end-of-buffer)
                 (recenter-top-bottom)))
-  (advice-add 'org-download-screenshot :before
-              (lambda ()
-                "Remove extra lines before inserted screenshot and check for pngpaste"
-                (if (executable-find "pngpaste")
-                    (progn
-                      (delete-blank-lines)
-                      (org-delete-backward-char 1))
-                  (error "pngpaste is not installed"))))
+
   (defun nh/org-mode-add-tag ()
     "Add a tag to the current headline"
     (interactive)
@@ -1009,6 +1102,7 @@ the path."
     (delete-horizontal-space)
     (insert
      (format " :%s:" (completing-read "Tag: " (nh/org-mode-list-tags)))))
+
   (defun nh/org-mode-list-tags ()
     (let ((all-tags '()))
       (org-map-entries
@@ -1019,6 +1113,17 @@ the path."
                    (append all-tags (split-string tag-string ":" t))))))
        t nil)
       (delq nil (delete-dups all-tags))))
+
+  (advice-add
+   'org-download-screenshot :before
+   (lambda ()
+     "Remove extra lines before inserted screenshot and check for pngpaste"
+     (if (executable-find "pngpaste")
+         (progn
+           (delete-blank-lines)
+           (org-delete-backward-char 1))
+       (error "pngpaste is not installed"))))
+
   :mode
   ("\\.org\\'" . org-mode)
   ("\\.org\\.txt\\'" . org-mode)
@@ -1056,106 +1161,6 @@ the path."
   (ad-activate 'org-download-screenshot)
   :hook
   (org-mode . nh/org-mode-hooks))
-
-(defvar nh/org-index
-  (concat (file-name-as-directory nh/onedrive) "notes/index.org")
-  "Path to primary org-mode notes file")
-
-;; https://zzamboni.org/post/how-to-insert-screenshots-in-org-documents-on-macos/
-;; requires pngpaste (install with homebrew)
-(defvar nh/org-download-image-dir "images"
-  "Directory name for storing images downloaded by `org-download'")
-
-(defun nh/org-show-todos-move-down ()
-  "Show TODOs in main notes file"
-  (interactive)
-  (find-file nh/org-index)
-  (org-show-todo-tree nil)
-  (end-of-buffer))
-
-(defun nh/org-download-add-caption (link)
-  "Annotate link with caption, enter RET for no output"
-  (interactive)
-  (let ((caption (read-string "Caption: ")))
-    (if (> (length caption) 0) (format "#+CAPTION: %s" caption))))
-
-(defun nh/org-open-org-download-dir ()
-  (interactive)
-  (let* ((buffer-file-dir (file-name-directory buffer-file-name))
-         (image-dir (concat buffer-file-dir nh/org-download-image-dir)))
-    (if (file-directory-p image-dir)
-        (browse-url-of-file image-dir)
-      (warn (format "Directory %s does not exist" image-dir)))))
-
-;; https://emacs.stackexchange.com/questions/3981/how-to-copy-links-out-of-org-mode
-(defun nh/org-link-at-point ()
-  "Return absolute path of link at point"
-  (let* ((link (org-element-lineage (org-element-context) '(link) t))
-         (type (org-element-property :type link))
-         (url (org-element-property :path link)))
-    (if (equal type "file")
-        (file-truename url)
-      (error (format "%s is not a regular file" link)))))
-
-(defun nh/org-link-file-delete ()
-  "Remove link and delete the associated file"
-  (interactive)
-  (let ((link (nh/org-link-at-point)))
-    (if (y-or-n-p (format "Delete %s?" link))
-        (progn
-          (delete-file link)
-          (if (org-in-regexp org-link-bracket-re 1)
-              (save-excursion
-                (apply 'delete-region (list (match-beginning 0) (match-end 0)))
-                ))))))
-
-(defun nh/org-babel-tangle-block()
-  "Tangle only the block at point"
-  (interactive)
-  (let ((current-prefix-arg '(4)))
-    (call-interactively 'org-babel-tangle)))
-
-(defun nh/org-add-entry (&optional filename time-format)
-  "Add an entry to an org-file with today's timestamp."
-  (interactive)
-  (find-file (or filename buffer-file-name))
-  (end-of-buffer)
-  (delete-blank-lines)
-  (insert (format-time-string (or time-format "\n* <%Y-%m-%d %a> "))))
-
-(defun nh/org-add-entry-to-index ()
-  (interactive)
-  (nh/org-add-entry nh/org-index))
-
-(defun nh/org-find-index ()
-  (interactive)
-  (find-file nh/org-index))
-
-(defun nh/org-table-copy-cell ()
-  "Copy org-table cell at point to the kill-ring."
-  (interactive)
-  (kill-new (string-trim (org-table-get-field)) t))
-
-(defun nh/org-element-as-docx ()
-  "Export the contents of the element at point to a file and
-convert to .docx with pandoc"
-  (interactive)
-  (let* ((sec (car (cdr (org-element-at-point))))
-         (header (plist-get sec ':title))
-         (fname (nh/safename header))
-         (basedir
-          (expand-file-name
-	   (read-directory-name
-	    "Output directory: " "~/Downloads")))
-         (orgfile (make-temp-file fname nil ".org"))
-         (docx (shell-quote-argument (concat (nh/path-join basedir fname) ".docx"))))
-
-    (write-region
-     (plist-get sec ':begin) (plist-get sec ':end) orgfile)
-    (call-process-shell-command (format "pandoc %s -o %s" orgfile docx))
-    (if (y-or-n-p "open file?")
-        (shell-command (format "open %s" docx)))
-    (message "wrote %s" docx)))
 
 ;;* org-mode helper packages
 (use-package ox-minutes
