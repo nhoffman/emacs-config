@@ -219,6 +219,12 @@
   :defer t
   :init (load-theme nh/theme-dark t))
 
+(defun nh/close-warnings ()
+  "Close *Warnings* window"
+  (interactive)
+  (when-let ((warnings-window (get-buffer-window "*Warnings*")))
+    (delete-window warnings-window)))
+
 ;;* execution environment
 (defun nh/ssh-refresh ()
   "Reset the environment variable SSH_AUTH_SOCK"
@@ -1548,6 +1554,7 @@ available. Otherwise will try normal tab-indent."
     ("T" nh/transpose-buffers "transpose-buffers")
     ("u" untabify "untabify")
     ("w" hydra-web-mode/body "web-mode commands")
+    ("W" nh/close-warnings "close *Warnings*")
     ("y" hydra-yasnippet/body "yasnippet commands")
     ("(" hydra-paredit/body "paredit commands")
     ("." hydra-flymake/body "flymake commands"))
