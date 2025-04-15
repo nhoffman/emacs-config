@@ -688,9 +688,17 @@ Or nil when nothing is found."
 ;; * elgot
 (use-package eglot
   :ensure t
-  :defer t
   :config
-  (setq eldoc-echo-area-use-multiline-p nil))
+  (setq eldoc-echo-area-use-multiline-p nil)
+  (setq-default
+   eglot-workspace-configuration
+   '(:basedpyright (:typeCheckingMode "off")))
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode)
+                 "basedpyright-langserver" "--stdio"))
+  ;; (add-to-list 'eglot-server-programs
+  ;;              '(python-mode "jedi-language-server"))
+  )
 
 ;;* elisp
 (use-package paredit
@@ -713,6 +721,16 @@ Or nil when nothing is found."
 (defcustom nh/py3-venv
   (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
+(defun nh/uv-tool-install (package)
+  "Install a package using uv tool"
+  (interactive "sPackage name: ")
+  (let ((bufname (generate-new-buffer (format "*uv tool install %s*" package)))
+        (command (format "uv tool install -U %s" package)))
+    (if (= 0 (call-process-shell-command command nil bufname t))
+        (message "installation complete, see output in %s" bufname)
+      (switch-to-buffer bufname)
+      )))
+
 ;; (defcustom nh/venv-setup-packages
 ;;   '("pip" "wheel" "'python-lsp-server[all]'" "autoflake" "mypy")
 ;;   "packages to install using `nh/venv-setup'")
@@ -721,8 +739,18 @@ Or nil when nothing is found."
   "Return the path to an executable installed in `nh/py3-venv'"
   (nh/path-join nh/py3-venv "bin" name))
 
+(use-package ruff-format
+  :ensure t)
+
+(use-package flymake-ruff
+  :ensure t
+  :hook (python-mode . flymake-ruff-load))
+
+(use-package pyvenv
+  :ensure t)
+
 (use-package python-mode
-  ;; :after eglot
+  :after (:all eglot flymake-ruff)
   :preface
   (defun nh/python-shell-make-comint (orig-fun &rest args)
     "Fix issue where python code block evaluation freezes on a mac in
@@ -751,23 +779,9 @@ Or nil when nothing is found."
   (setq python-indent-guess-indent-offset t)
   (setq python-indent-guess-indent-offset-verbose nil)
   (setq python-indent-offset tab-width)
-  (add-to-list 'eglot-server-programs
-               '(python-mode . ("ruff-lsp")))
-  :hook
-  ((python-mode . (lambda () (setq display-fill-column-indicator-column 80)))
-   ;; (python-mode . #'eglot-ensure)
-   )
+  (setq display-fill-column-indicator-column 80)
+  :hook (python-mode . flymake-mode)
   )
-
-(use-package ruff-format
-  :ensure t)
-
-(use-package flymake-ruff
-  :ensure t
-  :hook (python-mode . flymake-ruff-load))
-
-(use-package pyvenv
-  :ensure t)
 
 (defun nh/venv-list (basedir)
   "Return a list of paths to virtualenvs in 'basedir' or nil if
@@ -782,16 +796,14 @@ Or nil when nothing is found."
              (split-string (shell-command-to-string (format fstr pth)) "\n")))
     ))
 
-;; (defun nh/pylsp-installed-p ()
-;;   (= 0 (shell-command "python -c 'import pylsp' 2>/dev/null")))
+(defcustom nh/python-eglot-dependences '("ruff" "basedpyright")
+  "Python-related packages to install to the system")
 
 (defun nh/venv-activate-eglot ()
-  "Activate eglot in the selected virtualenv, installing
-dependencies if necessary."
+  "Activate eglot after installing dependencies."
   (interactive)
-  (nh/venv-activate)
-  ;; (unless (nh/pylsp-installed-p)
-  ;;   (save-excursion (nh/venv-setup)))
+  (dolist (package nh/python-eglot-dependences)
+    (nh/uv-tool-install package))
   (eglot-ensure))
 
 (defun nh/venv-activate ()
@@ -840,54 +852,6 @@ selection if no virtualenv is active."
         (message "installation complete, see output in %s" bufname)
       (switch-to-buffer bufname))))
 
-;; (use-package flycheck
-;;   :ensure t
-;;   :pin melpa
-;;   :config
-;;   (setq flycheck-flake8rc (nh/emacs-dir-path "flake8.conf"))
-;;   (setq flycheck-pylintrc (nh/emacs-dir-path "python-pylint.conf"))
-;;   (setq flycheck-temp-prefix ".flycheck")
-;;   :hook
-;;   (python-mode . flycheck-mode))
-
-;; (defun nh/python-flycheck-select-checker (checker)
-;;   (interactive)
-;;   (flycheck-reset-enabled-checker checker)
-;;   (flycheck-disable-checker checker t)
-;;   (flycheck-select-checker checker))
-
-;; (defun nh/python-flycheck-select-checkers ()
-;;   (interactive)
-;;   (nh/venv-setup)
-;;   (flycheck-mode t)
-;;   ;; checkers are run in reverse order of activation in lines below
-;;   (nh/python-flycheck-select-checker 'python-mypy)
-;;   (nh/python-flycheck-select-checker 'python-pylint)
-;;   (nh/python-flycheck-select-checker 'python-flake8)
-;;   ;; (flycheck-verify-setup)
-;;   )
-
-;; function to reformat using yapf
-(defun nh/yapf-region-or-buffer ()
-  "Apply yapf to the current region or buffer"
-  (interactive)
-  (let* ((yapf (nh/py3-venv-bin "yapf"))
-	 (yapf-config (nh/emacs-dir-path "yapf.cfg"))
-	 ;; use config file if exists
-	 (yapf-cmd (if (file-exists-p yapf-config)
-		       (concat yapf " --style " yapf-config)
-		     yapf)))
-    (unless (region-active-p)
-      (mark-whole-buffer))
-    (shell-command-on-region
-     (region-beginning) (region-end)  ;; beginning and end of region or buffer
-     yapf-cmd                         ;; command and parameters
-     (current-buffer)                 ;; output buffer
-     t                                ;; replace?
-     "*yapf errors*"                  ;; name of the error buffer
-     t)                               ;; show error buffer?
-    ))
-
 (defun nh/isort-region-or-buffer ()
   "Apply isort to the current region or buffer"
   (interactive)
@@ -903,20 +867,6 @@ selection if no virtualenv is active."
      t)                               ;; show error buffer?
     ))
 
-;; (defun nh/autopep8-and-ediff ()
-;;   "Compare the current buffer to the output of autopep8 using ediff"
-;;   (interactive)
-;;   (let ((p8-output
-;;          (get-buffer-create (format "* %s autopep8 *" (buffer-name)))))
-;;     (shell-command-on-region
-;;      (point-min) (point-max)    ;; beginning and end of buffer
-;;      "autopep8 -"               ;; command and parameters
-;;      p8-output                  ;; output buffer
-;;      nil                        ;; replace?
-;;      "*autopep8 errors*"        ;; name of the error buffer
-;;      t)                         ;; show error buffer?
-;;     (ediff-buffers (current-buffer) p8-output)))
-
 ;;* javascript/json
 (use-package json-mode
   :ensure t)
@@ -930,12 +880,6 @@ selection if no virtualenv is active."
           (lambda ()
             (make-local-variable 'js-indent-level)
             (setq js-indent-level 2)))
-
-;; (straight-use-package
-;;  '(tsx-mode
-;;    :type git
-;;    :host github
-;;    :repo "orzechowskid/tsx-mode.el"))
 
 ;;* ESS (R language support)
 
@@ -1532,11 +1476,12 @@ available. Otherwise will try normal tab-indent."
     ("c" nh/toggle-theme "toggle light/dark mode")
     ("d" nh/insert-date "nh/insert-date")
     ("D" nh/iterm2-open-project-dir "nh/iterm2-open-project-dir")
-    ("e" save-buffers-kill-emacs "save-buffers-kill-emacs")
+    ("e" hydra-eglot/body "eglot menu")
     ("f" nh/fix-frame "fix-frame")
     ("g" hydra-gptel/body "gptel")
     ("i" hydra-init-file/body "hydra for init file")
     ("j" consult-imenu "consult-imenu")
+    ("k" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("l" hydra-org-links/body "hydra-org-links")
     ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
     ("n" nh/org-find-index "nh/org-find-index")
@@ -1641,23 +1586,14 @@ available. Otherwise will try normal tab-indent."
   (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
     "hydra-python"
     ("RET" redraw-display "<quit>")
-    ;; ("c" nh/python-flycheck-select-checkers "activate flycheck checkers")
-    ("d" eldoc-doc-buffer "eldoc-doc-buffer")
-    ;; ("e" flycheck-list-errors "flycheck-list-errors")
-    ("E" nh/venv-activate-eglot "activate eglot")
-    ;; ("f" flycheck-verify-setup "flycheck-verify-setup")
     ("i" nh/isort-region-or-buffer "isort region or buffer")
     ("I" nh/pip-install "pip install package")
-    ;; ("j" (swiper "class\\|def\\b") "jump to function or class")
     ("j" consult-imenu "consult-imenu")
-    ;; ("n" flycheck-next-error "flycheck-next-error" :color red)
-    ;; ("p" flycheck-previous-error "flycheck-previous-error" :color red)
     ("P" python-mode "python-mode")
-    ("r" eglot-rename "eglot-rename")
+    ("r" ruff-format-region "ruff-format-region")
+    ("R" ruff-format-buffer "ruff-format-buffer")
     ("v" nh/venv-activate "nh/venv-activate")
-    ("x" eglot-shutdown "eglot-shutdown")
-    ("V" nh/venv-setup "nh/venv-setup")
-    ("y" nh/yapf-region-or-buffer "nh/yapf-region-or-buffer"))
+    ("V" nh/venv-setup "nh/venv-setup"))
 
   (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
     "hydra-yasnippet"
@@ -1726,6 +1662,7 @@ available. Otherwise will try normal tab-indent."
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
     "hydra-flymake"
     ("RET" nil "<quit>")
+    ("." (lambda () (interactive) (flymake-mode t)) "flymake-mode on" :color blue)
     ("b" flymake-show-buffer-diagnostics "show errors" :color blue)
     ("l" (lambda ()
            (interactive)
@@ -1737,5 +1674,12 @@ available. Otherwise will try normal tab-indent."
     ("p" flymake-goto-prev-error "previous error")
     ("t" flymake-mode "toggle flymake-mode" :color blue)
     ("q" nil "<quit>"))
+
+  (defhydra hydra-eglot (:color blue :columns 4 :post (redraw-display))
+    "hydra-eglot"
+    ("RET" redraw-display "<quit>")
+    ("e" nh/venv-activate-eglot "activate eglot")
+    ("r" eglot-rename "eglot-rename")
+    ("x" eglot-shutdown "eglot-shutdown"))
 
   ) ;; end hydra config
