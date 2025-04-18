@@ -1359,7 +1359,6 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
 
   :config
   (setq-default gptel-default-mode 'org-mode)
-  (setq-default gptel-model 'gpt-4o)
   ;; (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
   (setq-default gptel-api-key
                 (lambda () (nh/get-netrc-password "api.openai.com")))
@@ -1388,7 +1387,15 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (lambda () (nh/get-netrc-password "api.groq.com"))
-    :models '("llama3-70b-8192" "llama3-8b-8192" "mixtral-8x7b-32768")))
+    :models '("llama3-70b-8192" "llama3-8b-8192" "mixtral-8x7b-32768"))
+  (gptel-make-openai "litellm"
+    :host "litellm.dlmp.uw.edu"
+    :stream t
+    :key (lambda () (nh/get-netrc-password "litellm.dlmp.uw.edu"))
+    :models '("gpt-4.1" "gpt-4.1-mini"))
+  ;; set default model and backend
+  (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
+  (setq gptel-model 'gpt-4.1))
 
 ;;* GitHub copilot
 
