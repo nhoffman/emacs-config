@@ -1190,12 +1190,17 @@ convert to .docx with pandoc"
 
 (use-package mermaid-mode
   :ensure t
+  :mode (("\\.mmd" . mermaid-mode)
+         ("\\.mermaid" . mermaid-mode))
   :config
-  (setq mermaid-mmdc-location "docker")
-  (setq mermaid-flags
-        (concat (format "run -u %s " (user-real-uid))
-                "-v /tmp:/tmp "
-                "ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest")))
+  (setq mermaid-mmdc-location "/opt/homebrew/bin/mmdc")
+  (setq mermaid-flags "")
+  ;; (setq mermaid-mmdc-location "docker")
+  ;; (setq mermaid-flags
+  ;;       (concat (format "run -u %s " (user-real-uid))
+  ;;               "-v /tmp:/tmp "
+  ;;               "ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:latest"))
+  )
 
 ;;* sql-mode
 
@@ -1392,7 +1397,11 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :host "litellm.dlmp.uw.edu"
     :stream t
     :key (lambda () (nh/get-netrc-password "litellm.dlmp.uw.edu"))
-    :models '("gpt-4.1" "gpt-4.1-mini"))
+    :models '("gpt-4.1"
+              "gpt-4.1-mini"
+              "claude-3-7-sonnet-20250219-v1"
+              "claude-sonnet-4-20250514-v1"
+              "claude-opus-4-20250514-v1"))
   ;; set default model and backend
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
   (setq gptel-model 'gpt-4.1))
