@@ -1015,13 +1015,27 @@ the path."
     (interactive)
     (kill-new (string-trim (org-table-get-field)) t))
 
+  (defun nh/org-get-current-heading ()
+    "Return the text of the current heading"
+    (let ((el (org-element-at-point)))
+      (when (eq (car el) 'headline)
+        (org-element-property :raw-value el))))
+
+  (defun nh/org-get-current-section ()
+    "Return the contents of the current Org section as a string."
+    (let ((el (org-element-at-point)))
+      (when (eq (car el) 'headline)
+        (buffer-substring-no-properties
+         (org-element-property :begin el)
+         (org-element-property :end el)))))
+
   (defun nh/org-element-as-docx ()
     "Export the contents of the element at point to a file and
 convert to .docx with pandoc"
     (interactive)
-    (let* ((sec (car (cdr (org-element-at-point))))
-           (header (plist-get sec ':title))
-           (fname (nh/safename header))
+    (let* ((title (nh/org-get-current-heading))
+           (body (nh/org-get-current-section))
+           (fname (nh/safename title))
            (basedir
             (expand-file-name
 	     (read-directory-name
@@ -1029,8 +1043,7 @@ convert to .docx with pandoc"
            (orgfile (make-temp-file fname nil ".org"))
            (docx (shell-quote-argument (concat (nh/path-join basedir fname) ".docx"))))
 
-      (write-region
-       (plist-get sec ':begin) (plist-get sec ':end) orgfile)
+      (write-region body nil orgfile)
       (call-process-shell-command (format "pandoc %s -o %s" orgfile docx))
       (if (y-or-n-p "open file?")
           (shell-command (format "open %s" docx)))
