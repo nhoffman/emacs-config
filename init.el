@@ -1052,11 +1052,6 @@ convert to .docx with pandoc"
   (defun nh/org-mode-hooks ()
     (visual-line-mode)
     (yas-minor-mode t))
-  (advice-add 'org-todo-list :after
-              (lambda ()
-                "Move to bottom of page after entering org-todo-list"
-                (end-of-buffer)
-                (recenter-top-bottom)))
 
   (defun nh/org-mode-add-tag ()
     "Add a tag to the current headline"
@@ -1076,6 +1071,50 @@ convert to .docx with pandoc"
                    (append all-tags (split-string tag-string ":" t))))))
        t nil)
       (delq nil (delete-dups all-tags))))
+
+  (defun nh/org-get-matching-sections (keyword &optional file)
+    "Search for KEYWORD in org FILE and return top-level sections containing matches. If FILE is nil, search current buffer."
+    (interactive "sKeyword: ")
+    (let ((sections '())
+          (case-fold-search t))
+      (save-excursion
+        (when file
+          (find-file file))
+        (goto-char (point-min))
+        ;; Find each top-level heading
+        (while (re-search-forward "^\\* " nil t)
+          (let* ((section-start (line-beginning-position))
+                 (section-end (save-excursion
+                                (if (re-search-forward "^\\* " nil t)
+                                    (line-beginning-position)
+                                  (point-max))))
+                 (section-text (buffer-substring-no-properties
+                                section-start section-end))
+                 (heading (save-excursion
+                            (goto-char section-start)
+                            (buffer-substring-no-properties
+                             (point) (line-end-position)))))
+            ;; Check if keyword exists in this section
+            (when (string-match-p (regexp-quote keyword) section-text)
+              (push (cons heading section-text) sections)))))
+      (reverse sections)))
+
+  (defun nh/org-search-notes (keyword)
+    "Search for KEYWORD in nh/org-index file and insert results at end of buffer."
+    (interactive "sSearch notes for: ")
+    (let ((results (nh/org-get-matching-sections keyword nh/org-index)))
+      (save-excursion
+        (goto-char (point-max))
+        (if results
+            (dolist (result results)
+              (insert (format "\n%s\n" (cdr result))))
+          (insert (format "\n\n;; No results found for '%s'\n" keyword))))))
+
+  (advice-add 'org-todo-list :after
+              (lambda ()
+                "Move to bottom of page after entering org-todo-list"
+                (end-of-buffer)
+                (recenter-top-bottom)))
 
   (advice-add
    'org-download-screenshot :before
@@ -1120,8 +1159,8 @@ convert to .docx with pandoc"
      (mermaid . t)))
   ;; org-open-at-point uses system app for png
   (add-to-list 'org-file-apps '("\\.png\\'" . system))
-  (ad-activate 'org-todo-list-bottom)
-  (ad-activate 'org-download-screenshot)
+  ;; (ad-activate 'org-todo-list)
+  ;; (ad-activate 'org-download-screenshot)
   :hook
   (org-mode . nh/org-mode-hooks))
 
