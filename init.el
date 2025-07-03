@@ -589,7 +589,7 @@ Or nil when nothing is found."
   ;; Optionally configure the narrowing key.
   ;; Both < and C-+ work reasonably well.
   (setq consult-narrow-key "<") ;; (kbd "C-+")
-)
+  )
 
 (use-package marginalia
   :ensure t
@@ -834,9 +834,9 @@ virtualenv is active."
           (progn (setq bufname (generate-new-buffer
                                 (format "*%s*" pyvenv-virtual-env)))
                  (if (= 0 (call-process-shell-command
-	                       (format "uv pip install -U --python %sbin/python %s"
-                                       pyvenv-virtual-env packages)
-	                       nil bufname t))
+	                   (format "uv pip install -U --python %sbin/python %s"
+                                   pyvenv-virtual-env packages)
+	                   nil bufname t))
                      (message "installation complete, see output in %s" bufname)
                    (switch-to-buffer bufname)))))))
 
@@ -904,7 +904,7 @@ the path."
             (lambda()
               (message "** Loading ess-mode hooks")
               (ess-set-style 'GNU 'quiet)
-	          (nh/set-inferior-ess-r-program-name))))
+	      (nh/set-inferior-ess-r-program-name))))
 
 ;; (use-package poly-R
 ;;   :ensure t)
