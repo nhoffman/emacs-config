@@ -1451,6 +1451,9 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :key (lambda () (nh/get-netrc-password "litellm.dlmp.uw.edu"))
     :models '("gpt-4.1"
               "gpt-4.1-mini"
+              "gpt-5"
+              "gpt-5-mini"
+              "gpt-5-chat"
               "claude-3-7-sonnet-20250219-v1"
               "claude-sonnet-4-20250514-v1"
               "claude-opus-4-20250514-v1"))
