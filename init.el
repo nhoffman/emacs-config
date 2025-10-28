@@ -1617,6 +1617,7 @@ available. Otherwise will try normal tab-indent."
     ("l" lineum-mode "lineum-mode")
     ("m" moinmoin-mode "moinmoin-mode")
     ("o" org-mode "org-mode")
+    ("O" outline-minor-mode "outline-minor-mode")
     ("p" python-mode "python-mode")
     ("P" paredit-mode "paredit-mode")
     ("r" R-mode "R-mode")
