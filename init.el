@@ -1469,13 +1469,15 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
   (setq gptel-model 'gpt-5-chat))
 
-;;* GitHub copilot
+;;* transient
 
+;; required for copilot
 (use-package transient
   :ensure t)
 
-;; https://github.com/copilot-emacs/copilot.el
+;;* GitHub copilot
 
+;; https://github.com/copilot-emacs/copilot.el
 (use-package copilot
   :preface
   (transient-define-prefix nh/copilot-menu ()
