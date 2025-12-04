@@ -1449,7 +1449,8 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :host "litellm.dlmp.uw.edu"
     :stream t
     :key (lambda () (nh/get-netrc-password "litellm.dlmp.uw.edu"))
-    :models '("gpt-4.1"
+    :models '(
+              "gpt-4.1"
               "gpt-4.1-mini"
               "gpt-5-mini"
               "gpt-5"
@@ -1458,16 +1459,20 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
               "gpt-5.1"
               "gpt-5.1-chat"
               "gpt-5.1-codex"
-              "claude-3-7-sonnet-20250219-v1"
-              "claude-sonnet-4-20250514-v1"
-              "claude-opus-4-20250514-v1"))
-  ;; (gptel-make-openai "litellm-dev"
-  ;;   :host "litellm.dlmp-dev.uw.edu"
-  ;;   :stream t
-  ;;   :key (lambda () (nh/get-netrc-password "litellm.dlmp-dev.uw.edu"))
-  ;;   :models '(
-  ;;             "gpt-5-codex"
-  ;;             ))
+              "claude-opus-4-5-20251101-v1"
+              "claude-sonnet-4-5-20250929-v1"
+              "claude-haiku-4-5-20251001-v1"
+              ))
+  (gptel-make-openai "litellm-dev"
+    :host "litellm.dlmp-dev.uw.edu"
+    :stream t
+    :key (lambda () (nh/get-netrc-password "litellm.dlmp-dev.uw.edu"))
+    :models '(
+              "gpt-5.1-chat"
+              "claude-opus-4-5-20251101-v1"
+              "claude-sonnet-4-5-20250929-v1"
+              "claude-haiku-4-5-20251001-v1"
+              ))
   ;; set default model and backend
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
   (setq gptel-model 'gpt-5.1-chat))
