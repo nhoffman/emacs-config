@@ -1709,6 +1709,7 @@ available. Otherwise will try normal tab-indent."
     "hydra-gptel"
     ("RET" redraw-display "<quit>")
     ("a" gptel-add "gptel-add")
+    ("c" nh/gptel-new-chat "nh/gptel-new-chat")
     ("d" (dired nh/gptel-chat-dir) "open chat dir")
     ("e"
      (lambda ()
@@ -1724,7 +1725,7 @@ available. Otherwise will try normal tab-indent."
      "new gptel buffer")
     ("k" nh/gptel-kill-all-gptel-buffers "kill all gptel buffers")
     ("m" gptel-menu "gptel-menu")
-    ("n" nh/gptel-new-chat "nh/gptel-new-chat")
+    ("n" (lambda () (interactive) (find-file "~/.netrc")) "open ~/.netrc")
     ("o" nh/gptel-open-chat "nh/gptel-open-chat")
     ("r" gptel-rewrite "gptel-rewrite")
     ("s" nh/gptel-save-chat "nh/gptel-save-chat")
