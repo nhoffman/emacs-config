@@ -1461,6 +1461,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
               "gpt-5.1-codex"
               "gpt-5.2"
               "gpt-5.2-chat"
+              "gpt-5.2-codex"
               "claude-opus-4-5-20251101-v1"
               "claude-sonnet-4-5-20250929-v1"
               "claude-haiku-4-5-20251001-v1"
@@ -1470,7 +1471,6 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :stream t
     :key (lambda () (nh/get-netrc-password "litellm.dlmp-dev.uw.edu"))
     :models '(
-              "gpt-5.1-chat"
               "claude-opus-4-5-20251101-v1"
               "claude-sonnet-4-5-20250929-v1"
               "claude-haiku-4-5-20251001-v1"
