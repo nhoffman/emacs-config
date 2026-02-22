@@ -1010,6 +1010,13 @@ the path."
     (interactive)
     (find-file nh/org-index))
 
+  (defun nh/org-add-journal-entry-to-index ()
+    (interactive)
+    (nh/org-find-index)
+    (end-of-buffer)
+    (delete-blank-lines)
+    (yas-expand-snippet (yas-lookup-snippet "journal-entry")))
+
   (defun nh/org-table-copy-cell ()
     "Copy org-table cell at point to the kill-ring."
     (interactive)
@@ -1572,6 +1579,7 @@ available. Otherwise will try normal tab-indent."
     ("g" hydra-gptel/body "gptel")
     ("i" hydra-init-file/body "hydra for init file")
     ("j" consult-imenu "consult-imenu")
+    ("J" nh/org-add-journal-entry-to-index "nh/org-add-journal-entry-to-index")
     ("k" save-buffers-kill-emacs "save-buffers-kill-emacs")
     ("l" hydra-org-links/body "hydra-org-links")
     ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
