@@ -449,13 +449,6 @@ Or nil when nothing is found."
              (format " across %d lines" lines)
            ""))))))
 
-(defun nh/get-finder-directory ()
-  "Return the absolute path of the directory of the active Finder window."
-  (let ((script-file (nh/path-join (nh/emacs-dir-path "bin") "get-finder-dir.scpt")))
-    (string-trim-right
-     (shell-command-to-string
-      (format "/usr/bin/osascript %s" script-file)))))
-
 ;;* spelling
 (defvar nh/enable-flyspell-p "enable flyspell in various modes")
 
