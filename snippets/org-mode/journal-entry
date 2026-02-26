@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: journal-entry
+# key: org
+# --
+* `(format-time-string "<%Y-%m-%d %a>")` $1 :journal:
