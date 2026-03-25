@@ -1452,6 +1452,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :models '(
               "gpt-4.1"
               "gpt-4.1-mini"
+<<<<<<< HEAD
               "gpt-5-mini"
               "gpt-5"
               "gpt-5-chat"
@@ -1464,6 +1465,12 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
               "gpt-5.2-codex"
               "claude-opus-4-5-20251101-v1"
               "claude-sonnet-4-5-20250929-v1"
+=======
+              "gpt-5.3-chat"
+              "gpt-5.4"
+              "claude-opus-4-6-v1"
+              "claude-sonnet-4-6"
+>>>>>>> 9ac52f7 (update gptel modes)
               "claude-haiku-4-5-20251001-v1"
               ))
   (gptel-make-openai "litellm-dev"
@@ -1477,7 +1484,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
               ))
   ;; set default model and backend
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
-  (setq gptel-model 'gpt-5.2-chat))
+  (setq gptel-model 'gpt-5.4))
 
 ;;* transient
 
