@@ -1452,25 +1452,10 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :models '(
               "gpt-4.1"
               "gpt-4.1-mini"
-<<<<<<< HEAD
-              "gpt-5-mini"
-              "gpt-5"
-              "gpt-5-chat"
-              "gpt-5-codex"
-              "gpt-5.1"
-              "gpt-5.1-chat"
-              "gpt-5.1-codex"
-              "gpt-5.2"
-              "gpt-5.2-chat"
-              "gpt-5.2-codex"
-              "claude-opus-4-5-20251101-v1"
-              "claude-sonnet-4-5-20250929-v1"
-=======
               "gpt-5.3-chat"
               "gpt-5.4"
               "claude-opus-4-6-v1"
               "claude-sonnet-4-6"
->>>>>>> 9ac52f7 (update gptel modes)
               "claude-haiku-4-5-20251001-v1"
               ))
   (gptel-make-openai "litellm-dev"
