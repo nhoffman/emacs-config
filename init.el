@@ -1451,9 +1451,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :key (lambda () (nh/get-netrc-password "litellm.dlmp.uw.edu"))
     :models '(
               "gpt-4.1"
-              "gpt-4.1-mini"
-              "gpt-5.3-chat"
-              "gpt-5.4"
+              "gpt-5.5"
               "claude-opus-4-6-v1"
               "claude-sonnet-4-6"
               "claude-haiku-4-5-20251001-v1"
@@ -1469,7 +1467,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
               ))
   ;; set default model and backend
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
-  (setq gptel-model 'gpt-5.4))
+  (setq gptel-model 'gpt-5.5))
 
 ;;* transient
 
