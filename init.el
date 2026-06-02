@@ -449,6 +449,21 @@ Or nil when nothing is found."
              (format " across %d lines" lines)
            ""))))))
 
+(defun nh/listify-region (beg end)
+  "Replace words in the region with a comma-delimited list.
+Whitespace separators include spaces, tabs, and newlines. Extra
+whitespace is removed."
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (user-error "No active region")))
+  (let* ((text (buffer-substring-no-properties beg end))
+         (words (split-string text "[ \t\n\r]+" t))
+         (result (mapconcat
+                  (lambda (word) (concat "'" word "'")) words ", ")))
+    (delete-region beg end)
+    (insert result)))
+
 ;;* spelling
 (defvar nh/enable-flyspell-p "enable flyspell in various modes")
 
