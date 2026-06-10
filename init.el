@@ -250,7 +250,7 @@
 (nh/prepend-path (nh/emacs-dir-path "bin"))
 (add-to-list 'exec-path (nh/emacs-dir-path "bin"))
 
-;;* other utility functions
+;;* emacs utility functions
 
 (defun nh/advice-unadvice (sym)
   "Remove all advices from symbol SYM."
@@ -263,6 +263,17 @@
 (unless
     (equal (string-trim (shell-command-to-string "lsb_release -rs")) "18.04")
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
+
+;;* system utility functions
+
+(defun nh/install-dotfiles ()
+  "Execute ~/dotfiles/install_dotfiles.zsh with ~/dotfiles as cwd."
+  (interactive)
+  (let ((default-directory (expand-file-name "~/dotfiles/")))
+    (call-process (expand-file-name "install_dotfiles.zsh" default-directory)
+                  nil
+                  "*nh/install-dotfiles*"
+                  t)))
 
 ;;* dired
 ;; use 'ls --dired' if available
