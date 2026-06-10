@@ -926,7 +926,7 @@ the path."
               ;; don't redefine =M-<left>= and =M-<right>= in this mode
               ("M-<right>" . nil)
               ("M-<left>" . nil))
-  :init  (setq markdown-command "multimarkdown")
+  :init  (setq markdown-command "pandoc -t html5")
   :config
   ;; (set-face-background 'markdown-pre-face "grey20")
   ;; (set-face-background 'markdown-markup-face "grey20")
