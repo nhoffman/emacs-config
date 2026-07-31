@@ -600,8 +600,8 @@ whitespace is removed."
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
+   consult-source-bookmark consult-source-file-register
+   consult-source-recent-file consult-source-project-recent-file
    ;; :preview-key (kbd "M-.")
    :preview-key '(:debounce 0.4 any))
 
@@ -704,20 +704,27 @@ whitespace is removed."
 ;;   (global-company-mode)
 ;;   :hook (python-mode . company-mode))
 
-;; * elgot
+;;* eglot
+(defun nh/python-disable-inlay-hints ()
+  "Disable Eglot inlay hints by default in Python buffers."
+  (when (derived-mode-p 'python-base-mode)
+    (eglot-inlay-hints-mode -1)))
+
 (use-package eglot
-  :ensure t
+  :ensure nil
+  :hook
+  (python-base-mode . eglot-ensure)
+  (eglot-managed-mode . nh/python-disable-inlay-hints)
   :config
   (setq eldoc-echo-area-use-multiline-p nil)
+  ;; Keep Basedpyright for language features; let Ruff own diagnostics.
+  (add-to-list 'eglot-stay-out-of 'flymake)
   (setq-default
    eglot-workspace-configuration
-   '(:basedpyright (:typeCheckingMode "off")))
+   '(:basedpyright (:analysis (:typeCheckingMode "off"))))
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode)
-                 "basedpyright-langserver" "--stdio"))
-  ;; (add-to-list 'eglot-server-programs
-  ;;              '(python-mode "jedi-language-server"))
-  )
+                 "basedpyright-langserver" "--stdio")))
 
 ;;* elisp
 (use-package paredit
@@ -737,154 +744,64 @@ whitespace is removed."
 ;;   (explain-pause-mode))
 
 ;;* python
-(defcustom nh/py3-venv
-  (nh/emacs-dir-path "py3-env") "virtualenv for flycheck, etc")
 
 (defun nh/uv-tool-install (package)
-  "Install a package using uv tool"
+  "Install or update PACKAGE using `uv tool install'."
   (interactive "sPackage name: ")
-  (let ((bufname (generate-new-buffer (format "*uv tool install %s*" package)))
-        (command (format "uv tool install -U %s" package)))
-    (if (= 0 (call-process-shell-command command nil bufname t))
-        (message "installation complete, see output in %s" bufname)
-      (switch-to-buffer bufname)
-      )))
+  (let ((buffer (generate-new-buffer (format "*uv tool install %s*" package))))
+    (if (= 0 (call-process "uv" nil buffer t "tool" "install" "-U" package))
+        (message "Installation complete; see %s" (buffer-name buffer))
+      (switch-to-buffer buffer))))
 
-;; (defcustom nh/venv-setup-packages
-;;   '("pip" "wheel" "'python-lsp-server[all]'" "autoflake" "mypy")
-;;   "packages to install using `nh/venv-setup'")
-
-(defun nh/py3-venv-bin (name)
-  "Return the path to an executable installed in `nh/py3-venv'"
-  (nh/path-join nh/py3-venv "bin" name))
+(defun nh/python-mode-setup ()
+  "Set buffer-local defaults for Python buffers."
+  (setq-local tab-width 4
+              python-indent-offset 4
+              display-fill-column-indicator-column 80))
 
 (use-package ruff-format
   :ensure t)
 
 (use-package flymake-ruff
   :ensure t
-  :hook (python-mode . flymake-ruff-load))
+  :hook (python-base-mode . flymake-ruff-load))
 
-(use-package pyvenv
-  :ensure t)
-
-(use-package python-mode
-  :after (:all eglot flymake-ruff)
-  :preface
-  (defun nh/python-shell-make-comint (orig-fun &rest args)
-    "Fix issue where python code block evaluation freezes on a mac in
-     org-mode using :session. This as a bug in prompt detection
-     in python.el: apparently the startup message for the python
-     interpreter is not being recognized. Launching the
-     interpreter with python -q suppresses the prompt, but the
-     variable python-shell-interpreter-args does not appear to be
-     respected. So the brute force solution is to advise the
-     function that sets up inferior-python-mode to add -q:"
-    (setq args (append '("python3 -q") (cdr args)))
-    (apply orig-fun args))
-  (if (eq system-type 'darwin)
-      (progn
-        (advice-add 'python-shell-make-comint :around #'nh/python-shell-make-comint)
-        (setq python-shell-completion-native-enable nil)))
-  :mode
-  ("\\.py$'" . python-mode)
-  ("\\.wsgi$" . python-mode)
-  ("\\.cgi$" . python-mode)
-  ("SConstruct" . python-mode)
-  ("SConscript" . python-mode)
+(use-package pet
+  :ensure t
   :config
-  (setq python-shell-interpreter "python3")
-  (setq tab-width 4)
-  (setq python-indent-guess-indent-offset t)
-  (setq python-indent-guess-indent-offset-verbose nil)
-  (setq python-indent-offset tab-width)
-  (setq display-fill-column-indicator-column 80)
-  :hook (python-mode . flymake-mode)
-  )
+  ;; Configure project-local Python executables before Eglot and Ruff start.
+  (add-hook 'python-base-mode-hook #'pet-mode -10))
 
-(defun nh/venv-list (basedir)
-  "Return a list of paths to virtualenvs in 'basedir' or nil if
- none can be found"
-  (interactive)
-  (let ((fstr "find %s -path '*bin/activate' -maxdepth 5")
-        (pth (replace-regexp-in-string "/$" "" basedir)))
-    (mapcar (lambda (string)
-              (replace-regexp-in-string "/bin/activate$" "" string))
-            (cl-remove-if
-             (lambda (string) (= (length string) 0))
-             (split-string (shell-command-to-string (format fstr pth)) "\n")))
-    ))
-
-(defcustom nh/python-eglot-dependences '("ruff" "basedpyright")
-  "Python-related packages to install to the system")
-
-(defun nh/venv-activate-eglot ()
-  "Activate eglot after installing dependencies."
-  (interactive)
-  (dolist (package nh/python-eglot-dependences)
-    (nh/uv-tool-install package))
-  (eglot-ensure))
-
-(defun nh/venv-activate ()
-  "Activate the virtualenv in the current project, or in
-`default-directory' if not in a project. Prompts for a selection
-if there is more than one option."
-  (interactive)
-  (let* ((thisdir (or (projectile-project-root) default-directory))
-         (venvs (append
-                 (nh/venv-list thisdir)
-                 (list nh/py3-venv)))
-	 (venv (completing-read "choose a virtualenv: " venvs)))
-    (pyvenv-activate venv)
-    (message "Activated virtualenv %s (%s)"
-	     venv (string-trim (shell-command-to-string "python3 --version")))))
-
-(defun nh/venv-setup ()
-  "Install or update packages specified in `nh/venv-setup-packages'
-to the active virtualenv. Prompts for a selection if no
-virtualenv is active."
-  (interactive)
-  (unless pyvenv-virtual-env (nh/venv-activate))
-  (let ((bufname nil)
-	(packages (mapconcat 'identity nh/venv-setup-packages " ")))
-    (if (nh/pylsp-installed-p)
-        (message "dependencies already installed")
-      (if (y-or-n-p (format "Install dependencies to %s?" pyvenv-virtual-env))
-          (progn (setq bufname (generate-new-buffer
-                                (format "*%s*" pyvenv-virtual-env)))
-                 (if (= 0 (call-process-shell-command
-	                   (format "uv pip install -U --python %sbin/python %s"
-                                   pyvenv-virtual-env packages)
-	                   nil bufname t))
-                     (message "installation complete, see output in %s" bufname)
-                   (switch-to-buffer bufname)))))))
-
-(defun nh/pip-install (package)
-  "Pip install a python package in a virtualenv. Prompts for a
-selection if no virtualenv is active."
-  (interactive "sPackage name: ")
-  (unless pyvenv-virtual-env (nh/venv-activate))
-  (let ((bufname (generate-new-buffer (format "*%s*" pyvenv-virtual-env)))
-        (command (format "uv pip install -U --python %sbin/python %s"
-                         pyvenv-virtual-env package)))
-    (if (= 0 (call-process-shell-command command nil bufname t))
-        (message "installation complete, see output in %s" bufname)
-      (switch-to-buffer bufname))))
+(use-package python
+  :ensure nil
+  :mode
+  ("\\.wsgi\\'" . python-mode)
+  ("\\.cgi\\'" . python-mode)
+  ("SConstruct\\'" . python-mode)
+  ("SConscript\\'" . python-mode)
+  :custom
+  (python-shell-interpreter "python3")
+  (python-shell-interpreter-args "-i -q")
+  (python-indent-guess-indent-offset t)
+  (python-indent-guess-indent-offset-verbose nil)
+  :hook
+  (python-base-mode . flymake-mode)
+  (python-base-mode . nh/python-mode-setup))
 
 (defun nh/isort-region-or-buffer ()
-  "Apply isort to the current region or buffer"
+  "Apply PET's project-local isort to the region or buffer."
   (interactive)
-  (let* ((isort-cmd "isort -"))
-    (unless (region-active-p)
-      (mark-whole-buffer))
+  (let ((beg (if (use-region-p) (region-beginning) (point-min)))
+        (end (if (use-region-p) (region-end) (point-max)))
+        (isort (or (and (bound-and-true-p pet-mode)
+                        (pet-executable-find "isort"))
+                   (executable-find "isort"))))
+    (unless isort
+      (user-error "Could not find isort in the project or exec-path"))
     (shell-command-on-region
-     (region-beginning) (region-end)  ;; beginning and end of region or buffer
-     isort-cmd                        ;; command and parameters
-     (current-buffer)                 ;; output buffer
-     t                                ;; replace?
-     "*isort errors*"                 ;; name of the error buffer
-     t)                               ;; show error buffer?
-    ))
+     beg end
+     (format "%s -" (shell-quote-argument isort))
+     (current-buffer) t "*isort errors*" t)))
 
 ;;* javascript/json
 (use-package json-mode
@@ -1698,16 +1615,23 @@ available. Otherwise will try normal tab-indent."
     ("x" nh/org-link-file-delete "delete linked file"))
 
   (defhydra hydra-python (:color blue :columns 4 :post (redraw-display))
-    "hydra-python"
+    "Python"
     ("RET" redraw-display "<quit>")
-    ("i" nh/isort-region-or-buffer "isort region or buffer")
-    ("I" nh/pip-install "pip install package")
-    ("j" consult-imenu "consult-imenu")
-    ("P" python-mode "python-mode")
-    ("r" ruff-format-region "ruff-format-region")
-    ("R" ruff-format-buffer "ruff-format-buffer")
-    ("v" nh/venv-activate "nh/venv-activate")
-    ("V" nh/venv-setup "nh/venv-setup"))
+    ("a" eglot-code-actions "code actions")
+    ("b" xref-go-back "go back")
+    ("d" xref-find-definitions "definition")
+    ("e" eglot "start Eglot")
+    ("f" xref-find-references "references")
+    ("h" eglot-inlay-hints-mode "toggle type hints")
+    ("i" nh/isort-region-or-buffer "sort imports")
+    ("I" nh/uv-tool-install "install uv tool")
+    ("j" consult-imenu "symbols in file")
+    ("n" eglot-rename "rename")
+    ("r" ruff-format-region "format region")
+    ("R" ruff-format-buffer "format buffer")
+    ("s" xref-find-apropos "symbols in project")
+    ("v" pet-verify-setup "verify environment")
+    ("V" pet-mode "toggle PET"))
 
   (defhydra hydra-yasnippet (:color blue :columns 4 :post (redraw-display))
     "hydra-yasnippet"
@@ -1793,7 +1717,7 @@ available. Otherwise will try normal tab-indent."
   (defhydra hydra-eglot (:color blue :columns 4 :post (redraw-display))
     "hydra-eglot"
     ("RET" redraw-display "<quit>")
-    ("e" nh/venv-activate-eglot "activate eglot")
+    ("e" eglot "activate eglot")
     ("r" eglot-rename "eglot-rename")
     ("x" eglot-shutdown "eglot-shutdown"))
 
