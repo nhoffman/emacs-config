@@ -1498,7 +1498,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
               ))
   ;; set default model and backend
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
-  (setq gptel-model 'gpt-5.5))
+  (setq gptel-model 'gpt-5.6-terra))
 
 ;;* transient
 
