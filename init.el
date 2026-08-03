@@ -768,6 +768,12 @@ whitespace is removed."
 
 (use-package pet
   :ensure t
+  :custom
+  ;; Avoid slow, repeated recursive searches for optional config files;
+  ;; uv projects keep pyproject.toml and .venv at or above the buffer directory.
+  (pet-find-file-functions
+   '(pet-find-file-from-project-root
+     pet-locate-dominating-file))
   :config
   ;; Configure project-local Python executables before Eglot and Ruff start.
   (add-hook 'python-base-mode-hook #'pet-mode -10))
