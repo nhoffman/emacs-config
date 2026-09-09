@@ -1,3 +1,5 @@
+;;; init.el --- Personal Emacs configuration -*- lexical-binding: t; -*-
+
 ;;* dependencies
 ;; provides string-trim
 (eval-when-compile (require 'subr-x))
@@ -105,27 +107,34 @@
 (defun nh/fix-frame (&optional frame)
   "Apply platform-specific settings."
   (interactive)
-  (cond ((string= "ns" window-system) ;; cocoa
-         (progn
-           (message (format "** running %s windowing system" window-system))
-           ;; key bindings for mac - see
-           ;; http://stuff-things.net/2009/01/06/emacs-on-the-mac/
-           ;; http://osx.iusethis.com/app/carbonemacspackage
-           (set-keyboard-coding-system 'mac-roman)
-           (setq mac-option-modifier 'meta)
-           (setq mac-command-key-is-meta nil)
-           (nh/set-default-font-verbosely "Menlo-15")
-           (toggle-frame-maximized)))
-        ((string= "x" window-system)
-         (progn
-           (message (format "** running %s windowing system" window-system))
-           (set-default-font-verbosely "Liberation Mono-10")
-           ;; M-w or C-w copies to system clipboard
-           ;; see http://www.gnu.org/software/emacs/elisp/html_node/Window-System-Selections.html
-           (setq x-select-enable-clipboard t)))
-        (t
-         (message "** running in terminal mode"))))
-(nh/fix-frame)
+  (with-selected-frame (or frame (selected-frame))
+    (set-cursor-color "red")
+    (cond ((string= "ns" window-system) ;; cocoa
+           (progn
+             (message (format "** running %s windowing system" window-system))
+             ;; key bindings for mac - see
+             ;; http://stuff-things.net/2009/01/06/emacs-on-the-mac/
+             ;; http://osx.iusethis.com/app/carbonemacspackage
+             (set-keyboard-coding-system 'mac-roman)
+             (setq mac-option-modifier 'meta)
+             (setq mac-command-key-is-meta nil)
+             (nh/set-default-font-verbosely "Menlo-15")
+             (toggle-frame-maximized)))
+          ((string= "x" window-system)
+           (progn
+             (message (format "** running %s windowing system" window-system))
+             (set-default-font-verbosely "Liberation Mono-10")
+             ;; M-w or C-w copies to system clipboard
+             ;; see http://www.gnu.org/software/emacs/elisp/html_node/Window-System-Selections.html
+             (setq x-select-enable-clipboard t)))
+          (t
+           (message "** running in terminal mode")))))
+
+;; A daemon has no graphical frame while the init file is loaded.  Configure
+;; each client frame when it is created instead.
+(if (daemonp)
+    (add-hook 'after-make-frame-functions #'nh/fix-frame)
+  (nh/fix-frame))
 
 (setq inhibit-splash-screen t)
 (setq initial-scratch-message nil)
@@ -170,10 +179,9 @@
 
 ;;* appearance and GUI
 (blink-cursor-mode 1)
-(set-cursor-color "red")
 
 (menu-bar-mode -1)   ;; hide menu bar
-(scroll-bar-mode -1) ;; hide scroll bar
+;; (scroll-bar-mode -1) ;; hide scroll bar TODO, error in 31.1
 (tool-bar-mode -1)   ;; hide tool bar
 
 (setq column-number-mode t)
@@ -217,12 +225,18 @@
 (use-package spacemacs-theme
   :ensure t
   :defer t
-  :init (load-theme nh/theme-dark t))
+  :init
+  ;; spacemacs-theme 0.3 predates Emacs 31's lexical-binding warning.
+  ;; Keep the package manager's copy untouched and suppress only this warning
+  ;; while the theme is loaded.
+  (let ((warning-inhibit-types
+         (cons '(files missing-lexbind-cookie) warning-inhibit-types)))
+    (load-theme nh/theme-dark t)))
 
 (defun nh/close-warnings ()
   "Close *Warnings* window"
   (interactive)
-  (when-let ((warnings-window (get-buffer-window "*Warnings*")))
+  (when-let* ((warnings-window (get-buffer-window "*Warnings*")))
     (delete-window warnings-window)))
 
 ;;* execution environment
