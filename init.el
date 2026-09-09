@@ -851,23 +851,17 @@ the path."
 ;; (use-package poly-R
 ;;   :ensure t)
 
-(use-package markdown-mode
-  :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md" . gfm-mode)
-         ("\\.md" . markdown-mode)
-         ("\\.markdown" . markdown-mode))
-  :bind (:map markdown-mode-map
+(use-package markdown-ts-mode
+  :ensure nil
+  :mode ("\\.md\\'" "\\.mdx\\'" "\\.markdown\\'")
+  :bind (:map markdown-ts-mode-map
               ;; don't redefine =M-<left>= and =M-<right>= in this mode
               ("M-<right>" . nil)
               ("M-<left>" . nil))
-  :init  (setq markdown-command "pandoc -t html5")
+  :custom
+  (markdown-ts-default-converter '(html . pandoc))
   :config
-  ;; (set-face-background 'markdown-pre-face "grey20")
-  ;; (set-face-background 'markdown-markup-face "grey20")
-  ;; (set-face-background 'markdown-code-face "grey20")
-  ;; (set-face-background 'markdown-inline-code-face "grey20")
-  ;; (set-face-foreground 'markdown-markup-face "lavender")
-  )
+  (require 'markdown-ts-mode-x))
 
 ;; https://plantarum.ca/2021/10/03/emacs-tutorial-rmarkdown/
 (use-package poly-markdown
