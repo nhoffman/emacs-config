@@ -276,10 +276,13 @@
                   t)))
 
 ;;* dired
-;; use 'ls --dired' if available
-(setq dired-use-ls-dired
-      (if (eq (call-process-shell-command "ls --dired" nil nil nil) 0)
-	  t nil))
+(let ((ls-program (or (executable-find "gls")
+                      (executable-find "ls"))))
+  (setq insert-directory-program ls-program
+        dired-use-ls-dired
+        (and ls-program
+             (eq 0 (call-process ls-program nil nil nil
+                                 "--dired" "-d" ".")))))
 ;; dired performs file renaming using underlying version control system
 (setq dired-vc-rename-file t)
 
