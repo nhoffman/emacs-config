@@ -42,6 +42,25 @@
     (shell-command (format "\"%s\" \"%s\" \"%s\"" interpreter script thisdir))))
 
 ;;* Package management
+;; Bootstrap straight before package.el so the two managers do not activate
+;; competing versions during startup.  Package.el manages archive packages;
+;; straight manages only packages declared with :straight below.
+;; from https://github.com/radian-software/straight.el
+(setq straight-enable-package-integration nil)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
 (require 'package)
 (setq package-archives
       '(("ELPA" . "https://tromey.com/elpa/")
@@ -59,35 +78,7 @@
 (setq package-check-signature nil) ;; TODO: fix this properly
 (package-initialize)
 
-;; bootstrap use-package use-package is built in as of emacs 29; at
-;; some point this can be removed
-(unless (package-installed-p 'use-package)
-  (if (yes-or-no-p "use-package is not installed yet - install it? ")
-      (progn
-        (message "** installing use-package")
-        (package-refresh-contents)
-        (package-install 'use-package))
-    (message "** defining fake use-package macro")
-    (defmacro use-package (pkg &rest args)
-      (warn
-       "use-package is not installed - could not activate %s"
-       (symbol-name pkg)))))
-
-;; bootstrap straight
-;; from https://github.com/radian-software/straight.el
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+(require 'use-package)
 
 ;; save customizations here instead of init.el
 (setq custom-file (nh/emacs-dir-path "custom.el"))
@@ -1476,7 +1467,6 @@ available. Otherwise will try normal tab-indent."
         (indent-for-tab-command)))
   :straight
   (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
-  :ensure t
   :config (add-to-list 'copilot-indentation-alist
                        '(sql-mode sql-indent-offset))
   :hook (python-mode
