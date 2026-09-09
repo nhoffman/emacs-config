@@ -172,7 +172,6 @@
 (blink-cursor-mode 1)
 
 (menu-bar-mode -1)   ;; hide menu bar
-;; (scroll-bar-mode -1) ;; hide scroll bar TODO, error in 31.1
 (tool-bar-mode -1)   ;; hide tool bar
 
 (setq column-number-mode t)
