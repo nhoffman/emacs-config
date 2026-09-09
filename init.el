@@ -194,35 +194,28 @@
 ;; use list-faces-display to show preview of all faces for the current theme
 ;; use M-x customize-group to modify theme elements in specific modes
 
-(defvar nh/theme-dark 'spacemacs-dark)
-(defvar nh/theme-light 'spacemacs-light)
+(use-package ef-themes
+  :ensure t)
 
-(defun nh/hex-to-rgb (hexcolor)
-  "Return a list of decimal RGB values from a hex color name"
-  (mapcar (lambda (start)
-            (string-to-number
-             (substring-no-properties hexcolor start (+ start 2)) 16))
-          '(1 3 5)))
+(defvar nh/theme-dark 'ef-duo-dark)
+(defvar nh/theme-light 'ef-cyprus)
+
+(defun nh/load-theme (theme)
+  "Load THEME after disabling the other preferred theme."
+  (dolist (enabled-theme (list nh/theme-light nh/theme-dark))
+    (when (custom-theme-enabled-p enabled-theme)
+      (disable-theme enabled-theme)))
+  (load-theme theme t))
 
 (defun nh/toggle-theme ()
   "Toggle theme between preferred light and dark themes"
   (interactive)
-  ;; sum the RGB values of the current theme's background color and guess that
-  ;; the current theme is dark if < 300
-  (if (< (apply '+ (nh/hex-to-rgb (face-attribute 'default :background))) 300)
-      (load-theme nh/theme-light t)
-    (load-theme nh/theme-dark t)))
+  (nh/load-theme
+   (if (custom-theme-enabled-p nh/theme-dark)
+       nh/theme-light
+     nh/theme-dark)))
 
-(use-package spacemacs-theme
-  :ensure t
-  :defer t
-  :init
-  ;; spacemacs-theme 0.3 predates Emacs 31's lexical-binding warning.
-  ;; Keep the package manager's copy untouched and suppress only this warning
-  ;; while the theme is loaded.
-  (let ((warning-inhibit-types
-         (cons '(files missing-lexbind-cookie) warning-inhibit-types)))
-    (load-theme nh/theme-dark t)))
+(nh/load-theme nh/theme-dark)
 
 (defun nh/close-warnings ()
   "Close *Warnings* window"
