@@ -198,7 +198,7 @@
   :ensure t)
 
 (defvar nh/theme-dark 'ef-duo-dark)
-(defvar nh/theme-light 'ef-cyprus)
+(defvar nh/theme-light 'ef-light)
 
 (defun nh/load-theme (theme)
   "Load THEME after disabling the other preferred theme."
