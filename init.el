@@ -650,6 +650,10 @@ whitespace is removed."
   :ensure t
   :init
   ;; (setq projectile-completion-system 'ivy)
+  ;; Include files excluded by .gitignore while still omitting .git itself.
+  (setq projectile-git-command "git ls-files -zco")
+  (setq projectile-git-fd-args
+        "-H -I -0 -E .git -tf --strip-cwd-prefix -c never")
   :config
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (add-to-list 'projectile-globally-ignored-modes "fundamental-mode")
