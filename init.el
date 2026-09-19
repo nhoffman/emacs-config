@@ -1232,6 +1232,24 @@ convert to .docx with pandoc"
 (use-package magit
   :ensure t)
 
+(use-package difftastic
+  :ensure t
+  :after magit
+  :custom
+  ;; always use the full window width
+  (difftastic-requested-window-width-function
+   #'difftastic-rerun-requested-window-width)
+  ;; M-d replaces the Magit window instead of creating a split
+  (difftastic-display-buffer-function
+   (lambda (buffer _requested-width)
+     (pop-to-buffer-same-window buffer)))
+  :bind
+  (:map difftastic-mode-map
+        ("M-RET" . difftastic-diff-visit-file-other-window))
+  :config
+  (require 'difftastic-bindings)
+  (difftastic-bindings-mode 1))
+
 (use-package git-timemachine
   :ensure t)
 
