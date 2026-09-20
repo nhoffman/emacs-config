@@ -75,7 +75,6 @@
 
 (setq package-native-compile t)
 (setq package-menu-hide-low-priority t)
-(setq package-check-signature nil) ;; TODO: fix this properly
 (package-initialize)
 
 (require 'use-package)
@@ -103,10 +102,6 @@
     (cond ((string= "ns" window-system) ;; cocoa
            (progn
              (message (format "** running %s windowing system" window-system))
-             ;; key bindings for mac - see
-             ;; http://stuff-things.net/2009/01/06/emacs-on-the-mac/
-             ;; http://osx.iusethis.com/app/carbonemacspackage
-             (set-keyboard-coding-system 'mac-roman)
              (setq mac-option-modifier 'meta)
              (setq mac-command-key-is-meta nil)
              (nh/set-default-font-verbosely "Menlo-15")
@@ -117,7 +112,7 @@
              (set-default-font-verbosely "Liberation Mono-10")
              ;; M-w or C-w copies to system clipboard
              ;; see http://www.gnu.org/software/emacs/elisp/html_node/Window-System-Selections.html
-             (setq x-select-enable-clipboard t)))
+             (setq select-enable-clipboard t)))
           (t
            (message "** running in terminal mode")))))
 
@@ -254,13 +249,6 @@
   (interactive "aFunction symbol: ")
   (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
 
-;; fix errors with connection to package repositories
-;; see https://github.com/melpa/melpa/issues/7238
-;; suppress on Ubuntu 18.04 to prevent errors
-(unless
-    (equal (string-trim (shell-command-to-string "lsb_release -rs")) "18.04")
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
-
 ;;* system utility functions
 
 (defun nh/install-dotfiles ()
@@ -301,7 +289,7 @@
 
 (setq mouse-wheel-scroll-amount '(3 ((shift) . 3))) ;; number of lines at a time
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-(setq mouse-wheel-follow-mosue 't) ;; scroll window under mouse
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
 (setq scroll-step 1) ;; keyboard scroll one line at a time
 (setq scroll-conservatively 1) ;; scroll by one line to follow cursor off screen
 (setq scroll-margin 2) ;; Start scrolling when 2 lines from top/bottom
@@ -1085,7 +1073,6 @@ convert to .docx with pandoc"
         ("C-c C-v" . verb-command-map))
   :config
   (setq org-agenda-files `(,nh/org-index))
-  (setq org-confirm-babel-evaluate nil)
   (setq org-src-fontify-natively t)
   (setq org-edit-src-content-indentation 0)
   (setq org-adapt-indentation nil)  ;; headlines are flush left
@@ -1375,10 +1362,6 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
         (kill-matching-buffers
          (format "^\\*%s" nh/gptel-buffer-name) nil t)))
 
-  (defun nh/gptel-get-api-key ()
-    (nh/get-netrc-val
-     (gptel-backend-host gptel-backend) "password"))
-
   :config
   (setq-default gptel-default-mode 'org-mode)
   ;; (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
@@ -1587,7 +1570,7 @@ available. Otherwise will try normal tab-indent."
     ("g" groovy-mode "groovy-mode")
     ("j" jinja2-mode "jinja2-mode")
     ("k" markdown-mode "markdown-mode")
-    ("l" lineum-mode "lineum-mode")
+    ("l" display-line-numbers-mode "display-line-numbers-mode")
     ("m" moinmoin-mode "moinmoin-mode")
     ("o" org-mode "org-mode")
     ("O" outline-minor-mode "outline-minor-mode")
@@ -1685,12 +1668,6 @@ available. Otherwise will try normal tab-indent."
     ("RET" redraw-display "<quit>")
     ("a" gptel-add "gptel-add")
     ("c" nh/gptel-new-chat "nh/gptel-new-chat")
-    ("d" (dired nh/gptel-chat-dir) "open chat dir")
-    ("e"
-     (lambda ()
-       (interactive)
-       (nh/gptel-set-endpoint nil gptel-model))
-     "choose an endpoint")
     ("g"
      (lambda ()
        (interactive)
