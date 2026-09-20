@@ -190,7 +190,7 @@
        nh/theme-light
      nh/theme-dark)))
 
-(nh/load-theme nh/theme-dark)
+(nh/load-theme nh/theme-light)
 
 (defun nh/close-warnings ()
   "Close *Warnings* window"
