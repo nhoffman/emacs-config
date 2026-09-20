@@ -42,25 +42,9 @@
     (shell-command (format "\"%s\" \"%s\" \"%s\"" interpreter script thisdir))))
 
 ;;* Package management
-;; Bootstrap straight before package.el so the two managers do not activate
-;; competing versions during startup.  Package.el manages archive packages;
-;; straight manages only packages declared with :straight below.
-;; from https://github.com/radian-software/straight.el
-(setq straight-enable-package-integration nil)
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
+;; Emacs activates packages before loading init.el.  `use-package' and
+;; `package-vc' are built in; :ensure installs archive packages and :vc installs
+;; packages directly from their upstream repositories.
 (require 'package)
 (setq package-archives
       '(("ELPA" . "https://tromey.com/elpa/")
@@ -75,9 +59,6 @@
 
 (setq package-native-compile t)
 (setq package-menu-hide-low-priority t)
-(package-initialize)
-
-(require 'use-package)
 
 ;; save customizations here instead of init.el
 (setq custom-file (nh/emacs-dir-path "custom.el"))
@@ -728,10 +709,8 @@ whitespace is removed."
 
 ;;* debugging emacs
 ;; (use-package explain-pause-mode
-;;   :straight (explain-pause-mode
-;;              :type git
-;;              :host github
-;;              :repo "lastquestion/explain-pause-mode")
+;;   :vc (:url "https://github.com/lastquestion/explain-pause-mode"
+;;        :rev :newest)
 ;;   :config
 ;;   (explain-pause-mode))
 
@@ -1293,7 +1272,8 @@ convert to .docx with pandoc"
     (interactive "r")
     (shell-command-on-region start end "~/.emacs.d/bin/anki-qa-to-note.py" t t))
   :defer t
-  :straight (:repo "anki-editor/anki-editor"))
+  :vc (:url "https://github.com/anki-editor/anki-editor"
+       :rev :newest))
 
 ;;* OpenAI tools
 
@@ -1316,9 +1296,8 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
 (defvar nh/gptel-buffer-name "gptel")
 
 (use-package gptel
-  :straight '(gptel :type git
-                    :host github
-                    :repo "karthink/gptel")
+  :vc (:url "https://github.com/karthink/gptel"
+       :rev :newest)
   :bind (("C-c C-g" . gptel-menu)
          ("C-c C-r" . gptel-rewrite))
   :preface
@@ -1456,8 +1435,8 @@ available. Otherwise will try normal tab-indent."
     (interactive)
     (or (copilot-accept-completion)
         (indent-for-tab-command)))
-  :straight
-  (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :vc (:url "https://github.com/zerolfx/copilot.el"
+       :rev :newest)
   :config (add-to-list 'copilot-indentation-alist
                        '(sql-mode sql-indent-offset))
   :hook (python-mode
