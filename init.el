@@ -164,7 +164,8 @@
 (show-paren-mode 1)
 
 (use-package rainbow-delimiters
-  :ensure t)
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; use list-faces-display to show preview of all faces for the current theme
 ;; use M-x customize-group to modify theme elements in specific modes
@@ -672,7 +673,10 @@ whitespace is removed."
               display-fill-column-indicator-column 80))
 
 (use-package ruff-format
-  :ensure t)
+  :ensure t
+  :commands (ruff-format-buffer
+             ruff-format-region
+             ruff-format-on-save-mode))
 
 (use-package flymake-ruff
   :ensure t
@@ -723,7 +727,8 @@ whitespace is removed."
 
 ;;* javascript/json
 (use-package json-mode
-  :ensure t)
+  :ensure t
+  :commands json-mode)
 
 (add-hook 'js-mode-hook
           (lambda ()
@@ -1119,11 +1124,14 @@ convert to .docx with pandoc"
 
 ;;* csv-mode
 (use-package csv-mode
-  :ensure t)
+  :ensure t
+  :mode (("\\.[Cc][Ss][Vv]\\'" . csv-mode)
+         ("\\.tsv\\'" . tsv-mode)))
 
 ;;* tramp
 (use-package tramp-theme
-  :ensure t)
+  :ensure t
+  :defer t)
 
 ;;* misc packages
 (use-package yasnippet
@@ -1137,7 +1145,8 @@ convert to .docx with pandoc"
   :mode ("\\.yasnippet" . snippet-mode))
 
 (use-package magit
-  :ensure t)
+  :ensure t
+  :commands magit-status)
 
 (use-package difftastic
   :ensure t
@@ -1160,7 +1169,10 @@ convert to .docx with pandoc"
   (difftastic-bindings-mode 1))
 
 (use-package git-timemachine
-  :ensure t)
+  :ensure t
+  :commands (git-timemachine
+             git-timemachine-toggle
+             git-timemachine-switch-branch))
 
 (use-package smart-mode-line
   :ensure t
@@ -1172,7 +1184,8 @@ convert to .docx with pandoc"
   (sml/setup))
 
 (use-package tex-mode
-  :ensure auctex)
+  :ensure auctex
+  :defer t)
 
 (use-package groovy-mode
   :ensure t
@@ -1190,17 +1203,22 @@ convert to .docx with pandoc"
   :config (which-key-mode))
 
 (use-package yaml-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.\\(e?ya?\\|ra\\)ml\\'")
 
 (use-package jinja2-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.jinja2\\'")
 
 (use-package dockerfile-mode
   :ensure t
   :mode ("Dockerfile" . dockerfile-mode))
 
 (use-package yagist
-  :ensure t)
+  :ensure t
+  :commands (yagist-region-or-buffer
+             yagist-region-or-buffer-private
+             yagist-list))
 
 (use-package expand-region
   :ensure t
