@@ -537,7 +537,6 @@ whitespace is removed."
   :ensure t
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (("C-x b" . consult-buffer)
-         ;; ("C-s" . consult-line) ;; swiper is better
          ("M-g M-g" . consult-goto-line)
          ("M-g g" . consult-goto-line)
          ("M-y" . consult-yank-pop))
@@ -587,33 +586,10 @@ whitespace is removed."
          ("M-A" . marginalia-cycle))
   :init (marginalia-mode))
 
-;;* search and navigation (ivy, counsel, and friends)
-;; (use-package ivy
-;;   :ensure t
-;;   :pin melpa
-;;   :config
-;;   (ivy-mode 1)
-;;   (setq enable-recursive-minibuffers t)
-;;   (setq ivy-count-format "%d/%d ")
-;;   (setq ivy-height 30)
-;;   (global-set-key (kbd "C-c C-r") 'ivy-resume))
-
-;; (use-package counsel
-;;   :ensure t
-;;   :pin melpa
-;;   :bind (("M-x" . counsel-M-x)
-;;          ("C-x C-f" . counsel-find-file)
-;;          ("C-c g" . counsel-git)
-;;          ("C-c j" . counsel-git-grep)
-;;          ("C-c a" . counsel-ag)
-;;          ("M-y" . counsel-yank-pop))
-;;   :config
-;;   (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
-
+;;* search and navigation (swiper, projectile)
 (use-package swiper
   :ensure t
-  :config
-  (global-set-key (kbd "C-s") 'swiper))
+  :bind (("C-s" . swiper)))
 
 (use-package projectile
   :ensure t
@@ -633,12 +609,6 @@ whitespace is removed."
   :bind (("M-'" . avy-goto-word-1)
 	 ("C-M-SPC" . avy-goto-char-timer)))
 
-;; see https://github.com/ericdanan/counsel-projectile
-;; (use-package counsel-projectile
-;;   :ensure t
-;;   :config
-;;   (counsel-projectile-mode))
-
 (use-package rg
   :ensure t
   :config
@@ -647,35 +617,6 @@ whitespace is removed."
 (when (boundp 'grep-find-ignored-directories)
   (add-to-list 'grep-find-ignored-directories ".eggs")
   (add-to-list 'grep-find-ignored-directories "src"))
-
-;; (defun nh/grep-ignore-venv-current-project (&rest args)
-;;   (interactive)
-;;   (let ((venv (find-venv-current-project)))
-;;     (if venv
-;;         (progn
-;;           (setq venv (file-name-nondirectory
-;;                       (replace-regexp-in-string "/$" "" venv)))
-;;           (message "adding '%s' to grep-find-ignored-directories" venv)
-;;           (add-to-list 'grep-find-ignored-directories venv))
-;;       (message "no virtualenv at this location")
-;;       )))
-
-;; (advice-add 'rgrep :before #'nh/grep-ignore-venv-current-project)
-;; (advice-add 'projectile-grep :before #'nh/grep-ignore-venv-current-project)
-;; (advice-add 'counsel-projectile-grep :before #'nh/grep-ignore-venv-current-project)
-
-;;* auto-complete using company-mode
-;; (use-package company
-;;   :ensure t
-;;   :defer t
-;;   :config
-;;   (setq company-minimum-prefix-length 1
-;; 	company-idle-delay 0
-;; 	company-tooltip-limit 10
-;; 	company-transformers nil
-;; 	company-show-numbers t)
-;;   (global-company-mode)
-;;   :hook (python-mode . company-mode))
 
 ;;* eglot
 (defun nh/python-disable-inlay-hints ()
@@ -1211,9 +1152,11 @@ convert to .docx with pandoc"
      (pop-to-buffer-same-window buffer)))
   :bind
   (:map difftastic-mode-map
-        ("M-RET" . difftastic-diff-visit-file-other-window))
+        ("M-RET" . difftastic-diff-visit-file-other-window)))
+
+(use-package difftastic-bindings
+  :ensure difftastic
   :config
-  (require 'difftastic-bindings)
   (difftastic-bindings-mode 1))
 
 (use-package git-timemachine
