@@ -36,3 +36,4 @@ undohist/
 url
 var/
 /projectile-frecency.eld
+/org-persist
