@@ -254,6 +254,8 @@
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
+;; case-insensitive sort, eg in sort-lines
+(setq sort-fold-case t)
 
 ;; Default 'untabify converts a tab to equivalent number of spaces
 ;; before deleting a single character.
@@ -1258,7 +1260,7 @@ convert to .docx with pandoc"
     (shell-command-on-region start end "~/.emacs.d/bin/anki-qa-to-note.py" t t))
   :defer t
   :vc (:url "https://github.com/anki-editor/anki-editor"
-       :rev :newest))
+            :rev :newest))
 
 ;;* OpenAI tools
 
@@ -1274,7 +1276,7 @@ convert to .docx with pandoc"
 
 (use-package gptel
   :vc (:url "https://github.com/karthink/gptel"
-       :rev :newest)
+            :rev :newest)
   :bind (("C-c C-g" . gptel-menu)
          ("C-c C-r" . gptel-rewrite))
   :preface
@@ -1332,6 +1334,7 @@ convert to .docx with pandoc"
     :key (lambda () (nh/get-auth-password "api.anthropic.com"))
     :models '("claude-3-5-sonnet-20241022"
               "claude-3-7-sonnet-20250219"))
+
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
     :stream t
@@ -1339,12 +1342,14 @@ convert to .docx with pandoc"
               "mistral:latest"
               "llama3:8b-instruct-q8_0"
               "llama3:70b-instruct-q8_0"))
+
   (gptel-make-openai "Groq"
     :host "api.groq.com"
     :endpoint "/openai/v1/chat/completions"
     :stream t
     :key (lambda () (nh/get-auth-password "api.groq.com"))
     :models '("llama3-70b-8192" "llama3-8b-8192" "mixtral-8x7b-32768"))
+
   (gptel-make-openai "litellm"
     :host "litellm.dlmp.uw.edu"
     :stream t
@@ -1382,7 +1387,51 @@ convert to .docx with pandoc"
 
 ;; required for copilot
 (use-package transient
-  :ensure t)
+  :ensure t
+  :bind (("C-\\" . nh/transient-launcher))
+  :config
+  (transient-define-prefix nh/transient-launcher ()
+    "Open the main command launcher."
+    [["Notes & Org"
+      ("a" "Anki editor" hydra-anki-editor/body)
+      ("b" "Bookmarks" hydra-bookmarks/body)
+      ("d" "Insert date" nh/insert-date)
+      ("J" "Add journal entry to index" nh/org-add-journal-entry-to-index)
+      ("l" "Org links" hydra-org-links/body)
+      ("n" "Find index" nh/org-find-index)
+      ("N" "Add entry to index" nh/org-add-entry-to-index)
+      ("o" "Org navigation" hydra-org-navigation/body)
+      ("t" "Show TODOs" nh/org-show-todos-move-down)]
+     ["Development & AI"
+      ("e" "Eglot" hydra-eglot/body)
+      ("g" "GPTel" hydra-gptel/body)
+      ("p" "Python" hydra-python/body)
+      ("y" "Yasnippet" hydra-yasnippet/body)
+      ("(" "Paredit" hydra-paredit/body)
+      ("." "Flymake" hydra-flymake/body)]
+     ["Search and Editing"
+      ("B" "Copy buffer file name" nh/copy-buffer-file-name)
+      ("j" "Imenu" consult-imenu)
+      ("C-o" "Copy to other window" nh/copy-region-or-line-other-window)
+      ("O" "Occur word at point" nh/occur-word-at-point)
+      ("r" "Replace string" replace-string)
+      ("R" "Ripgrep menu" rg-menu)
+      ("u" "Untabify" untabify)]
+     ["Projects & Tools"
+      ("D" "Open project in iTerm2" nh/iterm2-open-project-dir)
+      ("i" "Init file" hydra-init-file/body)
+      ("m" "Magit status" magit-status)
+      ("P" "List packages" package-list-packages)
+      ("s" "Refresh SSH" nh/ssh-refresh)]
+     ["Display & Session"
+      ("c" "Toggle theme" nh/toggle-theme)
+      ("f" "Fix frame" nh/fix-frame)
+      ("k" "Save and quit Emacs" save-buffers-kill-emacs)
+      ("M" "Toggle mode" hydra-toggle-mode/body)
+      ("|" "Fill column indicator" display-fill-column-indicator-mode)
+      ("T" "Transpose buffers" nh/transpose-buffers)
+      ("w" "Close warnings" nh/close-warnings)
+      ("RET" "Quit" transient-quit-one)]]))
 
 ;;* GitHub copilot
 
@@ -1456,45 +1505,6 @@ available. Otherwise will try normal tab-indent."
 (use-package hydra
   :ensure t
   :config
-  (defhydra hydra-launcher (:color teal :columns 4 :post (redraw-display))
-    "hydra-launcher"
-    ("C-g" redraw-display "<quit>")
-    ("RET" redraw-display "<quit>")
-    ("a" hydra-anki-editor/body "hyrda for anki-editor")
-    ("b" hydra-bookmarks/body "hyrda for bookmarks")
-    ("B" nh/copy-buffer-file-name "nh/copy-buffer-file-name")
-    ("c" nh/toggle-theme "toggle light/dark mode")
-    ("d" nh/insert-date "nh/insert-date")
-    ("D" nh/iterm2-open-project-dir "nh/iterm2-open-project-dir")
-    ("e" hydra-eglot/body "eglot menu")
-    ("f" nh/fix-frame "fix-frame")
-    ("g" hydra-gptel/body "gptel")
-    ("i" hydra-init-file/body "hydra for init file")
-    ("j" consult-imenu "consult-imenu")
-    ("J" nh/org-add-journal-entry-to-index "nh/org-add-journal-entry-to-index")
-    ("k" save-buffers-kill-emacs "save-buffers-kill-emacs")
-    ("l" hydra-org-links/body "hydra-org-links")
-    ("|" display-fill-column-indicator-mode "display-fill-column-indicator-mode")
-    ("n" nh/org-find-index "nh/org-find-index")
-    ("N" nh/org-add-entry-to-index "nh/org-add-entry-to-index")
-    ("m" magit-status "magit-status")
-    ("M" hydra-toggle-mode/body "toggle mode")
-    ("o" hydra-org-navigation/body "hydra-org-navigation")
-    ("O" nh/copy-region-or-line-other-window "copy-region-or-line-other-window")
-    ("p" hydra-python/body "python menu")
-    ("P" package-list-packages "package-list-packages")
-    ("R" rg-menu "rg-menu")
-    ("r" replace-string "replace-string")
-    ("s" nh/ssh-refresh "ssh-refresh")
-    ("t" nh/org-show-todos-move-down "org-todo-list")
-    ("T" nh/transpose-buffers "transpose-buffers")
-    ("u" untabify "untabify")
-    ("w" hydra-web-mode/body "web-mode commands")
-    ("W" nh/close-warnings "close *Warnings*")
-    ("y" hydra-yasnippet/body "yasnippet commands")
-    ("(" hydra-paredit/body "paredit commands")
-    ("." hydra-flymake/body "flymake commands"))
-  (global-set-key (kbd "C-\\") 'hydra-launcher/body)
 
   (defhydra hydra-init-file (:color blue :columns 4 :post (redraw-display))
     "hydra-init-file"
