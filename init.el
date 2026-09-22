@@ -39,7 +39,11 @@
          (script
           (nh/path-join home "dotfiles" "mac" "bin" "iterm2_create_tab.py"))
          (thisdir (or (projectile-project-root) home)))
-    (shell-command (format "\"%s\" \"%s\" \"%s\"" interpreter script thisdir))))
+    (unless (and interpreter (file-executable-p interpreter))
+      (user-error "IT2PY does not name an executable Python interpreter"))
+    (unless (file-readable-p script)
+      (user-error "iTerm2 helper script not found: %s" script))
+    (start-process "nh-iterm2" nil interpreter script thisdir)))
 
 ;;* Package management
 ;; Emacs activates packages before loading init.el.  `use-package' and
@@ -223,13 +227,6 @@
 
 (nh/prepend-path (nh/emacs-dir-path "bin"))
 (add-to-list 'exec-path (nh/emacs-dir-path "bin"))
-
-;;* emacs utility functions
-
-(defun nh/advice-unadvice (sym)
-  "Remove all advices from symbol SYM."
-  (interactive "aFunction symbol: ")
-  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
 
 ;;* system utility functions
 
@@ -893,6 +890,8 @@ the path."
     "Export the contents of the element at point to a file and
 convert to .docx with pandoc"
     (interactive)
+    (unless (executable-find "pandoc")
+      (user-error "pandoc is not installed or not on exec-path"))
     (let* ((title (nh/org-get-current-heading))
            (body (nh/org-get-current-section))
            (fname (nh/safename title))
@@ -901,13 +900,28 @@ convert to .docx with pandoc"
 	     (read-directory-name
 	      "Output directory: " "~/Downloads")))
            (orgfile (make-temp-file fname nil ".org"))
-           (docx (shell-quote-argument (concat (nh/path-join basedir fname) ".docx"))))
-
-      (write-region body nil orgfile)
-      (call-process-shell-command (format "pandoc %s -o %s" orgfile docx))
-      (if (y-or-n-p "open file?")
-          (shell-command (format "open %s" docx)))
-      (message "wrote %s" docx)))
+           (docx (concat (nh/path-join basedir fname) ".docx"))
+           (output-buffer (get-buffer-create "*nh-pandoc*"))
+           succeeded)
+      (unwind-protect
+          (progn
+            (write-region body nil orgfile)
+            (with-current-buffer output-buffer
+              (erase-buffer))
+            (let ((status (call-process "pandoc" nil output-buffer nil
+                                        orgfile "-o" docx)))
+              (unless (and (integerp status) (zerop status))
+                (display-buffer output-buffer)
+                (user-error "pandoc failed with status %s; see %s"
+                            status (buffer-name output-buffer))))
+            (setq succeeded t)
+            (when (y-or-n-p "open file?")
+              (browse-url-of-file docx))
+            (message "wrote %s" docx))
+        (when (file-exists-p orgfile)
+          (delete-file orgfile))
+        (when (and succeeded (buffer-live-p output-buffer))
+          (kill-buffer output-buffer)))))
 
   (defun nh/org-mode-hooks ()
     (visual-line-mode)
@@ -970,21 +984,26 @@ convert to .docx with pandoc"
               (insert (format "\n%s\n" (cdr result))))
           (insert (format "\n\n;; No results found for '%s'\n" keyword))))))
 
-  (advice-add 'org-todo-list :after
-              (lambda ()
-                "Move to bottom of page after entering org-todo-list"
-                (end-of-buffer)
-                (recenter-top-bottom)))
+  (defun nh/org-todo-list-move-to-end (&rest _args)
+    "Move to the bottom of the page after entering `org-todo-list'."
+    (end-of-buffer)
+    (recenter-top-bottom))
 
-  (advice-add
-   'org-download-screenshot :before
-   (lambda ()
-     "Remove extra lines before inserted screenshot and check for pngpaste"
-     (if (executable-find "pngpaste")
-         (progn
-           (delete-blank-lines)
-           (org-delete-backward-char 1))
-       (error "pngpaste is not installed"))))
+  (unless (advice-member-p #'nh/org-todo-list-move-to-end 'org-todo-list)
+    (advice-add 'org-todo-list :after #'nh/org-todo-list-move-to-end))
+
+  (defun nh/org-download-before-screenshot (&rest _args)
+    "Prepare point for a screenshot and ensure pngpaste is available."
+    (if (executable-find "pngpaste")
+        (progn
+          (delete-blank-lines)
+          (org-delete-backward-char 1))
+      (user-error "pngpaste is not installed")))
+
+  (unless (advice-member-p #'nh/org-download-before-screenshot
+                           'org-download-screenshot)
+    (advice-add 'org-download-screenshot :before
+                #'nh/org-download-before-screenshot))
 
   :mode
   ("\\.org\\'" . org-mode)
@@ -1056,10 +1075,14 @@ convert to .docx with pandoc"
 (use-package ob-mermaid
   :preface
   ;; ensure that images are displayed
-  (nh/advice-unadvice 'org-babel-execute-src-block)
-  (advice-add 'org-babel-execute-src-block :after
-              (lambda (original-fun &optional rest)
-                (org-display-inline-images nil t (point) (point-max))))
+  (defun nh/org-babel-display-inline-images (&rest _args)
+    "Redisplay inline images after executing an Org source block."
+    (org-display-inline-images nil t (point) (point-max)))
+
+  (unless (advice-member-p #'nh/org-babel-display-inline-images
+                           'org-babel-execute-src-block)
+    (advice-add 'org-babel-execute-src-block :after
+                #'nh/org-babel-display-inline-images))
   :ensure t
   :after org)
 
@@ -1418,7 +1441,8 @@ available. Otherwise will try normal tab-indent."
     (with-file-modes #o600
       (comint-write-input-ring)))
   :config
-  (advice-add 'ielm-send-input :after 'nh/ielm-write-history)
+  (unless (advice-member-p #'nh/ielm-write-history 'ielm-send-input)
+    (advice-add 'ielm-send-input :after #'nh/ielm-write-history))
   :hook
   (ielm-mode . eldoc-mode)
   (ielm-mode . nh/ielm-init-history)
