@@ -1361,7 +1361,10 @@ convert to .docx with pandoc"
               "claude-opus-4-6-v1"
               "claude-opus-4-7"
               "claude-opus-4-8"
+              "claude-opus-5"
+              "claude-opus-5-5"
               ))
+
   (gptel-make-openai "litellm-dev"
     :host "litellm.dlmp-dev.uw.edu"
     :stream t
