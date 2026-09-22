@@ -1,4 +1,13 @@
 if [[ $(uname) == 'Darwin' ]]; then
+    # Prevent libgccjit from inferring an invalid deployment target from the
+    # Darwin kernel version on newer macOS releases.
+    _nh_macos_version=$(sw_vers -productVersion)
+    _nh_macos_major=${_nh_macos_version%%.*}
+    _nh_macos_minor=${_nh_macos_version#*.}
+    _nh_macos_minor=${_nh_macos_minor%%.*}
+    export MACOSX_DEPLOYMENT_TARGET="${_nh_macos_major}.${_nh_macos_minor}"
+    unset _nh_macos_version _nh_macos_major _nh_macos_minor
+
     if [[ -f /opt/homebrew/bin/emacs ]]; then
         EMACS=/opt/homebrew/bin/emacs
         EMACS_BIN=/opt/homebrew/bin

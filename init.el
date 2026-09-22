@@ -443,20 +443,23 @@ whitespace is removed."
     (insert result)))
 
 ;;* spelling
-(defvar nh/enable-flyspell-p "enable flyspell in various modes")
+(defun nh/enable-flyspell-mode ()
+  "Enable `flyspell-mode' without toggling it."
+  (flyspell-mode 1))
 
-;; use aspell if installed
-(if (cond
-     ((executable-find "aspell")
-      (setq ispell-dictionary "en")
-      (setq ispell-program-name "aspell")))
-    (progn
-      (message "** using %s for flyspell" ispell-program-name)
-      (autoload 'flyspell-mode "flyspell" "On-the-fly spelling checker." t)
-      (setq flyspell-issue-welcome-flag nil)
-      (setq nh/enable-flyspell-p t))
-  (setq nh/enable-flyspell-p nil)
-  (message "** could not find hunspell or aspell"))
+(if (executable-find "aspell")
+    (use-package flyspell
+      :ensure nil
+      :custom
+      (ispell-dictionary "en")
+      (flyspell-issue-welcome-flag nil)
+      :hook ((text-mode markdown-ts-mode org-mode)
+             . nh/enable-flyspell-mode))
+  (display-warning
+   'nh/spelling
+   "Aspell is not installed; Flyspell will not be enabled. Install it with
+`brew install aspell`."
+   :warning))
 
 ;;* init file utilities
 ;; TODO: refer to
@@ -1099,18 +1102,10 @@ convert to .docx with pandoc"
   :commands flymake-shellcheck-load
   :hook (sh-mode . flymake-shellcheck-load))
 
-;;* text-mode
-
-(add-hook 'text-mode-hook
-          (lambda ()
-            ;; (longlines-mode)
-            (if nh/enable-flyspell-p (flyspell-mode))))
-
 ;;* rst-mode
 (add-hook 'rst-mode-hook
           (lambda ()
             (message "Loading rst-mode hooks")
-            (if nh/enable-flyspell-p (flyspell-mode))
             (define-key rst-mode-map (kbd "C-c C-a") 'rst-adjust)))
 
 ;;* mermaid-mode
