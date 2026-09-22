@@ -1193,7 +1193,7 @@ convert to .docx with pandoc"
   :ensure t
   :config
   (setq sml/no-confirm-load-theme t)
-  (setq sml/theme 'light)
+  (setq sml/theme nil)
   (setq sml/name-width 30)
   (setq sml/time-format "%H:%M")
   (sml/setup))
