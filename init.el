@@ -197,6 +197,10 @@
 
 (nh/load-theme nh/theme-light)
 
+(add-to-list 'display-buffer-alist
+             '("\\*Warnings\\*\\'"
+               (display-buffer-reuse-window display-buffer-use-some-window)))
+
 (defun nh/close-warnings ()
   "Close *Warnings* window"
   (interactive)
@@ -779,14 +783,98 @@ the path."
 (use-package markdown-ts-mode
   :ensure nil
   :mode ("\\.md\\'" "\\.mdx\\'" "\\.markdown\\'")
+  :preface
+  (defface nh/markdown-preview-code-block
+    '((((background light)) (:background "gray95" :extend t))
+      (((background dark)) (:background "gray20" :extend t)))
+    "Face for code blocks in Markdown source and live previews.")
+
+  (defcustom nh/markdown-live-preview-idle-delay 0.5
+    "Seconds of idle time before refreshing a Markdown live preview."
+    :type 'number
+    :group 'markdown)
+
+  (defvar-local nh/markdown-live-preview-timer nil)
+
+  (defun nh/markdown-preview-render-pre (dom)
+    "Render a preformatted DOM node with a shaded background."
+    (let ((start (point)))
+      (shr-tag-pre dom)
+      (add-face-text-property
+       start (point) 'nh/markdown-preview-code-block t)))
+
+  (defun nh/markdown-live-preview-window-eww (file)
+    "Preview Markdown FILE in EWW with custom code-block styling."
+    (require 'shr)
+    (let ((shr-external-rendering-functions
+           (cons '(pre . nh/markdown-preview-render-pre)
+                 shr-external-rendering-functions)))
+      (markdown-live-preview-window-eww file)))
+
+  (defun nh/markdown-display-buffer-other-window (buffer)
+    "Display BUFFER in an existing other window, or split to the right."
+    (display-buffer
+     buffer
+     '((display-buffer-reuse-window
+        display-buffer-use-some-window
+        display-buffer-in-direction)
+       (inhibit-same-window . t)
+       (direction . right))))
+
+  (defun nh/markdown-live-preview-refresh (buffer)
+    "Refresh the live preview for Markdown BUFFER."
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        (setq nh/markdown-live-preview-timer nil)
+        (when (bound-and-true-p markdown-live-preview-mode)
+          (markdown-live-preview-if-markdown)))))
+
+  (defun nh/markdown-live-preview-schedule (&rest _)
+    "Schedule a live preview refresh after Markdown buffer changes."
+    (when (bound-and-true-p markdown-live-preview-mode)
+      (when (timerp nh/markdown-live-preview-timer)
+        (cancel-timer nh/markdown-live-preview-timer))
+      (setq nh/markdown-live-preview-timer
+            (run-with-idle-timer
+             nh/markdown-live-preview-idle-delay nil
+             #'nh/markdown-live-preview-refresh (current-buffer)))))
+
+  (defun nh/markdown-live-preview-cancel-timer ()
+    "Cancel the current buffer's pending live preview refresh."
+    (when (timerp nh/markdown-live-preview-timer)
+      (cancel-timer nh/markdown-live-preview-timer)
+      (setq nh/markdown-live-preview-timer nil)))
+
+  (defun nh/markdown-live-preview-setup ()
+    "Refresh Markdown live preview after edits in the current buffer."
+    (add-hook 'after-change-functions
+              #'nh/markdown-live-preview-schedule nil t)
+    (add-hook 'kill-buffer-hook
+              #'nh/markdown-live-preview-cancel-timer nil t))
   :bind (:map markdown-ts-mode-map
+              ("C-c l" . markdown-live-preview-mode)
               ;; don't redefine =M-<left>= and =M-<right>= in this mode
               ("M-<right>" . nil)
               ("M-<left>" . nil))
+  :hook (markdown-ts-mode . nh/markdown-live-preview-setup)
   :custom
   (markdown-ts-default-converter '(html . pandoc))
+  (markdown-live-preview-window-function
+   #'nh/markdown-live-preview-window-eww)
   :config
-  (require 'markdown-ts-mode-x))
+  (require 'markdown-ts-mode-x)
+  (custom-set-faces
+   '(markdown-ts-code-block
+     ((((background light))
+       (:inherit fixed-pitch :background "gray95" :extend t))
+      (((background dark))
+       (:inherit fixed-pitch :background "gray20" :extend t)))))
+  (with-eval-after-load 'markdown-mode
+    (add-hook 'markdown-mode-hook #'nh/markdown-live-preview-setup)
+    (unless (advice-member-p #'nh/markdown-display-buffer-other-window
+                             'markdown-display-buffer-other-window)
+      (advice-add 'markdown-display-buffer-other-window :override
+                  #'nh/markdown-display-buffer-other-window))))
 
 ;; https://plantarum.ca/2021/10/03/emacs-tutorial-rmarkdown/
 (use-package poly-markdown
@@ -1535,16 +1623,16 @@ available. Otherwise will try normal tab-indent."
     ("h" html-mode "html-mode")
     ("g" groovy-mode "groovy-mode")
     ("j" jinja2-mode "jinja2-mode")
-    ("k" markdown-mode "markdown-mode")
+    ("k" markdown-ts-mode "markdown-ts-mode")
     ("l" display-line-numbers-mode "display-line-numbers-mode")
     ("m" moinmoin-mode "moinmoin-mode")
     ("o" org-mode "org-mode")
     ("O" outline-minor-mode "outline-minor-mode")
-    ("p" python-mode "python-mode")
+    ("p" python-ts-mode "python-ts-mode")
     ("P" paredit-mode "paredit-mode")
     ("r" R-mode "R-mode")
     ("s" sql-mode "sql-mode")
-    ("S" sh-mode "sh-mode")
+    ("S" bash-ts-mode "bash-ts-mode")
     ("t" text-mode "text-mode")
     ("v" visual-line-mode "visual-line-mode")
     ("w" web-mode "web-mode")
