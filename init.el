@@ -641,6 +641,15 @@ whitespace is removed."
                '((python-mode python-ts-mode)
                  "basedpyright-langserver" "--stdio")))
 
+(defun nh/occur-word-at-point ()
+  "Run `occur' for the word at point and show the results in another window."
+  (interactive)
+  (let ((word (thing-at-point 'word t)))
+    (unless word
+      (user-error "No word at point"))
+    (occur (concat "\\_<" (regexp-quote word) "\\_>"))
+    (switch-to-buffer-other-window "*Occur*")))
+
 ;;* elisp
 (use-package paredit
   :ensure t
