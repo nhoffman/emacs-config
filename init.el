@@ -1238,18 +1238,10 @@ convert to .docx with pandoc"
 
 ;;* OpenAI tools
 
-(defun nh/get-netrc-password (machine)
-  "Return the value corresponding to 'key' from ~/.netrc for a
-specified machine.
-
-eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
-  (let ((credentials (auth-source-netrc-parse-all "~/.netrc")))
-    (car
-     (remq nil (mapcar
-                (lambda (x)
-                  (if (string= (cdr (assoc "machine" x)) machine)
-                      (cdr (assoc "password" x))))
-                credentials)))))
+(defun nh/get-auth-password (host)
+  "Return the first password registered for HOST in `auth-sources'."
+  (require 'auth-source)
+  (auth-source-pick-first-password :host host))
 
 (defvar nh/gptel-chats
   (nh/path-join nh/onedrive "gptel-chats"))
@@ -1304,20 +1296,16 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
 
   :config
   (setq-default gptel-default-mode 'org-mode)
-  ;; (setq-default gptel-api-key #'gptel-api-key-from-auth-source)
   (setq-default gptel-api-key
-                (lambda () (nh/get-netrc-password "api.openai.com")))
+                (lambda () (nh/get-auth-password "api.openai.com")))
   (setq-default gptel-track-media t)
   ;; replace default programming directive in gptel-rewrite
   (setf (alist-get 'programming gptel-directives)
         "You are a careful programmer. Provide code only with no markdown or code fences.")
 
-  ;; gptel-api-key-from-auth-source does not seem to retrieve keys
-  ;; from ~/.netrc other than for api.openai.com, so use
-  ;; nh/get-netrc-password instead
   (gptel-make-anthropic "Claude"
     :stream t
-    :key (lambda () (nh/get-netrc-password "api.anthropic.com"))
+    :key (lambda () (nh/get-auth-password "api.anthropic.com"))
     :models '("claude-3-5-sonnet-20241022"
               "claude-3-7-sonnet-20250219"))
   (gptel-make-ollama "Ollama"
@@ -1331,12 +1319,12 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
     :host "api.groq.com"
     :endpoint "/openai/v1/chat/completions"
     :stream t
-    :key (lambda () (nh/get-netrc-password "api.groq.com"))
+    :key (lambda () (nh/get-auth-password "api.groq.com"))
     :models '("llama3-70b-8192" "llama3-8b-8192" "mixtral-8x7b-32768"))
   (gptel-make-openai "litellm"
     :host "litellm.dlmp.uw.edu"
     :stream t
-    :key (lambda () (nh/get-netrc-password "litellm.dlmp.uw.edu"))
+    :key (lambda () (nh/get-auth-password "litellm.dlmp.uw.edu"))
     :models '(
               "gpt-4.1"
               "gpt-5.5"
@@ -1353,7 +1341,7 @@ eg (nh/get-netrc-val \"api.openai.com\" \"password\")"
   (gptel-make-openai "litellm-dev"
     :host "litellm.dlmp-dev.uw.edu"
     :stream t
-    :key (lambda () (nh/get-netrc-password "litellm.dlmp-dev.uw.edu"))
+    :key (lambda () (nh/get-auth-password "litellm.dlmp-dev.uw.edu"))
     :models '(
               "claude-opus-4-5-20251101-v1"
               "claude-sonnet-4-5-20250929-v1"
