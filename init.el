@@ -723,16 +723,13 @@ whitespace is removed."
      (current-buffer) t "*isort errors*" t)))
 
 ;;* javascript/json
-(use-package json-mode
-  :ensure t
-  :commands json-mode)
+(use-package json-ts-mode
+  :ensure nil
+  :mode ("\\.json\\'" . json-ts-mode)
+  :custom
+  (json-ts-mode-indent-offset 2))
 
 (add-hook 'js-mode-hook
-          (lambda ()
-            (make-local-variable 'js-indent-level)
-            (setq js-indent-level 2)))
-
-(add-hook 'json-mode-hook
           (lambda ()
             (make-local-variable 'js-indent-level)
             (setq js-indent-level 2)))
@@ -1225,17 +1222,17 @@ convert to .docx with pandoc"
   :ensure t
   :config (which-key-mode))
 
-(use-package yaml-mode
-  :ensure t
-  :mode "\\.\\(e?ya?\\|ra\\)ml\\'")
+(use-package yaml-ts-mode
+  :ensure nil
+  :mode ("\\.\\(e?ya?\\|ra\\)ml\\'" . yaml-ts-mode))
 
 (use-package jinja2-mode
   :ensure t
   :mode "\\.jinja2\\'")
 
-(use-package dockerfile-mode
-  :ensure t
-  :mode ("Dockerfile" . dockerfile-mode))
+(use-package dockerfile-ts-mode
+  :ensure nil
+  :mode ("Dockerfile" . dockerfile-ts-mode))
 
 (use-package yagist
   :ensure t
@@ -1416,7 +1413,7 @@ available. Otherwise will try normal tab-indent."
          css-mode
          mhtml-mode
          html-mode
-         dockerfile-mode
+         dockerfile-ts-mode
          sql-mode)
   :bind (("M-`" . (lambda () (interactive) (copilot-complete) (nh/copilot-menu)))
          :map copilot-mode-map
@@ -1534,7 +1531,7 @@ available. Otherwise will try normal tab-indent."
     ("t" text-mode "text-mode")
     ("v" visual-line-mode "visual-line-mode")
     ("w" web-mode "web-mode")
-    ("y" yaml-mode "yaml-mode"))
+    ("y" yaml-ts-mode "yaml-ts-mode"))
 
   (defhydra hydra-org-navigation
     (:exit nil :foreign-keys warn :columns 4 :post (redraw-display))
