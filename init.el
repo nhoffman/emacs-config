@@ -681,11 +681,55 @@ whitespace is removed."
         (message "Installation complete; see %s" (buffer-name buffer))
       (switch-to-buffer buffer))))
 
+(defun nh/python-imenu-container (node)
+  "Return the syntax-tree container of Python definition NODE."
+  (let ((parent (treesit-node-parent node)))
+    (treesit-node-parent
+     (if (and parent
+              (equal (treesit-node-type parent) "decorated_definition"))
+         parent
+       node))))
+
+(defun nh/python-imenu-visible-p (node)
+  "Include NODE if it is a module definition or a class method."
+  (let ((container (nh/python-imenu-container node)))
+    (or (equal (and container (treesit-node-type container)) "module")
+        (and (equal (treesit-node-type node) "function_definition")
+             (equal (and container (treesit-node-type container)) "block")
+             (let ((class (treesit-node-parent container)))
+               (and (equal (and class (treesit-node-type class))
+                           "class_definition")
+                    (equal (treesit-node-type
+                            (nh/python-imenu-container class))
+                           "module")))))))
+
+(defun nh/python-imenu-name (node)
+  "Return the name of Python definition NODE."
+  (when-let* ((name (treesit-node-child-by-field-name node "name")))
+    (treesit-node-text name t)))
+
+(defun nh/python-imenu-create-index ()
+  "Index module definitions and their class methods with tree-sitter."
+  (let ((treesit-primary-parser (treesit-parser-create 'python)))
+    (treesit-simple-imenu)))
+
 (defun nh/python-mode-setup ()
   "Set buffer-local defaults for Python buffers."
+  (require 'eglot)
+  ;; Eglot's document symbols include local variables.  Use tree-sitter's
+  ;; Imenu facility with a scope predicate to exclude function-body symbols.
+  (setq-local eglot-stay-out-of (cons 'imenu eglot-stay-out-of))
+  (when (treesit-language-available-p 'python)
+    (setq-local treesit-simple-imenu-settings
+                '((nil "\\`\\(?:class\\|function\\)_definition\\'"
+                       nh/python-imenu-visible-p nh/python-imenu-name))
+                imenu-create-index-function #'nh/python-imenu-create-index))
   (setq-local tab-width 4
               python-indent-offset 4
               display-fill-column-indicator-column 80))
+
+;; Run before `eglot-ensure' so Eglot leaves Python's Imenu index in place.
+(add-hook 'python-base-mode-hook #'nh/python-mode-setup -20)
 
 (use-package ruff-format
   :ensure t
@@ -722,8 +766,7 @@ whitespace is removed."
   (python-indent-guess-indent-offset t)
   (python-indent-guess-indent-offset-verbose nil)
   :hook
-  (python-base-mode . flymake-mode)
-  (python-base-mode . nh/python-mode-setup))
+  (python-base-mode . flymake-mode))
 
 (defun nh/isort-region-or-buffer ()
   "Apply PET's project-local isort to the region or buffer."
