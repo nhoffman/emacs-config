@@ -1303,7 +1303,10 @@ convert to .docx with pandoc"
 
 (use-package magit
   :ensure t
-  :commands magit-status)
+  :commands magit-status
+  :bind
+  (:map magit-diff-section-map
+        ("RET" . magit-diff-visit-file-other-window)))
 
 (use-package difftastic
   :ensure t
