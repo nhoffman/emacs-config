@@ -647,13 +647,20 @@ whitespace is removed."
                '((python-mode python-ts-mode)
                  "basedpyright-langserver" "--stdio")))
 
-(defun nh/occur-word-at-point ()
-  "Run `occur' for the word at point and show the results in another window."
+(defun nh/occur-word-or-region-at-point ()
+  "Run `occur' for the active region or the word at point.
+Show the results in another window."
   (interactive)
-  (let ((word (thing-at-point 'word t)))
-    (unless word
-      (user-error "No word at point"))
-    (occur (concat "\\_<" (regexp-quote word) "\\_>"))
+  (let ((regexp
+         (if (use-region-p)
+             (regexp-quote
+              (buffer-substring-no-properties
+               (region-beginning) (region-end)))
+           (when-let* ((word (thing-at-point 'word t)))
+             (concat "\\_<" (regexp-quote word) "\\_>")))))
+    (unless regexp
+      (user-error "No active region or word at point"))
+    (occur regexp)
     (switch-to-buffer-other-window "*Occur*")))
 
 ;;* elisp
@@ -1547,7 +1554,7 @@ convert to .docx with pandoc"
       ("B" "Copy buffer file name" nh/copy-buffer-file-name)
       ("j" "Imenu" consult-imenu)
       ("C-o" "Copy to other window" nh/copy-region-or-line-other-window)
-      ("O" "Occur word at point" nh/occur-word-at-point)
+      ("O" "Occur word or region" nh/occur-word-or-region-at-point)
       ("r" "Replace string" replace-string)
       ("R" "Ripgrep menu" rg-menu)
       ("u" "Untabify" untabify)]
