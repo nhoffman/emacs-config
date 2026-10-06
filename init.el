@@ -1311,6 +1311,9 @@ convert to .docx with pandoc"
 (use-package magit
   :ensure t
   :commands magit-status
+  :custom
+  (magit-display-buffer-function
+   #'magit-display-buffer-same-window-except-diff-v1)
   :bind
   (:map magit-diff-section-map
         ("RET" . magit-diff-visit-file-other-window)))
