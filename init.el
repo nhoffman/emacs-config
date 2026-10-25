@@ -909,6 +909,9 @@ the path."
   :hook (markdown-ts-mode . nh/markdown-live-preview-setup)
   :custom
   (markdown-ts-default-converter '(html . pandoc))
+  ;; Live preview uses markdown-mode's renderer, not the tree-sitter converter.
+  (markdown-command "pandoc")
+  (markdown-command-needs-filename nil)
   (markdown-live-preview-window-function
    #'nh/markdown-live-preview-window-eww)
   :config
@@ -1239,7 +1242,12 @@ convert to .docx with pandoc"
 
 (use-package quarto-mode
   :ensure t
-  :mode (("\\.Rmd" . poly-quarto-mode)))
+  :mode (("\\.Rmd" . poly-quarto-mode))
+  :config
+  ;; Quarto's default hook uses `setq'; keep its renderer buffer-local so
+  ;; opening a Quarto file cannot redirect ordinary Markdown previews.
+  (make-variable-buffer-local 'markdown-command)
+  (make-variable-buffer-local 'markdown-command-needs-filename))
 
 ;;* sh-mode
 
