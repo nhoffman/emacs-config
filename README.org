@@ -9,7 +9,7 @@ configuration with this one.
 - use-package for package management
 - hyrda for most custom key bindings
 - ivy, counsel, and friends for search and navigation
-- lsp-mode and Microsoft python language server for python development
+- Eglot and Basedpyright for Python language features
 
 * installation
 
@@ -18,7 +18,8 @@ cd ~
 git clone https://github.com/nhoffman/emacs-config .emacs.d
 #+END_SRC
 
-On first run, all dependencies should be installed by use-package.
+On first run, =use-package= installs the Emacs Lisp packages. Install the
+external programs listed in [[*Installing dependencies][Installing dependencies]] separately.
 
 * shell environment
 
@@ -181,3 +182,48 @@ The last two items cause option plus the right and left arrows to
 perform the same actions as =M-f= (=forward-word=) and =M-b=
 (=backward-word=) in both Emacs and in contexts that support default
 readline key bindings (which is [[https://coderwall.com/p/usc8qg][just about everywhere]]).
+
+* Installing dependencies
+
+** Python
+
+Install Basedpyright as a user-level tool so Emacs can start its language
+server:
+
+#+BEGIN_SRC sh
+uv tool install basedpyright
+#+END_SRC
+
+Make sure uv's tool executable directory is on the =PATH= seen by Emacs; the
+configured Eglot server command is =basedpyright-langserver --stdio=.
+
+For each Python project managed with uv, add Ruff and isort to the project's
+development dependencies:
+
+#+BEGIN_SRC sh
+uv add --dev ruff isort
+#+END_SRC
+
+Ruff provides Python formatting and diagnostics, and isort is used to sort
+imports. PET detects the project environment so these tools can be run from
+the project's =.venv=.
+
+** System dependencies
+
+Install these programs separately from Emacs packages. Install =uv= using its
+[[https://docs.astral.sh/uv/getting-started/installation/][official instructions]] or your operating system's package manager.
+
+- =uv= and Python 3 :: Python project environments and the Basedpyright tool;
+  the Python shell and Org Babel are configured to run =python3=.
+- Git :: Used by Magit and project navigation.
+- ripgrep (=rg=) :: Used by the ripgrep search interface.
+- =pandoc= :: Needed for Markdown conversion and exporting Org sections to
+  DOCX.
+
+These are optional, feature-specific dependencies:
+
+- =aspell= :: Enables Flyspell spelling support in text, Markdown, and Org
+  buffers.
+- =pngpaste= :: Enables pasting a screenshot from the macOS clipboard into an
+  Org buffer (installable with Homebrew).
+- =fd= and =fzf= :: Used by the optional =ef= file-search helper in =init.bash=.
