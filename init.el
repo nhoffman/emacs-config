@@ -1508,14 +1508,11 @@ convert to .docx with pandoc"
     :key (lambda () (nh/get-auth-password "litellm.dlmp.uw.edu"))
     :models '(
               "gpt-6-luna"
+              "gpt-6.1-terra"
               "gpt-6.1-sol"
               "gpt-6-astra"
-              "claude-haiku-4-5-20251001-v1"
-              "claude-sonnet-4-6"
-              "claude-opus-4-6-v1"
-              "claude-opus-4-7"
-              "claude-opus-4-8"
-              "claude-opus-5"
+              "claude-haiku-5-5"
+              "claude-sonnet-5-5"
               "claude-opus-5-5"
               ))
 
@@ -1530,7 +1527,7 @@ convert to .docx with pandoc"
               ))
   ;; set default model and backend
   (setq gptel-backend (cdr (assoc "litellm" gptel--known-backends)))
-  (setq gptel-model 'gpt-6.1-sol))
+  (setq gptel-model 'gpt-6.1-terra))
 
 ;;* transient
 
